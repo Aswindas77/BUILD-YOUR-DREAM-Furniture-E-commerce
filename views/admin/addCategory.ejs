@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Category</title>
+    <!-- Add SweetAlert2 CSS and JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 26px;
+            color: #333;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 20px 0px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #f9f9f9;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            background: #fff;
+            border-color: #007bff;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #aaa;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label,
+        .form-group textarea:focus + label,
+        .form-group textarea:not(:placeholder-shown) + label {
+            top: 5px;
+            left: 15px;
+            font-size: 12px;
+            color: #007bff;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 18px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .note {
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+            margin-top: 15px;
+        }
+    </style>
+</head> 
+<body>
+    <div class="container">
+        <h1>Add Category</h1>
+        <form method="post" action="addcategory" onsubmit="return handleSubmit(event)" id="add-category-form">
+            <div class="form-group">
+                <input type="text" id="category-name" name="name" placeholder=" " required>
+                <label for="category-name">Category Name</label>
+            </div>
+            <div class="form-group">
+                <textarea id="category-description" name="description" placeholder=" " required></textarea>
+                <label for="category-description">Category Description</label>
+            </div>
+            <button type="submit" id="btn-submit" class="btn">Add Category</button>
+        </form>
+        <div class="note">* Category name should only contain alphabets and spaces.</div>
+    </div>
+
+    <script>
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            const categoryName = document.getElementById('category-name').value;
+            const categoryDescription = document.getElementById('category-description').value;
+
+            // Validate that the category name contains only alphabets and spaces
+            const nameRegex = /^[A-Za-z ]+$/;
+            if (!nameRegex.test(categoryName)) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Category Name',
+                    text: 'Category name can only contain alphabets and spaces.',
+                    confirmButtonColor: '#007bff'
+                });
+                return false;
+            }
+
+            try {
+                const response = await fetch('/admin/addcategory', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: categoryName,
+                        description: categoryDescription,
+                    }),
+                });
+                const result = await response.json();
+
+                if (response.status === 400) {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message,
+                        confirmButtonColor: '#007bff'
+                    });
+                } else if (response.status === 200) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: result.message,
+                        confirmButtonColor: '#007bff'
+                    }).then(() => {
+                        window.location.href = '/admin/categoryManagement';
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong. Please try again.',
+                    confirmButtonColor: '#007bff'
+                });
+            }
+        }
+
+        document.getElementById('add-category-form').addEventListener('submit', handleSubmit);
+    </script>
+</body>
+</html>

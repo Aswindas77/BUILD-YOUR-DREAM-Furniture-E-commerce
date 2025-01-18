@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP Verification</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .otp-container {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .otp-container h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .otp-container p {
+      font-size: 14px;
+      margin-bottom: 25px;
+      color: #ddd;
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .otp-inputs input {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      font-size: 22px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      background: #fff;
+      color: #333;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .otp-inputs input:focus {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .otp-container button {
+      background: linear-gradient(135deg, #ff7e5f, #feb47b);
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .otp-container button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .otp-container button:active {
+      transform: scale(0.95);
+    }
+
+    .otp-container small {
+      display: block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="otp-container">
+    <h3>B U I L D Y O U R D R E A M</h3>
+    <h2 >Verify Your OTP</h2>
+    <p>Enter the 6-digit OTP sent to your email </p>
+    <div class="otp-inputs">
+      <input type="text" id="otp1" maxlength="1" oninput="moveToNext(this, 'otp2')"
+        onkeydown="handleBackspace(this, event, null)">
+      <input type="text" id="otp2" maxlength="1" oninput="moveToNext(this, 'otp3')"
+        onkeydown="handleBackspace(this, event, 'otp1')">
+      <input type="text" id="otp3" maxlength="1" oninput="moveToNext(this, 'otp4')"
+        onkeydown="handleBackspace(this, event, 'otp2')">
+      <input type="text" id="otp4" maxlength="1" oninput="moveToNext(this, 'otp5')"
+        onkeydown="handleBackspace(this, event, 'otp3')">
+      <input type="text" id="otp5" maxlength="1" oninput="moveToNext(this, 'otp6')"
+        onkeydown="handleBackspace(this, event, 'otp4')">
+      <input type="text" id="otp6" maxlength="1" onkeydown="handleBackspace(this, event, 'otp5')">
+    </div>
+    <p id="errr"></p>
+    <a href="/user/changePassword"><button onclick="verifyOtp()">Verify</button></a>
+    <small>Didn’t receive the code? <a href="" style="color: #feb47b; text-decoration: underline;">Resend
+        OTP</a></small>
+  </div>
+
+  <script>
+    // Function to move focus to the next input
+    function moveToNext(current, nextFieldId) {
+      if (current.value.length >= 1 && nextFieldId) {
+        document.getElementById(nextFieldId).focus();
+      }
+    }
+
+    // Function to handle backspace and move to the previous input
+    function handleBackspace(current, event, previousFieldId) {
+      if (event.key === 'Backspace') {
+        if (current.value === '' && previousFieldId) {
+          document.getElementById(previousFieldId).focus();
+        } else {
+          current.value = ''; // Clear the current field
+        }
+      }
+    }
+
+    // Function to handle OTP verification
+    function verifyOtp() {
+      const otpInputs = document.querySelectorAll('.otp-inputs input');
+      let otp = '';
+      otpInputs.forEach(input => otp += input.value);
+      if (otp.length === 6) {
+        fetch('/user/otp', { method: 'post', body: JSON.stringify({ otp }), headers: { "Content-Type": "application/json" } })
+          .then((response) => {
+            if (response.redirected) {
+              window.location = response.url
+            }
+            else {
+              document.getElementById('errr').innerHTML = 'invalid otp'
+
+            }
+          })
+      } else {
+        alert('Please enter all 6 digits of the OTP.');
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>

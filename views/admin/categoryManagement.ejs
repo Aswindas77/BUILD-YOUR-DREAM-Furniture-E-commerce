@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management</title>
+    <!-- Add SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
+    <style>
+        .container {
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        .btn-link {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-link:hover {
+            background-color: #218838;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="margin-left: 40%;">Category Management</h1>
+
+    <div class="container">
+        <div class="add-category">
+            <a href="/admin/addcategory" style="text-decoration: none;">
+                <button type="submit" class="btn-link" style="text-decoration: none;">Add new Category</button>
+            </a>
+        </div>
+        <div id="categoryList"></div>
+
+        <div class="categories-table">
+            <h2 style="margin-top: 20px;">Existing Categories</h2>
+            <table width="100%">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th>Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% categories.forEach((category,index)=>{ %>
+                        <tr>
+                            <td><%= index+1%></td>
+                            <td><%= category.name %></td>
+                            <td><%= category.description %></td>
+                            <td>
+                                <form method="post" action="editcategory">
+                                    <input hidden type="text" name="id" value="<%= category._id %>">
+                                    <button type="submit" class="btn" style="width: 80px;">Edit</button>
+                                </form>
+                                <button type="submit" class="btn btn-delete" onclick="deleteCategory('<%= category._id %>')">Delete</button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function deleteCategory(categoryId) {
+            // Show confirmation dialog
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/deletecategory/${categoryId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok!");
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Show success message
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'Category has been deleted successfully.',
+                            confirmButtonColor: '#28a745'
+                        });
+                        window.location.href = '/admin/categoryManagement';
+                    } else {
+                        // Show error message
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: data.message || 'Something went wrong!',
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Show error message
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'An error occurred while deleting the category.',
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

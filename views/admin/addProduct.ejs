@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+  
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Add New Product</h1>
+            <form method="post" action="/admin/addProduct" enctype="multipart/form-data">
+                <!-- Product Name -->
+                <div class="mb-3">
+                    <label for="name" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter product name" required>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" placeholder="Enter product description" rows="4" required></textarea>
+                </div>
+
+                <!-- Category -->
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category" required>
+                        
+                        <% categories.forEach(category => { %>
+                            <option value="<%= category._id %>"><%= category.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <!-- Sales Price -->
+                <div class="mb-3">
+                    <label for="salesPrice" class="form-label">Sales Price</label>
+                    <input type="number" class="form-control" id="salesPrice" name="salesPrice" placeholder="Enter sales price" step="0.01" required>
+                </div>
+
+                <!-- Product Offer -->
+                <div class="mb-3">
+                    <label for="productOffer" class="form-label">Product Offer (%)</label>
+                    <input type="number" class="form-control" id="productOffer" name="productOffer" placeholder="Enter product offer" step="1" min="0">
+                </div>
+
+                <!-- Stock -->
+                <div class="mb-3">
+                    <label for="stock" class="form-label">Stock</label>
+                    <input type="number" class="form-control" id="stock" name="stock" placeholder="Enter available stock" min="0" required>
+                </div>
+
+                <!-- Status -->
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-3">
+                    <label for="image" class="form-label">Product Image</label>
+                    <input type="file" class="form-control" id="image" name="images" required>
+                    <input type="file" class="form-control" id="image" name="images" required>
+                    <input type="file" class="form-control" id="image" name="images" required>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary w-100">Add Product</button>
+            </form>
+        </div>
+    </div>
+
+    
+</body>
+</html>

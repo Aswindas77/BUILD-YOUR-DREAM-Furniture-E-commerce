@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - User Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Common Styles from Previous Code */
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #2c3e50;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-gray: #f5f6fa;
+            --dark-gray: #2c3e50;
+            --sidebar-width: 250px;
+        }
+
+        /* Sidebar, Navbar, Main Content styles */
+        /* [Include existing styles here] */
+
+        /* User Management Styles */
+        .user-management {
+            margin-top: 20px;
+        }
+
+        .user-management h2 {
+            font-size: 1.5em;
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+        }
+
+        .user-management table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-management table th,
+        .user-management table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .user-management table th {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .user-management table td {
+            background: white;
+        }
+
+        .user-management .actions i {
+            cursor: pointer;
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .user-management .actions i:hover {
+            color: var(--danger-color);
+        }
+
+        .add-user-btn {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-user-btn:hover {
+            background: var(--success-color);
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <!-- [Navbar content] -->
+    </nav>
+
+    <aside class="sidebar">
+        <!-- [Sidebar content] -->
+    </aside>
+
+    <main class="main-content">
+        <!-- Dashboard content -->
+
+        <div class="user-management">
+            <h2>User Management</h2>
+
+            <button class="add-user-btn">Add New User</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Doe</td>
+                        <td>johndoe@example.com</td>
+                        <td>Admin</td>
+                        <td>Active</td>
+                        <td class="actions">
+                            <i class="fas fa-edit" title="Edit"></i>
+                            <i class="fas fa-trash-alt" title="Delete"></i>
+                            <i class="fas fa-user-times" title="Deactivate"></i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jane Smith</td>
+                        <td>janesmith@example.com</td>
+                        <td>User</td>
+                        <td>Inactive</td>
+                        <td class="actions">
+                            <i class="fas fa-edit" title="Edit"></i>
+                            <i class="fas fa-trash-alt" title="Delete"></i>
+                            <i class="fas fa-user-check" title="Activate"></i>
+                        </td>
+                    </tr>
+                    <!-- Add more users here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // JS code to handle Add User, Edit, Delete, and Activate/Deactivate actions
+
+        document.querySelector('.add-user-btn').addEventListener('click', function() {
+            alert('Add new user functionality will go here!');
+        });
+
+        document.querySelectorAll('.fas.fa-edit').forEach(function(editBtn) {
+            editBtn.addEventListener('click', function() {
+                alert('Edit user functionality will go here!');
+            });
+        });
+
+        document.querySelectorAll('.fas.fa-trash-alt').forEach(function(deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                alert('Delete user functionality will go here!');
+            });
+        });
+
+        document.querySelectorAll('.fas.fa-user-times').forEach(function(deactivateBtn) {
+            deactivateBtn.addEventListener('click', function() {
+                alert('Deactivate user functionality will go here!');
+            });
+        });
+
+        document.querySelectorAll('.fas.fa-user-check').forEach(function(activateBtn) {
+            activateBtn.addEventListener('click', function() {
+                alert('Activate user functionality will go here!');
+            });
+        });
+    </script>
+</body>
+</html>
