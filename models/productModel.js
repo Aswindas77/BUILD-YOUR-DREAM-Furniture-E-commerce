@@ -4,41 +4,37 @@ const productSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        trim: true, 
+        trim: true,
     },
     description: {
         type: String,
-        
     },
     category: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category', 
-        required: true,
-    },
-    brand: {
-        type: String,
+        ref: 'Category',
         
+    },
+    brand: { 
+        type: String,
     },
     salesPrice: {
         type: Number,
-        min: 0, 
+        min: 0,
     },
     productOffer: {
         type: Number,
-        default: 0, 
+        default: 0,
         min: 0,
-        max: 100, 
+        max: 100,
     },
     stock: {
         type: Number,
-        min: 0, 
+        min: 0,
     },
-    images: [
-        {
-            type: String,
-           
-        },
-    ],
+    
+    images: {
+        type: [String], 
+    },
     status: {
         type: String,
         enum: ['active', 'inactive'],
@@ -46,7 +42,7 @@ const productSchema = new mongoose.Schema({
     },
     ratings: {
         type: Number,
-        default: 0, 
+        default: 0,
         min: 0,
         max: 5,
     },
@@ -61,7 +57,12 @@ const productSchema = new mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false,
-      },
-})
+    },
+    isListed: {
+        type: Boolean,
+        default: false,
+    },
+});
 
-module.exports = mongoose.model('Products', productSchema);
+const Products = mongoose.model('Products', productSchema);
+module.exports = Products;

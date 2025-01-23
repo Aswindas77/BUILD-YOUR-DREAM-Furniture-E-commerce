@@ -4,8 +4,8 @@ const User = require('../models/userModel');
 
 
 const   isLogin = async (req, res, next) => {
-    if (req.session && req.session.user) {
-        res.redirect('/user/home')
+    if (req.session.logged  ) {
+        res.redirect('/user')
     } else {
         next()
         
@@ -27,13 +27,20 @@ const isLOgut = async (req, res, next) => {
 };
  
 
-const checkUserSession = (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/user/login'); 
-    }
-    next(); 
-};
+const isBan = async(req,res,next)=>{
+    try{
+        if(req.session?.user?.isblocked===true){
+            console.log("logining user=====",req.session.user)
+            req.session.destroy()
+            next()
+        }else{
+            next()
+        }
+    }catch (err) {
+        console.log(err.message);
+}
 
+}
 
 
 
@@ -42,7 +49,8 @@ const checkUserSession = (req, res, next) => {
 module.exports = {
     isLogin,
     isLOgut,
-    checkUserSession,
+    isBan
+    
     
 };
 

@@ -3,40 +3,57 @@ const Categories = require("../models/categoryModel");
 const product = require("../models/productModel");
 const fs = require("fs");
 const path = require("path");
+const mongoose = require('mongoose');
 
 
+ 
 
-
-// load category page
+// load category page 
 
 //====================================================================================================================================================
 
 const loadCategory = async (req, res) => {
   try {
-    const SearchQuery = req.query.search ||"";
-    const isAjax =req.headers["x-requested-with"]==="XMLhttpRequest";
+    const searchQuery = req.query.search || ""; // Search query from URL
+    const page = parseInt(req.query.page) || 1; // Current page, defaults to 1
+    const limit = 4; // Display 4 categories per page
+    const skip = (page - 1) * limit; // Skip logic for pagination
 
-    let categories = await Categories.find({
-      isDeleted:false,
-      name:{ $regex :SearchQuery , $options:'i'},
+    // Fetch total number of matching categories
+    const totalCategories = await Categories.countDocuments({
+      name: { $regex: searchQuery, $options: "i" },
     });
-    if(isAjax){
-      return res.json({success:true,categories});
-    }
 
+    // Fetch paginated categories
+    const categories = await Categories.find({isDeleted:false,
+      name: { $regex: searchQuery, $options: "i" },
+    })
+      .skip(skip)
+      .limit(limit);
 
-    res.render("categoryManagement", { categories });
+    // Calculate total pages
+    const totalPages = Math.ceil(totalCategories / limit);
 
-
+    
+    res.render("categoryManagement", {
+      categories,
+      searchQuery,
+      currentPage: page,
+      totalPages,
+    });
   } catch (err) {
     console.error("Error in loadCategory:", err.message);
-
-    if (req.headers["x-requested-with"] === "XMLHttpRequest") {
-      return res.json({ success: false, message: "Error loading categories" });
-    }
-    res.render("categoryManagement", { categories: [] });
+    res.render("categoryManagement", {
+      categories: [],
+      searchQuery: "",
+      currentPage: 1,
+      totalPages: 1,
+    });
   }
-}
+};
+
+
+
 
 //====================================================================================================================================================
 
@@ -89,7 +106,7 @@ const addCategory = async (req, res) => {
 //====================================================================================================================================================
 
 
-//load edit category
+//load edit category 
 
 //====================================================================================================================================================
 
@@ -112,6 +129,7 @@ const loadEditCategory = async (req, res) => {
 const EditCategory = async (req, res) => {
   try {
     const categoryId = req.body.id;
+    
 
     const category = await Categories.findById(categoryId)
 
@@ -122,7 +140,7 @@ const EditCategory = async (req, res) => {
   } catch (error) {
     console.log(error.message);
     res.redirect("/admin/categoryManagement");
-  }
+  } 
 };
 
 
@@ -134,11 +152,16 @@ const EditCategory = async (req, res) => {
 //====================================================================================================================================================
 
 const updateCategory = async (req, res) => {
-  try {
+  try { 
     // Extracting values from req.body
     const { name, description, id } = req.body;
     console.log(req.body)
 
+    const existingCategory = await Categories.findOne({name})
+
+    if(existingCategory){
+      
+    }
     // Updating the category in the database
     const updatedCategory = await Categories.findByIdAndUpdate(
       id,
@@ -155,7 +178,7 @@ const updateCategory = async (req, res) => {
     res.redirect("/admin/categoryManagement");
   } catch (error) {
     console.log(error.message);
-    res.redirect("dashboard");
+    res.redirect("/admin/categoryManagement");
   }
 }; 
 
@@ -185,6 +208,65 @@ const deleteCategory = async (req,res)=>{
   }
 }
 
+// toggle list||unlist category 
+
+const toggleListCategory = async (req,res) =>{
+  try {
+    const {categoryId,action} =req.params;
+    
+
+    // Validate category
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+              console.log("Invalid userId:", categoryId);
+              return res.status(400).json({
+                  success: false,
+                  message: "Invalid category ID"
+              });
+          }
+
+      // Validate action
+      if (!["block", "unblock"].includes(action)) {
+        console.log("Invalid action:", action);
+        return res.status(400).json({
+            success: false,
+            message: "Invalid action. Use 'listed' or 'unlisted'."
+        });
+    } 
+    
+    const isListed = action ==='block';
+     
+    // Update category and get updated document
+    const updateCategory =await Categories.findByIdAndUpdate(
+      categoryId,
+      {isListed},
+      {new:true,runValidators:true}
+    );
+
+    // Check if user exists
+    if (!updateCategory) {
+      console.log("Category not found in database for ID:", categoryId);
+      return res.status(404).json({
+          success: false,
+          message: "User not found"
+      });
+  }
+  console.log("User updated successfully:", updateCategory);
+
+  // Send success response
+  return res.status(200).json({
+    success: true,
+    message: `category list ${action}ed successfully`,
+    isListed: updateCategory.isListed
+});
+
+  } catch (error) {
+    console.error("Error in toggleListAccess:", error);
+      return res.status(500).json({
+          success: false,
+          message: "Server error while updating user status"
+      });
+  }
+}
 
 
 
@@ -197,65 +279,6 @@ const deleteCategory = async (req,res)=>{
 
 
 
-
-
-
-
-
-
-//!  category info 
-// const categoryInfo = async (req,res)=>{
-//     try{
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = 3;
-//         const skip = (page-1)*limit;
-
-//         const categoryData = await Category.find({}) 
-//         .sort({createdAt:-1})
-//         .skip(skip)
-//         .limit(limit);
-
-//        const totalCategories = await Category.countDocuments();
-//        const totalPages = Math.ceil(totalCategories/limit);
-//        res.render("category",{
-//         cat:categoryData,
-//         currentPage:page,
-//         totalPages:totalPages,
-//         totalCategories:totalCategories
-
-//        });
-//     }catch(error){
-//         console.error(error.message);
-
-//     }
-// }
-
-
-
-
-// !add category 
-
-// const addCategory = async (req,res) =>{
-//     try {
-//         const existingCategory = await Category.findOne({name});
-//         if(existingCategory){
-//             return res.status(400).json({error:"cat already exists"})
-//         } 
-
-//         const newCategory = new Category({
-//             name,
-//             description,
-//         })
-
-//         await newCategory.save()
-//         return res.json({message:"category added successfully"})
-
-
-
-//     } catch (error) {
-//         console.error(error)
-//     }
-// }
 
 
 
@@ -267,6 +290,7 @@ module.exports = {
   EditCategory,
   updateCategory,
   deleteCategory,
+  toggleListCategory,
 
 
 }

@@ -15,7 +15,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      color: #fff;
+      color: #fff; 
     }
 
     .otp-container {
@@ -101,6 +101,7 @@
     <h3>B U I L D Y O U R D R E A M</h3>
     <h2>Verify Your OTP</h2>
     <p>Enter the 6-digit OTP sent to your mobile number</p>
+
     <div class="otp-inputs">
       <input type="text" id="otp1" maxlength="1" oninput="moveToNext(this, 'otp2')"
         onkeydown="handleBackspace(this, event, null)">
@@ -114,10 +115,14 @@
         onkeydown="handleBackspace(this, event, 'otp4')">
       <input type="text" id="otp6" maxlength="1" onkeydown="handleBackspace(this, event, 'otp5')">
     </div>
-    <p id="errr"></p>
+    <p style="color: #ffd30d;" id="errr"></p>
     <button onclick="verifyOtp()">Verify</button>
-    <small>Didn’t receive the code? <a href="#" style="color: #feb47b; text-decoration: underline;">Resend
-        OTP</a></small>
+
+    <div>
+      <small>Didn’t receive the code? 
+        <a id="resendOtpLink" href="/user/resendOtp" style="color: gray; text-decoration: none; pointer-events: none;">Resend OTP</a>
+      </small>
+    </div>
   </div>
 
   <script>
@@ -126,7 +131,7 @@
       if (current.value.length >= 1 && nextFieldId) {
         document.getElementById(nextFieldId).focus();
       }
-    }
+    } 
 
     // Function to handle backspace and move to the previous input
     function handleBackspace(current, event, previousFieldId) {
@@ -155,7 +160,13 @@
               window.location = response.url
             }
             else {
-              document.getElementById('errr').innerHTML = 'invalid otp'
+              if(response.status===404){
+               document.getElementById('errr').innerHTML = "time expired "
+              }
+
+              if(response.status===400){
+                document.getElementById('errr').innerHTML = 'invalid otp '
+              }
 
             }
           })
@@ -164,9 +175,33 @@
             document.getElementById('errr').innerHTML = 'Something went wrong, please try again.';
         });
       } else {
-        alert('Please enter all 6 digits of the OTP.');
+        document.getElementById('errr').innerHTML = 'Please enter all 6 digits of the OTP.'
       }
     }
+
+    // Wait for the page to load before executing
+  window.onload = function() {
+    const resendLink = document.getElementById('resendOtpLink');
+    
+    // Disable the link initially
+    resendLink.style.pointerEvents = "none"; // Prevent clicking
+    resendLink.style.color = "white";        // Change appearance to look disabled
+    resendLink.style.textDecoration = "none";
+
+    let countdown = 60; // Set the countdown time in seconds
+
+    const timer = setInterval(() => {
+      if (countdown > 0) {
+        resendLink.textContent = `Resend OTP in ${countdown--} seconds`; // Show countdown text
+      } else {
+        clearInterval(timer); // Stop the timer when it reaches 0
+        resendLink.textContent = "Resend OTP"; // Restore original text
+        resendLink.style.pointerEvents = "auto"; // Enable clicking
+        resendLink.style.color = "#feb47b"; // Restore link appearance
+        resendLink.style.textDecoration = "underline";
+      }
+    }, 1000); // Execute every second
+  };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

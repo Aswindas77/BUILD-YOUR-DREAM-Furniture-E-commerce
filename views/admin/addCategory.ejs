@@ -20,7 +20,7 @@
             margin: 50px auto;
             padding: 20px;
             background: #ffffff;
-            border-radius: 8px;
+            border-radius: 8px; 
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -109,11 +109,11 @@
         <h1>Add Category</h1>
         <form method="post" action="addcategory" onsubmit="return handleSubmit(event)" id="add-category-form">
             <div class="form-group">
-                <input type="text" id="category-name" name="name" placeholder=" " required>
+                <input type="text" id="category-name" name="name" placeholder=" ">
                 <label for="category-name">Category Name</label>
             </div>
             <div class="form-group">
-                <textarea id="category-description" name="description" placeholder=" " required></textarea>
+                <textarea id="category-description" name="description" placeholder=" " ></textarea>
                 <label for="category-description">Category Description</label>
             </div>
             <button type="submit" id="btn-submit" class="btn">Add Category</button>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +16,7 @@
         
         .btn {
             padding: 8px 15px;
-            border: none;
+            border: none;  
             border-radius: 4px;
             cursor: pointer;
             background-color: #007bff;
@@ -66,57 +66,178 @@
 
         th {
             background-color: #f8f9fa;
-            font-weight: 600;
+            font-weight: 600; 
         }
-
+ 
         tr:hover {
             background-color: #f5f5f5;
         }
     </style>
 </head>
 <body>
-    <h1 style="margin-left: 40%;">Category Management</h1>
+    <h1 style="margin-left: 40%">Category Management</h1>
 
-    <div class="container">
-        <div class="add-category">
-            <a href="/admin/addcategory" style="text-decoration: none;">
-                <button type="submit" class="btn-link" style="text-decoration: none;">Add new Category</button>
-            </a>
-        </div>
-        <div id="categoryList"></div>
-
-        <div class="categories-table">
-            <h2 style="margin-top: 20px;">Existing Categories</h2>
-            <table width="100%">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Category Name</th>
-                        <th>Description</th>
-                        <th>Update</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% categories.forEach((category,index)=>{ %>
-                        <tr>
-                            <td><%= index+1%></td>
-                            <td><%= category.name %></td>
-                            <td><%= category.description %></td>
-                            <td>
-                                <form method="post" action="editcategory">
-                                    <input hidden type="text" name="id" value="<%= category._id %>">
-                                    <button type="submit" class="btn" style="width: 80px;">Edit</button>
-                                </form>
-                                <button type="submit" class="btn btn-delete" onclick="deleteCategory('<%= category._id %>')">Delete</button>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        </div>
+  <div class="container">
+    <div class="add-category">
+      <a href="/admin/addcategory" style="text-decoration: none;">
+        <button type="submit" class="btn-link" style="text-decoration: none;">
+          Add new Category
+        </button>
+      </a>
     </div>
 
+    <div class="categories-table">
+      <h2 style="margin-top: 20px;">Existing Categories</h2>
+      <table width="100%">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Category Name</th>
+            <th>Description</th>
+            <th>Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% categories.forEach((category, index) => { %>
+            <tr>
+              <td><%= (currentPage - 1) * 4 + index + 1 %></td>
+              <td><%= category.name %></td>
+              <td><%= category.description %></td>
+              <td>
+                <form method="post" action="editcategory">
+                  <input hidden type="text" name="id" value="<%= category._id %>">
+                  <button type="submit" class="btn" style="width: 77px;">Edit</button>
+                </form>
+                <button type="submit" class="btn btn-delete" onclick="deleteCategory('<%= category._id %>')">
+                  Delete
+                </button>
+                
+                <button style="margin-top:22px"
+                class="btn <%= category.isListed ? 'btn-danger' : 'btn-success' %> btn-sm access-btn" 
+                data-id="<%= category._id %>"
+                data-status="<%= category.isListed ? 'unlisted' : 'active' %>"
+              >
+                <span class="button-text">
+                  <%= category.isListed ? 'listed' : 'unlisted' %>
+                </span>
+                <span class="spinner-border spinner-border-sm d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+              </button> 
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Links -->
+    <div class="pagination" style="margin-top: 20px; text-align: center;">
+      <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>&search=<%= searchQuery %>" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %>&search=<%= searchQuery %>" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; background-color: <%= currentPage === i ? '#ddd' : '#fff' %>;">
+          <%= i %>
+        </a>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>&search=<%= searchQuery %>" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
+      <% } %>
+    </div>
+  </div>
+
     <script>
+
+      // ======list and unlist function====== //
+      
+     document.addEventListener('DOMContentLoaded', function () {
+            const accessButtons = document.querySelectorAll('.access-btn');
+    
+            accessButtons.forEach(button => {
+                button.addEventListener('click', async function () {
+                    try {
+                        const userId = this.dataset.id;
+                        const currentStatus = this.dataset.status;
+                        const action = currentStatus === 'active' ? 'block' : 'unblock';
+                        const buttonText = this.querySelector('.button-text');
+                        const spinner = this.querySelector('.spinner-border');
+    
+                        // Disable button and show spinner
+                        this.disabled = true;
+                        buttonText.classList.add('d-none');
+                        spinner.classList.remove('d-none');
+    
+                        // Make API call
+                        const response = await fetch(`admin/list/${userId}/${action}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        });
+    
+                        // Check response content-type
+                        const contentType = response.headers.get('Content-Type');
+                        if (!contentType.includes('application/json')) {
+                            throw new Error('Unexpected response from the server. Please try again.');
+                        }
+    
+                        // Parse JSON response
+                        const data = await response.json();
+    
+                        if (response.ok) {
+                            // Update button state
+                            const newStatus = currentStatus === 'active' ? 'unlisted' : 'active';
+                            this.dataset.status = newStatus;
+    
+                            // Update button appearance
+                            if (newStatus === 'unlisted') {
+                                this.classList.remove('btn-success');
+                                this.classList.add('btn-danger');
+                                buttonText.textContent = 'Unblock';
+                            } else {
+                                this.classList.remove('btn-danger');
+                                this.classList.add('btn-success');
+                                buttonText.textContent = 'Block';
+                            }
+    
+                            // Show success message using SweetAlert
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+    
+                        // Show error message using SweetAlert
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'Failed to update Category status.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    } finally {
+                        // Re-enable button and hide spinner
+                        this.disabled = false;
+                        buttonText.classList.remove('d-none');
+                        spinner.classList.add('d-none');
+                    }
+                });
+            });
+        });
+      
+
+      // delete button function
         async function deleteCategory(categoryId) {
             // Show confirmation dialog
             const result = await Swal.fire({
@@ -148,7 +269,7 @@
 
                     if (data.success) {
                         // Show success message
-                        await Swal.fire({
+                        await Swal.fire({ 
                             icon: 'success',
                             title: 'Deleted!',
                             text: 'Category has been deleted successfully.',

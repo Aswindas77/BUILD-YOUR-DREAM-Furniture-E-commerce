@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const Products = require("../models/productModel");
 const Category = require("../models/categoryModel")
 const OTP = require("../models/otp");
+const { isDate } = require('util/types');
+const { name } = require('ejs');
 
 const saltRounds = 10;
 
@@ -13,12 +15,15 @@ const saltRounds = 10;
 
 // ==================================================================================================================================================== 
 const loadHome = async (req, res) => {
-    try {
-        res.render("home")
-    } catch (err) {
-        console.log(err.message);
-    }
-}
+
+    const user = req.session.user
+    const products = await Products.find({isDeleted:false ,isListed:false})
+    const categories = await Category.find({ isDeleted: false ,isListed:false})
+
+
+    // Pass categories to the frontend
+    res.render('home', { categories, user,products });
+};
 
 // ====================================================================================================================================================
 
@@ -30,7 +35,10 @@ const loadHome = async (req, res) => {
 const userhome = (req, res) => {
 
     if (req.session.user) {
-        res.render("userHome")
+
+        const user = req.session.user
+
+        res.render("userHome", { user })
     } else {
         res.redirect("login")
     }
@@ -59,7 +67,11 @@ const userProfile = async (req, res) => {
 
 const loadLogin = async (req, res) => {
     try {
-        res.render("userLogin", { emailError: "", passwordError: "", message: "" });
+
+        const user = req.session.user
+        const categories = await Category.find({ isDeleted: false })
+
+        res.render("userLogin", { emailError: "", passwordError: "", message: "", categories, user });
     } catch (err) {
         console.log(err.message);
     }
@@ -78,13 +90,13 @@ const verifyUser = async (req, res) => {
         const user = await User.findOne({ email: email });
 
         if (!user) {
-           return res.status(400).json({emailError:"user not found!"});
+            return res.status(400).json({ emailError: "user not found!" });
 
         }
 
         // Check if the user is blocked
         if (user.isBlocked) {
-            return res.status(400).json({emailError:"user not found!"});
+            return res.status(400).json({ emailError: "sorry you have been blocked!" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
@@ -94,10 +106,11 @@ const verifyUser = async (req, res) => {
         }
 
         req.session.user = user;
-        res.status(200).json({success:true});
+        req.session.logged = true
+        res.status(200).json({ success: true });
     } catch (err) {
         console.log(err.message);
-        res.status(500).json({ error:" internal Server Error"});
+        res.status(500).json({ error: " internal Server Error" });
     }
 };
 
@@ -147,7 +160,7 @@ const genOtpForgotPass = async (req, res) => {
         }
         req.session.otp = otp
         console.log(
-            
+
         )
 
         res.status(200).render("passOtp");
@@ -219,7 +232,10 @@ const otpVerifyForgotPassword = async (req, res) => {
 const loadSingUp = async (req, res) => {
     try {
         if (!req.session.user) {
-            res.render("signUp");
+
+            const user = req.session.user
+            const categories = await Category.find({ isDeleted: false })
+            res.render("signUp", { categories, user });
         } else {
             res.redirect('/')
         }
@@ -237,10 +253,10 @@ const loadSingUp = async (req, res) => {
 
 const registration = async (req, res) => {
     try {
-        console.log('this is the data',req.body)
-        const { name , email, password } = req.body;
+        console.log('this is the data', req.body)
+        const { name, email, password } = req.body;
         const username = name
-        console.log(`bbbbbbbbbbbbbbbbbbbbb::::${JSON.stringify(req.body)}`)
+
         const existingUser = await User.findOne({ email });
         console.log("Existing User:", existingUser);
         if (existingUser) {
@@ -255,16 +271,14 @@ const registration = async (req, res) => {
             const otp = generateOtp()
 
             sendotp(otp, email)
-            console.log(otp)
 
-            req.session.data = {
-                username,
-                email,
-                password
-            }
+
+            req.session.data = { username, email, password }
             req.session.otp = otp
+            req.session.time = Date.now()
+            console.log(`requset time=============${req.session.time}`)
 
-            console.log(otp)
+            console.log(`your email is:${otp}`)
 
             res.status(200).json({
                 success: true,
@@ -300,7 +314,8 @@ const registration = async (req, res) => {
 
 const loadOtp = async (req, res) => {
     try {
-        res.render("userotp")
+        const message = req.flash("Expired")
+        res.render("userotp", { message });
     } catch (err) {
         console.log(err.message);
     }
@@ -371,10 +386,19 @@ const verifyOtp = async (req, res) => {
         console.log(`session: ${req.session.otp} ,,,
             body: ${req.body.otp}`)
 
+        const currentTime = Date.now()
+
+
+
         if (req.session.otp === req.body.otp) {
 
+            if (currentTime - req.session.time > 60000) {
+
+                return res.status(404).send("your OTP time expired ")
+            }
+
             const { username, email, password } = req.session.data;
-            console.log('this is the user data from session',req.session)
+            console.log('this is the user data from session', req.session)
 
 
             const hashedpassword = await bcrypt.hash(password, saltRounds);
@@ -404,7 +428,61 @@ const verifyOtp = async (req, res) => {
 
 //====================================================================================================================================================
 
+// resend otp
 
+const resendOtp = async (req, res) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'aswindasachu2004@gmail.com',
+                pass: 'asag tany ghvt sfsf'
+            }
+        })
+        const email = req.session?.data?.email
+
+        console.log("asdfghjiuygfdsdfghj", email)
+
+        let newOtp;
+        do {
+            newOtp = generateOtp()
+
+        } while (newOtp === req.session.otp)
+
+        req.session.otp = newOtp;
+
+        console.log("resend", newOtp)
+
+        req.session.time = Date.now()
+
+        const mail = {
+            from: 'your-email@gmail.com',
+            to: email,
+            subject: 'Your OTP Code',
+            html: `
+            <div style="font-family: Arial, sans-serif; text-align: center; border: 1px solid #ddd; padding: 20px; max-width: 500px; margin: auto; border-radius: 10px;">
+                <h2 style="color: #4CAF50;">Your One-Time Password (OTP)</h2>
+                <p style="font-size: 18px;">Hello,</p>
+                <p style="font-size: 16px;">Your OTP for login/registration is:</p>
+                <h1 style="font-size: 36px; color: #333;">${newOtp}</h1>
+                <p style="font-size: 16px; color: #555;">This OTP is valid for the next 5 minutes.</p>
+                <p style="font-size: 14px; color: #888;">If you did not request this, please ignore this email.</p>
+                <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                <p style="font-size: 12px; color: #aaa;">BUILD YOUR DREAM | Secure Login System</p>
+            </div>`
+        }
+
+        const info = await transporter.sendMail(mail);
+
+        res.status(200).redirect("/user/otp")
+
+
+    } catch (err) {
+
+        console.log(err.message)
+
+    }
+}
 
 
 
@@ -422,13 +500,21 @@ const verifyOtp = async (req, res) => {
 
 //====================================================================================================================================================
 
-const loadShopSofa = async (req, res) => {
+const loadShopCategory = async (req, res) => {
     try {
+        const user= req.session.user
+        
+        const categories = await Category.findOne({ name: req.params.cat, isListed: false, isDeleted: false });
+        const a = await Category.find({ isListed: false, isDeleted: false });
+        
 
-        const category = await Category.findOne({ name: 'sofas' });
-        const products = await Products.find({ isDeleted: false, category: category._id }).populate('category', 'name');
+        const products = await Products.find({ isListed:false,isDeleted: false, category: categories?._id })
+        console.log('llllllllll');
 
-        res.render("shop-sofas", { products });
+        console.log(a);
+        console.log('llllllllll');
+
+        res.render("shopCategory", { products, categories: a ,user});
     } catch (err) {
         console.log(err.message);
     }
@@ -477,11 +563,11 @@ const loadProductView = async (req, res) => {
 
 const loadShopChairs = async (req, res) => {
     try {
-        
+
         const category = await Category.findOne({ name: 'chairs' });
         const products = await Products.find({ isDeleted: false, category: category._id }).populate('category', 'name');
 
-        res.render("shop-chairs",{products});
+        res.render("shop-chairs", { products });
     } catch (err) {
         console.log(err.message);
     }
@@ -510,7 +596,10 @@ const loadAbout = async (req, res) => {
 
 const loadContact = async (req, res) => {
     try {
-        res.render("contact");
+        const user = req.session.user
+    const products = await Products.find({isDeleted:false ,isListed:false})
+    const categories = await Category.find({ isDeleted: false ,isListed:false})
+        res.render("contact",{user,products,categories});
     } catch (err) {
         console.log(err.message);
     }
@@ -566,7 +655,7 @@ const googleLogin = async (req, res) => {
         };
 
         // If the user is logged in and not blocked, redirect to home
-        res.redirect('/user/home');
+        res.redirect('/user');
 
     } catch (error) {
         console.log(error.message);
@@ -587,6 +676,7 @@ module.exports = {
 
     googleLogin,
     ForgotPassword,
+    resendOtp,
     genOtpForgotPass,
     loadOtpForgetPass,
     otpVerifyForgotPassword,
@@ -598,7 +688,7 @@ module.exports = {
     loadOtp,
 
 
-    loadShopSofa,
+    loadShopCategory,
     loadShopBeds,
     loadShopChairs,
     loadAbout,

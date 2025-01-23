@@ -72,7 +72,7 @@ document.getElementById("login-form").addEventListener("submit", (event) => {
       .then((data) => {
         if (data.success) {
           
-          window.location.href = "/user/home"; // Redirect on success
+          window.location.href = "/user"; // Redirect on success
         } else {
           if (data.emailError) emailError.textContent = data.emailError;
           if (data.passwordError) passwordError.textContent = data.passwordError;

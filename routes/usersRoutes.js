@@ -2,7 +2,7 @@
 const express = require('express');
 const session = require("express-session");
 const config = require("../config/config");
-const {isLogin} = require("../middlewares/userAuth")
+const {isLogin,isBan} = require("../middlewares/userAuth")
 const userController = require("../controllers/userController");
 const userRouter = express.Router();
 const multer = require('../config/multer.js');
@@ -16,12 +16,12 @@ userRouter.use(
         saveUninitialized: false,
         resave: false,
     })
-);
-
-
+); 
+ 
+  
 
 // default route
-userRouter.get("/", isLogin,userController.loadHome);
+userRouter.get("/",userController.loadHome);
 
 
 // login route
@@ -50,22 +50,25 @@ userRouter.get("/changePassword",isLogin,userController.changePassword)
 
 // register route
 userRouter.get("/register", isLogin,userController.loadSingUp);
-
+ 
 
 // generate otp route
 userRouter.post("/register", userController.registration);
  
 // load otp
-userRouter.get('/otp',isLogin, userController.loadOtp)
+userRouter.get('/otp',isLogin,userController.loadOtp);
+
+// resend otp
+userRouter.get('/resendOtp',isLogin,userController.resendOtp)
 
 // verify otp
 userRouter.post("/otp", isLogin,userController.verifyOtp)
 
 // user home
-userRouter.get("/home", userController.userhome);
+userRouter.get("/home",isBan,userController.userhome);
 
 // user profile
-userRouter.get("/myProfile",userController.userProfile);
+userRouter.get("/myProfile",isBan,userController.userProfile);
 
 //==============================================================================================================================================================================================================================
 
@@ -73,19 +76,19 @@ userRouter.get("/myProfile",userController.userProfile);
 
 
 
-
-
-// shop-sofa route
-userRouter.get("/shop-sofas", userController.loadShopSofa);
+userRouter.get("/shop",userController.loadHome);
 
 // shop-sofa route
-userRouter.get("/shop-beds", userController.loadShopBeds);
+userRouter.get("/shop-Category/:cat",isBan, userController.loadShopCategory);
 
 // shop-sofa route
-userRouter.get("/shop-chairs", userController.loadShopChairs);
+userRouter.get("/shop-beds",isBan, userController.loadShopBeds);
+
+// shop-sofa route
+userRouter.get("/shop-chairs",isBan,userController.loadShopChairs);
 
 // contact route
-userRouter.get("/contact", userController.loadContact);
+userRouter.get("/contact",isBan, userController.loadContact);
 
 // logout section
 
@@ -95,7 +98,7 @@ userRouter.get("/logout",userController.logOut);
 
 // product view
 
-userRouter.get('/product_view/:product_id',userController.loadProductView)
+userRouter.get('/product_view/:product_id',isBan,userController.loadProductView)
 
 
 

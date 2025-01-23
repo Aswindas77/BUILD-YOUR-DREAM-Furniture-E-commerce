@@ -1,6 +1,6 @@
 <h1>Product Management</h1>
 
-<!-- Add Product Form -->
+<!-- Add Product Form --> 
 
 <a href="/admin/addProduct"><button type="submit">Add Product</button></a>
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
@@ -12,51 +12,172 @@
     <tr>
       <th>#</th>
       <th>Product Name</th>
-      <!-- <th>Description</th> -->
       <th>Category</th>
       <th>Sales Price</th>
       <th>Product Offer (%)</th>
       <th>Stock</th>
       <th>Status</th>
       <th>Action</th>
+      <th>product listing</th>
     </tr>
   </thead>
   <tbody>
-    <% products.forEach((product, index)=> { %>
+    <% products.forEach((product, index) => { %>
       <tr>
-
-        <td>
-          <%= index + 1 %>
-        </td>
-        <td><a href=/admin/productView/<%=product._id%>><%= product.name %></a></td>
-        <td>
-          <%= product.category ? product.category.name : "No Category Assigned" %>
-        </td>
-        <!-- <td>product.description</td> -->
-        <td>₹<%= product.salesPrice.toFixed(2) %>
-        </td>
-        <td>
-          <%= product.productOffer %>
-        </td>
-        <td>
-          <%= product.stock %>
-        </td>
+        <td><%= index + 1 + (currentPage - 1) * 4 %></td> <!-- Adjust index for pagination -->
+        <td><a href="/admin/productView/<%= product._id %>"><%= product.name %></a></td>
+        <td><%= product.category ? product.category.name : "No Category Assigned" %></td>
+        <td>₹<%= product.salesPrice?.toFixed(2) %></td>
+        <td><%= product.productOffer %></td>
+        <td><%= product.stock %></td>
         <td>
           <span class="badge <%= product.status === 'active' ? 'bg-success' : 'bg-danger' %>">
             <%= product.status %>
           </span>
         </td>
         <td>
-          <!-- Add Action Buttons -->
-          <button class="btn btn-primary btn-sm" onclick="editProduct('<%= product._id %>')">Edit</button>
-          <button id="deleteBtn <%= product._id %>" class="btn btn-danger btn-sm"
+          <form method="post" action="editProduct">
+            <input hidden type="text" name="id" value="<%= product._id %>">
+            <button type="submit" class="btn" style="width: 70px;">Edit</button>
+          </form>
+          <button id="deleteBtn<%= product._id %>" class="btn btn-danger btn-sm"
             onclick="deleteProduct('<%= product._id %>')">Delete</button>
         </td>
+        <td>
+          <button style="margin-top:22px"
+                class="btn <%= product.isListed ? 'btn-danger' : 'btn-success' %> btn-sm access-btn" 
+                data-id="<%= product._id %>"
+                data-status="<%= product.isListed ? 'unlisted' : 'active' %>"
+              >
+                <span class="button-text">
+                  <%= product.isListed ? 'listed' : 'unlisted' %>
+                </span>
+                <span class="spinner-border spinner-border-sm d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+              </button> 
+        </td>
       </tr>
-      <% }) %>
+    <% }) %> 
   </tbody>
 </table>
-<script>
+
+<!-- Pagination Controls -->
+<div class="pagination" style="margin-top: 20px; text-align: center;">
+  <!-- Previous Button -->
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>" style="text-decoration: none; margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc;">Previous</a>
+  <% } else { %>
+    <span style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc; color: #ccc;">Previous</span>
+  <% } %>
+
+  <!-- Page Numbers -->
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>" style="text-decoration: none; margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc; background-color: <%= currentPage === i ? '#ddd' : '#fff' %>;">
+      <%= i %>
+    </a>
+  <% } %>
+
+  <!-- Next Button -->
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>" style="text-decoration: none; margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc;">Next</a>
+  <% } else { %>
+    <span style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc; color: #ccc;">Next</span>
+  <% } %>
+</div>
+
+<script> 
+ 
+  //======== Product list || unlist function======//
+  document.addEventListener('DOMContentLoaded', function () {
+            const accessButtons = document.querySelectorAll('.access-btn');
+    
+            accessButtons.forEach(button => {
+                button.addEventListener('click', async function () {
+                    try {
+                        const userId = this.dataset.id;
+                        const currentStatus = this.dataset.status;
+                        const action = currentStatus === 'active' ? 'block' : 'unblock';
+                        const buttonText = this.querySelector('.button-text');
+                        const spinner = this.querySelector('.spinner-border');
+    
+                        // Disable button and show spinner
+                        this.disabled = true;
+                        buttonText.classList.add('d-none');
+                        spinner.classList.remove('d-none');
+    
+                        // Make API call
+                        const response = await fetch(`admin/product/${userId}/${action}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        });
+    
+                        // Check response content-type
+                        const contentType = response.headers.get('Content-Type');
+                        if (!contentType.includes('application/json')) {
+                            throw new Error('Unexpected response from the server. Please try again.');
+                        }
+    
+                        // Parse JSON response
+                        const data = await response.json();
+    
+                        if (response.ok) {
+                            // Update button state
+                            const newStatus = currentStatus === 'active' ? 'unlisted' : 'active';
+                            this.dataset.status = newStatus;
+    
+                            // Update button appearance
+                            if (newStatus === 'unlisted') {
+                                this.classList.remove('btn-success');
+                                this.classList.add('btn-danger');
+                                buttonText.textContent = 'Unblock';
+                            } else {
+                                this.classList.remove('btn-danger');
+                                this.classList.add('btn-success');
+                                buttonText.textContent = 'Block';
+                            }
+    
+                            // Show success message using SweetAlert
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+    
+                        // Show error message using SweetAlert
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'Failed to update Category status.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    } finally {
+                        // Re-enable button and hide spinner
+                        this.disabled = false;
+                        buttonText.classList.remove('d-none');
+                        spinner.classList.add('d-none');
+                    }
+                });
+            });
+        });
+      
+  
+
+
+
+  //  product delete function
+
   function deleteProduct(productId) {
   Swal.fire({
     title: 'Are you sure?',
@@ -82,13 +203,13 @@
           Swal.fire({
             title: 'Deleted!',
             text: 'Product has been deleted successfully.',
-            icon: 'success',
+            icon: 'success', 
             timer: 1500
           }).then(() => {
             window.location.href = 'http://localhost:3000/admin/productManagement';
           });
         } else {
-          Swal.fire({
+          Swal.fire({ 
             title: 'Error!',
             text: 'Failed to delete product',
             icon: 'error',

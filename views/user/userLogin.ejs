@@ -69,63 +69,7 @@
 <body>
 
 	<!-- Start Header Area -->
-	<header class="header_area sticky-header">
-		<div class="main_menu">
-			<nav class="navbar navbar-expand-lg navbar-light main_box">
-				<div class="container">
-					<!-- Brand and toggle get grouped for better mobile display -->
-					<a class="navbar-brand logo_h" href="index.html"><img src="/public/userAssets/images/logo.png" alt=""></a>
-					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-					 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-					<!-- Collect the nav links, forms, and other content for toggling -->
-					<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
-						<ul class="nav navbar-nav menu_nav ml-auto">
-							<li class="nav-item active"><a class="nav-link" href="http://localhost:3000/user">Home</a></li>
-							<li class="nav-item submenu dropdown">
-								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								 aria-expanded="false">Shop</a>
-								<ul class="dropdown-menu">
-									<li class="nav-item"><a class="nav-link" href="http://localhost:3000/user/shop-sofas">Sofas</a></li>
-									<li class="nav-item"><a class="nav-link" href="http://localhost:3000/user/shop-beds">beds</a></li>
-									<li class="nav-item"><a class="nav-link" href="http://localhost:3000/user/shop-chairs">chairs</a></li>
-									
-								</ul>
-							</li>
-							<li class="nav-item"><a class="nav-link" href="">about</a></li>
-							<li class="nav-item submenu dropdown">
-								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								 aria-expanded="false">Profile</a>
-								<ul class="dropdown-menu">
-									<li class="nav-item"><a class="nav-link" href="http://localhost:3000/user/login">Login</a></li>
-									<li class="nav-item"><a class="nav-link" href="http://localhost:3000/user/register">Register</a></li>
-								</ul>
-							</li>
-							<li class="nav-item"><a class="nav-link" href="http://localhost:3000/user/contact">Contact</a></li>
-						</ul>
-						<ul class="nav navbar-nav navbar-right">
-							<li class="nav-item"><a href="#" class="cart"><span class="ti-bag"></span></a></li>
-							<li class="nav-item">
-								<button class="search"><span class="lnr lnr-magnifier" id="search"></span></button>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</nav>
-		</div>
-		<div class="search_input" id="search_input_box">
-			<div class="container">
-				<form class="d-flex justify-content-between">
-					<input type="text" class="form-control" id="search_input" placeholder="Search Here">
-					<button type="submit" class="btn"></button>
-					<span class="lnr lnr-cross" id="close_search" title="Close Search"></span>
-				</form>
-			</div>
-		</div>
-	</header>
+	<%- include("../partials/userPartial/userHeader") %>
 	<!-- End Header Area -->
 
 
@@ -203,74 +147,7 @@
 	<!--================End Login Box Area =================-->
 
 	<!-- start footer Area -->
-	<footer>
-		<div class="footer-section">
-		  <div class="footer-column">
-			<h3>Corporate</h3>
-			<ul>
-			  <li><a href="#">About Us</a></li>
-			  <li><a href="#">Corporate Governance</a></li>
-			  <li><a href="#">BYD in the News</a></li>
-			  <li><a href="#">Careers</a></li>
-			</ul>
-		  </div>
-		  <div class="footer-column">
-			<h3>Useful Links</h3>
-			<ul>
-			  <li><a href="#">Explore Gift Cards</a></li>
-			  <li><a href="#">Buy in Bulk</a></li>
-			  <li><a href="#">Discover Our Brands</a></li>
-			  <li><a href="#">Check Out Bonhomie, Our Blog</a></li>
-			  <li><a href="#">Find a Store</a></li>
-			</ul>
-		  </div>
-		  <div class="footer-column">
-			<h3>Partner With Us</h3>
-			<ul>
-			  <li><a href="#">Sell on byd</a></li>
-			  <li><a href="#">Become a Franchisee</a></li>
-			  <li><a href="#">Become Our Channel Partner</a></li>
-			  <li><a href="#">Become Our Pep Homie</a></li>
-			  <li><a href="#">Merchant Dashboard Login</a></li>
-			</ul>
-		  </div>
-		  <div class="footer-column">
-			<h3>Need Help?</h3>
-			<ul>
-			  <li><a href="#">FAQs</a></li>
-			  <li><a href="#">Policies</a></li>
-			  <li><a href="#">Contact Us</a></li>
-			</ul>
-		  </div>
-		  <div class="footer-column">
-			<h3>Shop Built Safe Products</h3>
-			<ul>
-			  <li><a href="#">Kids & Pet Friendly</a></li>
-			  <li><a href="#">Certified Non-Toxic</a></li>
-			  <li><a href="#">Made with Vegetarian Glue</a></li>
-			  <li><a href="#">Scratch Resistant Finish</a></li>
-			</ul>
-		  </div>
-		</div>
-	  
-		<div class="footer-bottom">
-		  <div class="social-links">
-			<p>Like What You See? Follow us Here</p>
-			<a href="#"><img src="instagram-icon.png" alt="Instagram"></a>
-			<a href="#"><img src="facebook-icon.png" alt="Facebook"></a>
-			<a href="#"><img src="pinterest-icon.png" alt="Pinterest"></a>
-			<a href="#"><img src="linkedin-icon.png" alt="LinkedIn"></a>
-			<a href="#"><img src="youtube-icon.png" alt="YouTube"></a>
-		  </div>
-		  <div class="payment-methods">
-			<p>We accept</p>
-			<img src="visa-icon.png" alt="Visa">
-			<img src="mastercard-icon.png" alt="Mastercard">
-			<img src="rupay-icon.png" alt="Rupay">
-			<img src="wallet-icon.png" alt="Wallet">
-		  </div>
-		</div>
-	  </footer>
+	<%- include("../partials/userPartial/userFooter")  %>
 	  
 	<!-- End footer Area -->
 
@@ -310,7 +187,7 @@
 		  .then(data => {
 			  
 			  if (data.success) {
-				  window.location.href = '/userHome'; 
+				  window.location.href = '/user'; 
 			  } else {
 				  alert('Authentication failed');
 			  }

@@ -3,6 +3,7 @@ const adminData = require("../models/adminDataModel");
 const userData = require('../models/userModel');
 const bcrypt = require("bcrypt");
 const mongoose = require('mongoose');
+const { unblock } = require('sharp');
 const saltRounds = 10;
 
 
@@ -87,12 +88,26 @@ const dashboad = async (req, res) => {
 
 const loadusermanagment = async (req,res) =>{
   try{
+    const page = parseInt(req.query.page) || 1; 
+    const limit = 9; 
+    const skip = (page - 1) * limit; 
 
-    let users= await userData.find({})
+    const totalUsers = await userData.countDocuments();
+
+    // Fetch users with pagination
+    let users= await userData.find({}).skip(skip).limit(limit);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalUsers / limit);
     
     
 
-    res.render("userManagement",{users});
+    res.render("userManagement",{
+      users,
+      currentPage:page,
+      totalPages,
+      
+    });
   }catch (err) {
     console.error("Error in loadusermanagment:", err.message);
     res.status(500).send("Server error");
@@ -102,95 +117,72 @@ const loadusermanagment = async (req,res) =>{
 //====================================================================================================================================================
 
 
-// load user block 
 
-//====================================================================================================================================================
-
-const blockUser = async (req,res)=>{
-  try{
-    const id=req.params.userId;
-
-    console.log("Route hit:", id); 
-   
-    
-    if(!mongoose.Types.ObjectId.isValid(id)){
-      console.log("Invalid userID: ",id);
-      return res.status(400).send("invalid user Id");
-    }
-       
-   const result = await userData.updateOne({_id:id},{$set:{isBlocked:true}});
-
-   console.log("updated result:",result)
-
-   if(result.matchedCount===0){
-
-    return res.status(404).send("user not found or already blocked");
-   }
-
-   res.redirect("/admin/user-management")
-
-  }catch(err){
-    console.error("Error in blockUser:",err.message)
-    res.status(500).send("Server error");
-  }
-}
-
-
-//====================================================================================================================================================
 
 
 
 
 // user block
 
-const toggleUserAccess = async (req, res) => {
+const toggleBlockAccess = async (req, res) => {
   try {
-      const userId = req.params.userId;
-      const action = req.params.action;
+      const { userId, action } = req.params;
 
       console.log("Toggle access request:", { userId, action });
 
+      // Validate userId
       if (!mongoose.Types.ObjectId.isValid(userId)) {
-        console.log("Invalid userId:", userId);
+          console.log("Invalid userId:", userId);
           return res.status(400).json({
               success: false,
               message: "Invalid user ID"
           });
       }
 
+      // Validate action
+      if (!["block", "unblock"].includes(action)) {
+          console.log("Invalid action:", action);
+          return res.status(400).json({
+              success: false,
+              message: "Invalid action. Use 'block' or 'unblock'."
+          });
+      }
+
       const isBlocked = action === 'block';
       
-      const result = await userData.updateOne(
-          { _id: userId },
-          { $set: { isBlocked } }
+      // Update user and get updated document
+      const updatedUser = await userData.findByIdAndUpdate(
+          userId,
+          { isBlocked },
+          { new: true, runValidators: true }
       );
 
-      console.log("Update result:", result);
+      // Check if user exists
+      if (!updatedUser) {
+          console.log("User not found in database for ID:", userId);
+          return res.status(404).json({
+              success: false,
+              message: "User not found"
+          });
+      }
 
-      // Send JSON response instead of redirect
-      if (result.matchedCount === 0) {
-        return res.status(404).json({
-            success: false,
-            message: "User not found"
-        });
-    }
+      console.log("User updated successfully:", updatedUser);
 
-    // Send success response
-    return res.status(200).json({
-      success: true,
-      message: `User ${action}ed successfully`,
-      isBlocked: isBlocked
-  });
+      // Send success response
+      return res.status(200).json({
+          success: true,
+          message: `User ${action}ed successfully`,
+          isBlocked: updatedUser.isBlocked
+      });
 
   } catch (err) {
       console.error("Error in toggleUserAccess:", err);
       return res.status(500).json({
           success: false,
-          message: "Server error"
+          message: "Server error while updating user status"
       });
   }
 };
-
 
 
 
@@ -220,10 +212,8 @@ module.exports = {
   loadDash,
   dashboad,
   loadusermanagment,
-  // blockUser,
-  // unBlockUser,
   logout,
 
-  toggleUserAccess,
+  toggleBlockAccess,
   
 };

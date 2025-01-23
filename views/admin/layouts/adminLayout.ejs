@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,100 +33,108 @@
         }
 
 
-      /* Sidebar */
-.sidebar {
-    width: 250px;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    transition: all 0.3s ease-in-out;
-    z-index: 1000;
-    overflow-y: auto;
-}
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition: all 0.3s ease-in-out;
+            z-index: 1000;
+            overflow-y: auto;
+        }
 
-/* Sidebar Collapsed State */
-.sidebar.collapsed {
-    width: 70px; /* Reduced width */
-}
+        /* Sidebar Collapsed State */
+        .sidebar.collapsed {
+            width: 70px;
+            /* Reduced width */
+        }
 
-.sidebar-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    background-color: #34495e;
-}
+        .sidebar-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-color: #34495e;
+        }
 
-.sidebar-header h2 {
-    font-size: 1.2em;
-    display: none; /* Hide text in collapsed mode */
-}
+        .sidebar-header h2 {
+            font-size: 1.2em;
+            display: none;
+            /* Hide text in collapsed mode */
+        }
 
-.sidebar.collapsed .sidebar-header h2 {
-    display: none; /* Hide the full title in collapsed mode */
-}
+        .sidebar.collapsed .sidebar-header h2 {
+            display: none;
+            /* Hide the full title in collapsed mode */
+        }
 
-/* Navigation Links */
-.nav-item {
-    display: flex;
-    align-items: center;
-    padding: 15px 10px;
-    color: #ecf0f1;
-    text-decoration: none;
-    font-size: 1em;
-    border-bottom: 1px solid #34495e;
-    transition: background-color 0.3s ease, width 0.3s ease;
-    justify-content: center; /* Center icon in collapsed mode */
-}
+        /* Navigation Links */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 10px;
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 1em;
+            border-bottom: 1px solid #34495e;
+            transition: background-color 0.3s ease, width 0.3s ease;
+            justify-content: center;
+            /* Center icon in collapsed mode */
+        }
 
-.nav-item i {
-    font-size: 1.2em;
-}
+        .nav-item i {
+            font-size: 1.2em;
+        }
 
-.nav-item span {
-    margin-left: 10px;
-    white-space: nowrap;
-    display: inline-block; /* Text visible in default mode */
-}
+        .nav-item span {
+            margin-left: 10px;
+            white-space: nowrap;
+            display: inline-block;
+            /* Text visible in default mode */
+        }
 
-.sidebar.collapsed .nav-item span {
-    display: none; /* Hide text in collapsed mode */
-}
+        .sidebar.collapsed .nav-item span {
+            display: none;
+            /* Hide text in collapsed mode */
+        }
 
-/* Toggle Button */
-.toggle-btn {
-    background: none;
-    border: none;
-    color: #ecf0f1;
-    font-size: 1.5em;
-    cursor: pointer;
-    outline: none;
-    position: absolute;
-    top: 15px;
-    right: -40px;
-    background-color: #2c3e50;
-    padding: 10px;
-    border-radius: 50%;
-    z-index: 1001;
-}
+        /* Toggle Button */
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #ecf0f1;
+            font-size: 1.5em;
+            cursor: pointer;
+            outline: none;
+            position: absolute;
+            top: 15px;
+            right: -40px;
+            background-color: #2c3e50;
+            padding: 10px;
+            border-radius: 50%;
+            z-index: 1001;
+        }
 
-/* Responsive Design */
-@media screen and (max-width: 768px) {
-    .sidebar {
-        width: 70px; /* Sidebar collapsed by default on small screens */
-    }
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                /* Sidebar collapsed by default on small screens */
+            }
 
-    .sidebar.collapsed {
-        width: 250px; /* Sidebar expands when toggled */
-    }
+            .sidebar.collapsed {
+                width: 250px;
+                /* Sidebar expands when toggled */
+            }
 
-    .toggle-btn {
-        display: block;
-    }
-}
+            .toggle-btn {
+                display: block;
+            }
+        }
 
 
         /* Main Content Styles */
@@ -151,7 +160,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .stat-card h3 {
@@ -183,7 +192,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .chart-card h3 {
@@ -251,83 +260,85 @@
                 transform: translateX(0);
             }
 
-            .navbar, .main-content {
+            .navbar,
+            .main-content {
                 left: 0;
                 margin-left: 0;
             }
         }
     </style>
 </head>
+
 <body>
-   <!-- sidebar -->
-<%- include('../../partials/adminSidebar.ejs')  %>
-    
-<!-- main contents -->
-    <main class="main-content">
-    <%- body  %>
-    </main>
+    <!-- sidebar -->
+    <%- include('../../partials/admin/adminSidebar.ejs') %>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <script>
-        // Toggle Sidebar
-        const toggleBtn = document.querySelector('#toggle-btn');
-        const sidebar = document.querySelector('.sidebar');
-        const navbar = document.querySelector('.navbar');
-        const mainContent = document.querySelector('.main-content');
+        <!-- main contents -->
+        <main class="main-content">
+            <%- body %>
+        </main>
 
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            navbar.classList.toggle('expanded');
-            mainContent.classList.toggle('expanded');
-            toggleBtn.classList.toggle('collapsed');
-        });
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+        <script>
+            // Toggle Sidebar
+            const toggleBtn = document.querySelector('#toggle-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const navbar = document.querySelector('.navbar');
+            const mainContent = document.querySelector('.main-content');
 
-        // Navigation Active State
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                navbar.classList.toggle('expanded');
+                mainContent.classList.toggle('expanded');
+                toggleBtn.classList.toggle('collapsed');
             });
-        });
 
-        // Sales Chart
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Sales',
-                    data: [4000, 3000, 5000, 4500, 6000, 5500],
-                    borderColor: '#4a90e2',
-                    tension: 0.4,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+            // Navigation Active State
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+
+            // Sales Chart
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [4000, 3000, 5000, 4500, 6000, 5500],
+                        borderColor: '#4a90e2',
+                        tension: 0.4,
+                        fill: false
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            display: true,
-                            color: '#f0f0f0'
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
                         }
                     },
-                    x: {
-                        grid: {
-                            display: false
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: '#f0f0f0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
 
 
 
@@ -335,6 +346,7 @@
 
 
 
-    </script>
+        </script>
 </body>
+
 </html>

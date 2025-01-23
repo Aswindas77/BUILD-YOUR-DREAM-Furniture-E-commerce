@@ -6,9 +6,10 @@ const nocache = require('nocache');
 const session = require('express-session');
 const passport = require('passport');
 const expressLayouts = require('express-ejs-layouts');
-const bodyParser = require('body-parser');
+
 const config = require('./config/config');
 const connectDb = require("./config/db");
+const flash = require("connect-flash");
 const userRoute = require('./routes/usersRoutes');
 const adminRouter = require('./routes/adminRoutes');
 const User = require("./models/userModel");
@@ -22,19 +23,19 @@ connectDb();
 
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
-
+app.use(flash());
 
 
 // layout dfor admin
 
-app.use('/admin',(req,res,next)=>{
-    app.set('layout','layouts/adminLayout');
+app.use('/admin', (req, res, next) => {
+    app.set('layout', 'layouts/adminLayout');
     next();
 })
 
 // layout for user
 app.use('/user', (req, res, next) => {
-    app.set('layout',false);
+    app.set('layout', false);
     next();
 });
 
@@ -42,10 +43,14 @@ app.use('/user', (req, res, next) => {
 
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/public", express.static(path.join(__dirname, "public")));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(morgan('dev'))
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+
+
+app.use(express.json({ limit: '50mb' }));
+
+
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// app.use(morgan('dev'))
 
 app.use(nocache());
 app.use(session({

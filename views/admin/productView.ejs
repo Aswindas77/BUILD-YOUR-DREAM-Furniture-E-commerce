@@ -15,14 +15,18 @@
 
         body {
             background-color: #f4f6f8;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-
+ 
         .product-card {
             border: none;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             border-radius: 20px;
             overflow: hidden;
             margin: 2rem auto;
+            max-width: 800px;
             background: white;
         }
 
@@ -30,7 +34,8 @@
             background: linear-gradient(135deg, var(--primary-color), #2c5282);
             color: white;
             padding: 1.5rem;
-            border: none;
+            text-align: center;
+            font-size: 1.5rem;
         }
 
         .product-image-container {
@@ -71,48 +76,6 @@
             display: inline-block;
         }
 
-        /* Enhanced Pagination */
-        .pagination {
-            margin: 2rem 0;
-            gap: 0.5rem;
-        }
-
-        .page-item .page-link {
-            border: none;
-            padding: 0.75rem 1.25rem;
-            border-radius: 10px;
-            color: var(--primary-color);
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .page-item.active .page-link {
-            background: linear-gradient(135deg, var(--primary-color), #2c5282);
-            border: none;
-            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
-        }
-
-        .page-link:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .btn-back {
-            background: linear-gradient(135deg, var(--primary-color), #2c5282);
-            color: white;
-            border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
-            color: white;
-        }
-
-        /* Image Navigation */
         .image-nav {
             display: flex;
             gap: 1rem;
@@ -135,65 +98,79 @@
             border-color: var(--primary-color);
             transform: translateY(-2px);
         }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--primary-color), #2c5282);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
+            color: white;
+        }
     </style>
 </head>
 
 <body>
     <div class="container mt-5">
         <div class="product-card">
-            <div class="card-header text-center">
-                <h2><%= product.name %></h2>
+            <div class="card-header">
+                <h2><%= product.name || 'Product Name Not Available' %></h2>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <% if (product.images && product.images.length > 0) { %>
-                        <div class="col-md-6">
-                            <div class="product-image-container">
-                                <img src="<%= product.images[0] %>" id="mainImage" class="product-image" alt="<%= product.name %>">
-                            </div>
-                            <div class="image-nav">
+                    <!-- Main Image Section -->
+                    <div class="col-md-6 text-center">
+                        <div class="product-image-container">
+                            <% if (product.images && product.images.length > 0) { %>
+                                <img id="mainImage" class="product-image" src="<%= product.images[0] %>" alt="<%= product.name || 'Product Image' %>">
+                            <% } else { %>
+                                <img id="mainImage" class="product-image" src="/path/to/default-placeholder.jpg" alt="Default Image">
+                            <% } %>
+                        </div>
+                        <div class="image-nav">
+                            <% if (product.images && product.images.length > 0) { %>
                                 <% product.images.forEach((image, index) => { %>
-                                    <img src="<%= image %>" 
-                                         onclick="document.getElementById('mainImage').src='<%= image %>'"
-                                         alt="Product thumbnail <%= index + 1 %>"
-                                         class="thumbnail">
-                                <% }) %>
-                            </div>
+                                    <img class="thumbnail" src="<%= image %>" alt="Thumbnail <%= index + 1 %>">
+                                <% }); %>
+                            <% } else { %>
+                                <p>No thumbnails available</p>
+                            <% } %>
                         </div>
-                    <% } else { %>
-                        <div class="col-md-6">
-                            <div class="product-image-container">
-                                <p class="text-center">No image available</p>
-                            </div>
-                        </div>
-                    <% } %>
+                    </div>
 
+                    <!-- Product Details Section -->
                     <div class="col-md-6">
                         <div class="product-details">
                             <p>
                                 <strong>Description:</strong>
-                                <span><%= product.description %></span>
+                                <span><%= product.description || 'No description available' %></span>
                             </p>
                             <p>
                                 <strong>Category:</strong>
-                                <span><%= product.category.name %></span>
+                                <span><%= product.category?.name || 'No category' %></span>
                             </p>
                             <p>
                                 <strong>Sales Price:</strong>
-                                <span class="text-success">₹<%= product.salesPrice.toFixed(2) %></span>
+                                <span class="text-success">₹<%= product.salesPrice ? product.salesPrice.toFixed(2) : '0.00' %></span>
                             </p>
                             <p>
                                 <strong>Product Offer:</strong>
-                                <span class="text-danger"><%= product.productOffer %>% OFF</span>
+                                <span class="text-dark"><%= product.productOffer || 0 %>% OFF</span>
                             </p>
                             <p>
                                 <strong>Stock:</strong>
-                                <span><%= product.stock %> units</span>
+                                <span><%= product.stock || 'Out of stock' %></span>
                             </p>
                             <p>
                                 <strong>Status:</strong>
-                                <span class="<%= product.status === 'Active' ? 'text-success' : 'text-danger' %>">
-                                    <%= product.status %>
+                                <span class="<%= product.status === 'Active' ?  'text-danger':'text-success' %>">
+                                    <%= product.status || 'Inactive' %>
                                 </span>
                             </p>
                         </div>
@@ -206,10 +183,20 @@
                 </a>
             </div>
         </div>
-
-        <!-- Enhanced Pagination -->
-        
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const mainImage = document.getElementById("mainImage");
+            const thumbnails = document.querySelectorAll(".thumbnail");
+
+            thumbnails.forEach((thumbnail) => {
+                thumbnail.addEventListener("click", () => {
+                    mainImage.src = thumbnail.src;
+                });
+            });
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
-  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
     <style>
         body {
             background-color: #f8f9fa;
         }
+
         .form-container {
             max-width: 600px;
             margin: 50px auto;
@@ -17,71 +20,101 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
+
         .form-container h1 {
             text-align: center;
             margin-bottom: 20px;
             color: #343a40;
         }
+
         .btn-primary {
             background-color: #007bff;
             border: none;
         }
+
         .btn-primary:hover {
             background-color: #0056b3;
         }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        img {
+            margin-top: 10px;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+        }
     </style>
-    
 </head>
+
 <body>
     <div class="container">
         <div class="form-container">
             <h1>Add New Product</h1>
-            <form method="post" action="/admin/addProduct" enctype="multipart/form-data">
+            <form id="addProductForm" method="post" action="/admin/addProduct" onsubmit="productAdder(event)">
                 <!-- Product Name -->
                 <div class="mb-3">
                     <label for="name" class="form-label">Product Name</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter product name" required>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter product name">
+                    <div class="error" id="nameError">Please enter a valid product name (at least 3 characters).</div>
                 </div>
 
                 <!-- Description -->
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" placeholder="Enter product description" rows="4" required></textarea>
+                    <textarea class="form-control" id="description" name="description"
+                        placeholder="Enter product description" rows="4"></textarea>
+                    <div class="error" id="descriptionError">Description must be at least 10 characters long.</div>
                 </div>
 
                 <!-- Category -->
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="category" name="category" required>
-                        
-                        <% categories.forEach(category => { %>
-                            <option value="<%= category._id %>"><%= category.name %></option>
-                        <% }); %>
+                    <select class="form-select" id="category" name="category">
+                        <% categories.forEach(category=> { %>
+                            <option value="<%= category._id %>">
+                                <%= category.name %>
+                            </option>
+                            <% }); %>
                     </select>
+                    <div class="error" id="categoryError">Please select a category.</div>
                 </div>
 
                 <!-- Sales Price -->
                 <div class="mb-3">
                     <label for="salesPrice" class="form-label">Sales Price</label>
-                    <input type="number" class="form-control" id="salesPrice" name="salesPrice" placeholder="Enter sales price" step="0.01" required>
+                    <input type="number" class="form-control" id="salesPrice" name="salesPrice"
+                        placeholder="Enter sales price" step="0.01">
+                    <div class="error" id="salesPriceError">Sales price must be greater than 0.</div>
                 </div>
 
                 <!-- Product Offer -->
                 <div class="mb-3">
                     <label for="productOffer" class="form-label">Product Offer (%)</label>
-                    <input type="number" class="form-control" id="productOffer" name="productOffer" placeholder="Enter product offer" step="1" min="0">
+                    <input type="number" class="form-control" id="productOffer" name="productOffer"
+                        placeholder="Enter product offer" step="1" min="0">
+                    <div class="error" id="productOfferError">Offer must be between 0 and 100.</div>
                 </div>
 
                 <!-- Stock -->
                 <div class="mb-3">
                     <label for="stock" class="form-label">Stock</label>
-                    <input type="number" class="form-control" id="stock" name="stock" placeholder="Enter available stock" min="0" required>
+                    <input type="number" class="form-control" id="stock" name="stock"
+                        placeholder="Enter available stock" min="0">
+                    <div class="error" id="stockError">Stock must be a positive number.</div>
                 </div>
 
                 <!-- Status -->
                 <div class="mb-3">
                     <label for="status" class="form-label">Status</label>
-                    <select class="form-select" id="status" name="status" required>
+                    <select class="form-select" id="status" name="status">
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
@@ -89,10 +122,20 @@
 
                 <!-- Image Upload -->
                 <div class="mb-3">
-                    <label for="image" class="form-label">Product Image</label>
-                    <input type="file" class="form-control" id="image" name="images" required>
-                    <input type="file" class="form-control" id="image" name="images" required>
-                    <input type="file" class="form-control" id="image" name="images" required>
+                    <label>Image 1</label>
+                    <input onchange="cropper(1)" id="image1" type="file" accept="image/*">
+                    <img style="display: none;" src="" alt="" id="prev1">
+                    <div class="error" id="image1Error">Please upload Image 1.</div>
+
+                    <label>Image 2</label>
+                    <input onchange="cropper(2)" id="image2" type="file" accept="image/*">
+                    <img style="display: none;" src="" alt="" id="prev2">
+                    <div class="error" id="image2Error">Please upload Image 2.</div>
+
+                    <label>Image 3</label>
+                    <input onchange="cropper(3)" id="image3" type="file" accept="image/*">
+                    <img style="display: none;" src="" alt="" id="prev3">
+                    <div class="error" id="image3Error">Please upload Image 3.</div>
                 </div>
 
                 <!-- Submit Button -->
@@ -101,6 +144,139 @@
         </div>
     </div>
 
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        let croppers = {};
+
+        function cropper(index) {
+            const files = document.getElementById(`image${index}`);
+            const preview = document.getElementById(`prev${index}`);
+            const file = files.files[0];
+            if (file) {
+                const objectURL = URL.createObjectURL(file);
+                preview.src = objectURL;
+                preview.style.display = 'block';
+                if (croppers[index]) {
+                    croppers[index].destroy();
+                }
+                croppers[index] = new Cropper(preview, {
+                    aspectRatio: NaN,
+                    cropBoxMovable: true,
+                });
+            }
+        }
+
+        function productAdder(e) {
+            e.preventDefault(); // Prevent form submission
+
+            // Initialize validity flag
+            let isValid = true;
+
+            // Get all input values
+            const name = document.getElementById("name").value.trim();
+            const description = document.getElementById("description").value.trim();
+            const category = document.getElementById("category").value;
+            const salesPrice = parseFloat(document.getElementById("salesPrice").value.trim());
+            const productOffer = parseInt(document.getElementById("productOffer").value.trim(), 10);
+            const stock = parseInt(document.getElementById("stock").value.trim(), 10);
+            const image1 = document.getElementById("image1").files.length > 0;
+            const image2 = document.getElementById("image2").files.length > 0;
+            const image3 = document.getElementById("image3").files.length > 0;
+
+            // Reset all error messages
+            document.querySelectorAll(".error").forEach((error) => {
+                error.style.display = "none";
+            });
+
+            // Validation rules
+            if (name.length < 3) {
+                document.getElementById("nameError").style.display = "block";
+                isValid = false;
+            }
+
+            if (description.length < 10) {
+                document.getElementById("descriptionError").style.display = "block";
+                isValid = false;
+            }
+
+            if (!category) {
+                document.getElementById("categoryError").style.display = "block";
+                isValid = false;
+            }
+
+            if (isNaN(salesPrice) || salesPrice <= 0) {
+                document.getElementById("salesPriceError").style.display = "block";
+                isValid = false;
+            }
+
+            if (isNaN(productOffer) || productOffer < 0 || productOffer > 100) {
+                document.getElementById("productOfferError").style.display = "block";
+                isValid = false;
+            }
+
+            if (isNaN(stock) || stock < 0) {
+                document.getElementById("stockError").style.display = "block";
+                isValid = false;
+            }
+
+            if (!image1) {
+                document.getElementById("image1Error").style.display = "block";
+                isValid = false;
+            }
+
+            if (!image2) {
+                document.getElementById("image2Error").style.display = "block";
+                isValid = false;
+            }
+
+            if (!image3) {
+                document.getElementById("image3Error").style.display = "block";
+                isValid = false;
+            }
+
+            // If validation fails, stop the function here
+            if (!isValid) {
+                return;
+            }
+
+            // Proceed with image processing and form submission if validation passed
+            let images = [];
+            for (let i = 1; i < 4; i++) {
+                const canvas = croppers[i]?.getCroppedCanvas(); // Assuming croppers[i] exists
+                const base64Image = canvas?.toDataURL("image/png"); // Convert canvas to Base64
+                images.push(base64Image);
+            }
+
+            const formdata = new FormData(e.target); // Create FormData from form
+
+            // Append images to formdata with proper keys
+            images.forEach((image, index) => {
+                formdata.append(`image${index}`, image); // Properly use template literal
+            });
+
+            // Convert FormData to a plain object
+            const formObject = {};
+            formdata.forEach((value, key) => {
+                formObject[key] = value;
+            });
+
+            // Send the form object as JSON via fetch
+            fetch("/admin/addproduct", {
+                method: "POST",
+                body: JSON.stringify(formObject), // Convert object to JSON
+                headers: { "Content-Type": "application/json" }, // Set headers
+            })
+                .then((r) => r.text())
+                .then((html) => {
+                    document.querySelector("body").innerHTML = html; // Update UI
+                })
+                .catch((error) => {
+                    console.error("Error during fetch:", error); // Handle errors
+                });
+        }
+
+
+    </script>
 </body>
+
 </html>

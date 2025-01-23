@@ -5,7 +5,7 @@ const categorySchema=new mongoose.Schema({
     name:{
         type:String,
         required:true,
-        unique:true
+        unique:true  
     },
     description:{
         type:String,
@@ -27,6 +27,10 @@ const categorySchema=new mongoose.Schema({
         type: Boolean,
         default: false,
       },
+      isListed:{
+        type:Boolean,
+        default:false
+      }
 })
 
 const Category=mongoose.model("Category",categorySchema)
