@@ -694,7 +694,6 @@ module.exports = {
     loadAbout,
     loadContact,
     verifyOtp,
-    userhome,
     userProfile,
     logOut,
     loadProductView,
