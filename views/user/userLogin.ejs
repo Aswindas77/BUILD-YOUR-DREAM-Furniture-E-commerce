@@ -29,7 +29,7 @@
 	<link rel="stylesheet" href="/public/userAssets/css/bootstrap.css">
 	<link rel="stylesheet" href="/public/userAssets/css/main.css">
    
-	<!-- start password eye button -->
+	<!-- start password eye button --> 
 
 	<style>
 		
@@ -60,6 +60,10 @@
 		
 		.password-eye:hover i {
 			color: #333;
+		}
+
+		a {
+          color: #333;
 		}
 		</style>
 		<!-- end password eye button -->
@@ -101,37 +105,40 @@
 						<span style="color: red;"><%= emailError || "" %></span>
             <span style="color: red;"><%= passwordError || "" %></span>
 
-						<form class="row login_form" action="#" id="login-form" >
-							<div id="emailError" class="text-danger">
-								
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="email" name="email" placeholder="email adress" onfocus="this.placeholder = ''" onblur="this.placeholder = 'email adress'">
-								
-							</div>
-							
-							<div id="passwordError" class="text-danger">
-								
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="password" class="form-control" id="password" name="password" 
-									   placeholder="Password" onfocus="this.placeholder = ''" 
-									   onblur="this.placeholder = 'Password'">
-								<button type="button" class="password-eye" onclick="togglePassword()">
-									<i class="fa fa-eye" id="eyeIcon"></i>
-								</button>
-							</div>
-							
-							
-							<div class="col-md-12 form-group mt-3">
-								<button type="submit" value="submit" class="primary-btn btn-submit" id="btn-submit">Log In</button>
-							</form>
-								<a href="/user/forgot">Forgot Password?</a>
-								<a class="text-decoration-underline singup-new" href="/user/register"> don’t have an account? sing up</a>
+			<form class="row login_form" action="#" id="login-form">
+				<div id="emailError" class="text-danger"></div>
+				<div class="col-md-12 form-group">
+					<input type="text" class="form-control" id="email" name="email" 
+						   placeholder="email address" 
+						   onfocus="this.placeholder = ''" 
+						   onblur="this.placeholder = 'email address'">
+				</div>
+				
+				<div id="passwordError" class="text-danger"></div>
+				<div class="col-md-12 form-group">
+					<input type="password" class="form-control" id="password" name="password" 
+						   placeholder="Password" 
+						   onfocus="this.placeholder = ''" 
+						   onblur="this.placeholder = 'Password'">
+					<button type="button" class="password-eye" onclick="togglePassword()">
+						<i class="fa fa-eye" id="eyeIcon"></i>
+					</button>
+				</div>
+
+				<div class="col-md-12 form-group mt-3">
+					<button type="submit" class="primary-btn btn-submit" id="btn-submit">Log In</button>
+				</div>
+			</form>
+			<div id="captchaError" class="text-danger"></div>
+			<div style="margin-left: 30%; transform: scale(0.75); transform-origin: left;">
+				<div class="g-recaptcha" data-sitekey="6LfVW8MqAAAAAHRVbwYqC1jyVGrG2EEotFW8f8Q1"></div>
+			</div>
+								<a  href="/user/forgot">Forgot Password?</a><br>
+								<a style="margin-top: 10px;" class="text-decoration-underline singup-new" href="/user/register"> don’t have an account? sing up</a>
 
 									<!-- Google Login Button -->
 							
-					<div class="social d-flex text-center mb-5">
+					<div style="margin-left:15%; margin-top: 8px;" class="social d-flex text-center mb-5">
 						<a href="/user/auth/google" class="px-1 py-1 pl-5  ml-5 rounded">login with <svg xmlns="http://www.w3.org/2000/svg" width="50" height="70" fill="currentColor" class="bi bi-google" viewBox="0 0 16 16">
 							<path d="M15.545 6.558a9.4 9.4 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.7 7.7 0 0 1 5.352 2.082l-2.284 2.284A4.35 4.35 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.8 4.8 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.7 3.7 0 0 0 1.599-2.431H8v-3.08z"/>
 						  </svg> google</a></div>
@@ -167,6 +174,9 @@
 	<script src="/public/userAssets/js/main.js"></script>
 	<script src="/public/userAssets/js/userLogin.js"></script>
 	<script src="https://apis.google.com/js/platform.js" async defer></script>
+
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 	<script>
 
 		// google sign in function
@@ -201,7 +211,7 @@
 
 	
 
-
+ 
 	
 
 	  </script>

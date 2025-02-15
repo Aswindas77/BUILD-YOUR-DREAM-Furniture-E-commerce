@@ -4,7 +4,7 @@ const User = require('../models/userModel');
 
 
 const   isLogin = async (req, res, next) => {
-    if (req.session.logged  ) {
+    if (req.session.logged ) {
         res.redirect('/user')
     } else {
         next()
@@ -29,10 +29,24 @@ const isLOgut = async (req, res, next) => {
 
 const isBan = async(req,res,next)=>{
     try{
-        if(req.session?.user?.isblocked===true){
-            console.log("logining user=====",req.session.user)
-            req.session.destroy()
-            next()
+
+       
+        if(req.session?.User){
+            
+            const email =req.session?.User?.email
+
+            const user =await User.findOne({email})
+
+            console.log("aswinnnn====",user)
+
+            if(user.isBlocked===true){
+                req.session.destroy()
+                next()
+            }else{
+                next()
+            }
+           
+            
         }else{
             next()
         }

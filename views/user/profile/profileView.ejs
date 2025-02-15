@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary-color: #FF6F00;
+            /* Vibrant Orange */
+            --hover-color: #FF8F00;
+            /* Lighter Orange for hover */
+            --bg-color: #ffffff;
+            /* White background */
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #1f2937;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            position: fixed;
+            height: 100vh;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .nav-menu {
+            padding: 1.5rem 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            text-decoration: none;
+            color: #4b5563;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 2rem;
+            padding-top: 2rem;
+        }
+
+        .nav-item.logout:hover {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .welcome-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .welcome-card p {
+            color: #6b7280;
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .stat-card h3 {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                z-index: 1001;
+                background: var(--primary-color);
+                color: white;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+            }
+        }
+
+        .orders-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #2d3748;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .order-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-id .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .order-id .value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        .status-timeline {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .status-point {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .status-point i {
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-point.active i {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: #fff;
+        }
+
+        .order-items {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .item-quantity {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .more-items {
+            text-align: center;
+            color: #718096;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .order-footer {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: #f7fafc;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .order-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .order-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .status-shipped {
+            background: #87ceeb;
+            color: #000;
+        }
+
+        .status-delivered {
+            background: #90ee90;
+            color: #000;
+        }
+
+        .status-cancelled {
+            background: #ff6b6b;
+            color: #fff;
+        }
+
+        .view-details-btn,
+        .cancel-order-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .view-details-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .view-details-btn:hover {
+            background: var(--hover-color);
+        }
+
+        .cancel-order-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .cancel-order-btn:hover {
+            background: #ef4444;
+        }
+
+        .empty-orders {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .empty-orders i {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .shop-now-btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .shop-now-btn:hover {
+            background: var(--hover-color);
+        }
+
+        @media (max-width: 768px) {
+            .orders-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-timeline {
+                padding: 1rem 0.5rem;
+            }
+
+            .status-point span {
+                font-size: 0.8rem;
+            }
+        }
+
+        .item-name {
+            display: inline-block;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+
+        .item-name:hover {
+            overflow: visible;
+            white-space: normal;
+            position: absolute;
+            background: #fff;
+            padding: 5px;
+            border: 1px solid #ccc;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="/user/myProfile" class="nav-item active">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="/user/updateProfile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Update Profile</span>
+                </a>
+                <a href="/user/useraddress" class="nav-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>My Address</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </a>
+                <a href="/user" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>home</span>
+                </a>
+            </nav>
+        </div>
+
+        <main class="main-content">
+            <div class="welcome-card">
+                <h1>👋 Hello, <%= user.username %>
+                </h1>
+                <p>From your account dashboard, you can easily check & view your recent orders, manage your shipping and
+                    billing addresses, and edit your password and account details.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Orders</h3>
+                    <div class="value">
+                        <%= orders.length %>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Orders</h3>
+                    <div class="value">3</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Wallet Balance</h3>
+                    <div class="value">$249.99</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Saved Addresses</h3>
+                    <div class="value">2</div>
+                </div>
+            </div>
+
+            <div class="orders-section">
+                <h2 class="section-title">My Orders</h2>
+
+                <% if (orders && orders.length> 0) { %>
+                    <div class="orders-grid">
+                        <% orders.forEach(order=> { %>
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div class="order-id">
+                                        <span class="label">Order ID:</span>
+                                        <span class="value">#<%= order._id.toString().slice(-8) %></span>
+                                    </div>
+                                    <div class="order-date">
+                                        <i class="far fa-calendar-alt"></i>
+                                        <%= new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric' ,
+                                            month: 'short' , year: 'numeric' }) %>
+                                    </div>
+                                </div>
+
+                                <div class="order-status-bar">
+                                    <div class="status-timeline">
+                                        <div class="status-point <%= order.status === 'Pending' ? 'active' : '' %>">
+                                            <i class="fas fa-box"></i>
+                                            <span>Ordered</span>
+                                        </div>
+                                        <div class="status-point <%= order.status === 'Shipped' ? 'active' : '' %>">
+                                            <i class="fas fa-shipping-fast"></i>
+                                            <span>Shipped</span>
+                                        </div>
+                                        <div class="status-point <%= order.status === 'Delivered' ? 'active' : '' %>">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Delivered</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="order-items">
+                                    <% if (order.items && order.items.length> 0) { %>
+                                        <% order.items.slice(0, 2).forEach(item=> { %>
+                                            <div class="item-row">
+                                                <div class="item-info">
+                                                    <span class="item-name">
+                                                        Name: <%= item.productId.name.length> 15 ?
+                                                            item.productId.name.substring(0, 15) + "..." :
+                                                            item.productId.name %>
+                                                    </span>
+
+                                                    <span class="item-quantity">x<%= item.quantity %></span>
+                                                </div>
+                                                <span class="item-price">₹<%= (item.price * item.quantity).toFixed(2) %>
+                                                </span>
+                                            </div>
+                                            <% }); %>
+                                                <% if (order.items.length> 2) { %>
+                                                    <div class="more-items">
+                                                        + <%= order.items.length - 2 %> more items
+                                                    </div>
+                                                    <% } %>
+                                                        <% } %>
+                                </div>
+
+                                <div class="order-footer">
+                                    <div class="order-total">
+                                        <span class="label">Total Amount:</span>
+                                        <span class="value">₹<%= (order.totalAmount || 0).toFixed(2) %></span>
+                                    </div>
+                                    <div class="order-actions">
+                                        <span class="status-badge status-<%= order.status.toLowerCase() %>">
+                                            <%= order.status %>
+                                        </span>
+                                        <div class="order-buttons">
+                                            <a href="/user/orderdetails/<%= order._id %>" class="view-details-btn">View
+                                                Details</a>
+                                            <% if (order.status !=='Delivered' && order.status !=='Cancelled' ) { %>
+                                                <button class="cancel-order-btn"
+                                                    onclick="cancelOrder('<%= order._id %>')">
+                                                    Cancel Order
+                                                </button>
+                                                <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } else { %>
+                        <div class="empty-orders">
+                            <i class="fas fa-shopping-bag"></i>
+                            <h3>No Orders Yet</h3>
+                            <p>When you place your first order, it will appear here</p>
+                            <a href="/shop" class="shop-now-btn">Start Shopping</a>
+                        </div>
+                        <% } %>
+            </div>
+
+        </main>
+    </div>
+
+    <div class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        function showOrderDetails(orderId) {
+            window.location.href = `/user/orderdetails/${orderId}`;
+        }
+
+        function cancelOrder(orderId) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Do you really want to cancel this order?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, cancel it!",
+                cancelButtonText: "No, keep it"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/user/orderCancel/${orderId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: "Cancelled!",
+                                    text: "Your order has been cancelled.",
+                                    icon: "success",
+                                    timer: 2000, // Auto close in 2 seconds
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Error",
+                                    text: data.message || "Error cancelling order",
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            Swal.fire({
+                                title: "Error",
+                                text: "Something went wrong!",
+                                icon: "error"
+                            });
+                        });
+                }
+            });
+        }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>
+
+</html>
+
+</html>
+
+</html>
+
+</html>
+
+</html>
+
+</html>

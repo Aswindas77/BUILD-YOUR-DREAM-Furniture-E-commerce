@@ -8,6 +8,7 @@ const { Module } = require("module");
 const Categories = require("../models/categoryModel");
 const { log } = require("console");
 const Category = require("../models/categoryModel");
+const { updateCategory } = require("./categoryController");
 
 
 
@@ -27,6 +28,7 @@ const loadProducts = async (req, res) => {
     // Fetch products for the current page
     const products = await Products.find({ isDeleted: false })
       .populate('category', 'name description')
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
 
@@ -47,6 +49,27 @@ const loadProducts = async (req, res) => {
 //====================================================================================================================================================
 
 
+// product view
+
+const loadProductView = async (req, res) => {
+
+  try {
+    const productId = req.params.productid
+
+
+    const product = await Products.findOne({ _id: productId, isListed: false, isDeleted: false })
+
+    const category = await Categories.findOne({ _id: product.category })
+    console.log(category);
+
+
+    res.render("productView", { product, categoryname: category.name })
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+
 
 // load product page
 
@@ -54,7 +77,7 @@ const loadProducts = async (req, res) => {
 
 const loadAddProducts = async (req, res) => {
   try {
-    const categories = await Categories.find({isDeleted:false})
+    const categories = await Categories.find({ isDeleted: false })
     res.render('addProduct', { categories })
   }
   catch (err) {
@@ -68,35 +91,43 @@ const loadAddProducts = async (req, res) => {
 // add product page
 
 //====================================================================================================================================================
-
 const addProducts = async (req, res) => {
   try {
-    const imgArray = [req.body.image0, req.body.image1, req.body.image2];
-    const dirPath = `./public/uploads/products/${req.body.name}`;
-    console.log(imgArray);
+    // Step 1: Insert product (without images)
+    const newProduct = await Products.create(req.body);
+    console.log(newProduct);
 
-    // Create directory for product images
+    // Step 2: Create directory for product images using the product ID
+    const dirPath = `./public/uploads/products/${newProduct._id}`;
     fs.mkdirSync(dirPath, { recursive: true });
 
+    // Step 3: Process images and save to folder
+    const imgArray = [req.body.image0, req.body.image1, req.body.image2];
     const imagePaths = [];
 
-    // Process images and save to folder
     imgArray.forEach((img, index) => {
       if (img) {
         const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
         const binary = Buffer.from(base64Data, "base64");
         const filePath = `${dirPath}/image${index}.png`;
-        fs.writeFile(filePath, binary, (er) => {
-          console.log(er);
 
+        fs.writeFile(filePath, binary, (er) => {
+          if (er) {
+            console.log(er);
+          }
         });
-        imagePaths.push(`/public/uploads/products/${req.body.name}/image${index}.png`);
+
+        imagePaths.push(`/public/uploads/products/${newProduct._id}/image${index}.png`);
       }
     });
 
-    // Add product to database
-    req.body.images = imagePaths; // Assign processed image paths to `images`
-    const newProduct = await Products.create(req.body);
+    // Step 4: Update the existing product document with the image paths
+    newProduct.images = imagePaths;
+
+    // Save the updated product document
+    await newProduct.save();
+
+    // Step 5: Respond with success
     res.status(201).redirect("/admin/productManagement");
   } catch (error) {
     console.log(error.message);
@@ -110,26 +141,10 @@ const addProducts = async (req, res) => {
 
 
 
+
+
 //====================================================================================================================================================
 
-
-// product view
-
-const loadProductView = async (req, res) => {
-
-  try {
-    const productId = req.params.productid
-    const category = await Categories.find({})
-
-    const product = await Products.findOne({ _id: productId })
-
-
-
-    res.render("productView", { product, category })
-  } catch (error) {
-    console.log(error.message)
-  }
-}
 
 
 // load edit product
@@ -154,10 +169,15 @@ const editProduct = async (req, res) => {
     const productId = req.body.id;
 
     const product = await Products.findById(productId)
+    const categories = await Categories.find({ isDeleted: false })
 
-    if (!product) return res.send("category not found")
 
-    res.render("editproduct", { product })
+
+
+
+    if (!product) return res.send("product not found")
+
+    res.render("editproduct", { product, categories })
 
 
 
@@ -172,31 +192,59 @@ const editProduct = async (req, res) => {
 
 // update product
 const updateProduct = async (req, res) => {
+  console.log('Updating product...');
   try {
+    const { id, name, description, salesPrice, category, productOffer, stock, status } = req.body;
 
-    const { name, description, salesPrice, productOffer, stock, status } = req.body;
-    console.log(req.body);
+    
+    const images = [req.body?.image0, req.body?.image1, req.body?.image2];
 
+    
+    const dirPath = `./public/uploads/products/${id}`;
+    fs.mkdirSync(dirPath, { recursive: true });
 
-    const id = name[0]
-    const namee = name[1]
-    await Products.findByIdAndUpdate
-      (
-        id,
-        { name: namee, description, salesPrice, category: 'huhuhu', productOffer, stock, status }
+    const imagep = [];
+    images.forEach((img, index) => {
+      if (img && img !== 'undefined') {
+       
+        const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
+        const binary = Buffer.from(base64Data, "base64");
+        const filePath = `${dirPath}/image${index}.png`;
 
-      );
+       
+        fs.writeFile(filePath, binary, (er) => {
+          if (er) console.log('Error writing image:', er);
+        });
 
+        imagep[index] = `/public/uploads/products/${id}/image${index}.png`;
+      } else {
+        imagep[index] = null;
+      }
+    });
 
+    for (let i = 0; i < images.length; i++) {
+      if (imagep[i] !== null) {
+        await Products.updateOne(
+          { _id: id },
+          { $set: { [`images.${i}`]: imagep[i] } }
+        );
+      }
+    }
 
+    const updatedProduct = await Products.findByIdAndUpdate(
+      id,
+      { name, description, salesPrice, category, productOffer, stock, status },
+      { new: true } 
+    );
+
+    console.log('Product updated successfully:', updatedProduct);
     res.redirect("/admin/productManagement");
-
 
   } catch (error) {
-    console.error(error.message)
+    console.error('Error updating product:', error);
     res.redirect("/admin/productManagement");
   }
-}
+};
 
 //  delete product 
 

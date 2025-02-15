@@ -1,0 +1,26 @@
+<section style="margin-top: 150px;" class="breadcrumb-area">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <h2>
+                <%= pageTitle %>
+            </h2>
+            <div class="breadcrumb-nav">
+                <a href="/user/" class="breadcrumb-item">Home</a>
+                <span class="breadcrumb-separator">
+                    <i class="fa fa-angle-right"></i>
+                </span>
+                <% if (parentPage) { %>
+                    <a href="<%= parentPath %>" class="breadcrumb-item">
+                        <%= parentPage %>
+                    </a>
+                    <span class="breadcrumb-separator">
+                        <i class="fa fa-angle-right"></i>
+                    </span>
+                    <% } %>
+                        <span class="breadcrumb-item active">
+                            <%= currentPage %>
+                        </span>
+            </div>
+        </div>
+    </div>
+</section>

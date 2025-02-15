@@ -22,44 +22,51 @@
     </tr>
   </thead>
   <tbody>
-    <% products.forEach((product, index) => { %>
+    <% if (products.length === 0) { %>
       <tr>
-        <td><%= index + 1 + (currentPage - 1) * 4 %></td> <!-- Adjust index for pagination -->
-        <td><a href="/admin/productView/<%= product._id %>"><%= product.name %></a></td>
-        <td><%= product.category ? product.category.name : "No Category Assigned" %></td>
-        <td>₹<%= product.salesPrice?.toFixed(2) %></td>
-        <td><%= product.productOffer %></td>
-        <td><%= product.stock %></td>
-        <td>
-          <span class="badge <%= product.status === 'active' ? 'bg-success' : 'bg-danger' %>">
-            <%= product.status %>
-          </span>
-        </td>
-        <td>
-          <form method="post" action="editProduct">
-            <input hidden type="text" name="id" value="<%= product._id %>">
-            <button type="submit" class="btn" style="width: 70px;">Edit</button>
-          </form>
-          <button id="deleteBtn<%= product._id %>" class="btn btn-danger btn-sm"
-            onclick="deleteProduct('<%= product._id %>')">Delete</button>
-        </td>
-        <td>
-          <button style="margin-top:22px"
-                class="btn <%= product.isListed ? 'btn-danger' : 'btn-success' %> btn-sm access-btn" 
-                data-id="<%= product._id %>"
-                data-status="<%= product.isListed ? 'unlisted' : 'active' %>"
-              >
-                <span class="button-text">
-                  <%= product.isListed ? 'listed' : 'unlisted' %>
-                </span>
-                <span class="spinner-border spinner-border-sm d-none" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </span>
-              </button> 
-        </td>
+        <td colspan="8" class="text-center" style="font-size: 35px; color: red; background-color: white;" >No products available</td>
       </tr>
-    <% }) %> 
+    <% } else { %>
+      <% products.forEach((product, index) => { %>
+        <tr>
+          <td><%= index + 1 + (currentPage - 1) * 4 %></td> <!-- Adjust index for pagination -->
+          <td><a href="/admin/productView/<%= product._id %>"><%= product.name %></a></td>
+          <td><%= product.category ? product.category.name : "No Category Assigned" %></td>
+          <td>₹<%= product.salesPrice?.toFixed(2) %></td>
+          <td><%= product.productOffer %></td>
+          <td><%= product.stock %></td>
+          <td>
+            <span class="badge <%= product.status === 'active' ? 'bg-success' : 'bg-danger' %>">
+              <%= product.status %>
+            </span>
+          </td>
+          <td>
+            <form method="post" action="editProduct">
+              <input hidden type="text" name="id" value="<%= product._id %>">
+              <button type="submit" class="btn" style="width: 70px;">Edit</button>
+            </form>
+            <button id="deleteBtn<%= product._id %>" class="btn btn-danger btn-sm"
+              onclick="deleteProduct('<%= product._id %>')">Delete</button>
+          </td>
+          <td>
+            <button style="margin-top:22px"
+              class="btn <%= product.isListed ? 'btn-danger' : 'btn-success' %> btn-sm access-btn"
+              data-id="<%= product._id %>"
+              data-status="<%= product.isListed ? 'unlist' : 'active' %>"
+            >
+              <span class="button-text">
+                <%= product.isListed ? 'list' : 'unlist' %>
+              </span>
+              <span class="spinner-border spinner-border-sm d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </span>
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    <% } %>
   </tbody>
+  
 </table>
 
 <!-- Pagination Controls -->
@@ -75,7 +82,7 @@
   <% for (let i = 1; i <= totalPages; i++) { %>
     <a href="?page=<%= i %>" style="text-decoration: none; margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc; background-color: <%= currentPage === i ? '#ddd' : '#fff' %>;">
       <%= i %>
-    </a>
+    </a> 
   <% } %>
 
   <!-- Next Button -->

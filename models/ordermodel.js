@@ -1,0 +1,78 @@
+const mongoose = require('mongoose');
+
+const orderSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',  // Assuming you have a User model
+
+  },
+  items: [{
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product', // Referring to the Product model
+
+    },
+    quantity: {
+      type: Number,
+
+      min: [1, 'Quantity must be at least 1'], // Ensures there's at least one product
+    },
+    price: {
+      type: Number,
+
+    }
+  }],
+  billingAddress: {
+    name: { type: String },
+    country: { type: String },
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    postcode: { type: String },
+    phone: { type: String },
+  },
+  status: {
+    type: String,
+    enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+    default: 'Pending',
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  totalAmount: {
+    type: Number,
+
+
+    min: [0, 'Total amount cannot be negative'], // Ensuring total amount is positive
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Paid', 'Failed','Processing'],
+    default: 'Pending',
+  },
+  isPaid: {
+    type: Boolean,
+    default: false,
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['Credit Card', 'Debit Card', 'paypal', 'Cash on Delivery'],
+
+  },
+  shippingDetails: {
+    origin: { type: String, default: "India" },
+    estimatedArrival: { type: Date, default: new Date('2025-02-15') },
+    actualArrival: { type: Date, default: null },
+    status: { type: String, enum: ['Pending', 'Shipped', 'Cancelled', 'Processing', 'Delivered'], default: 'Pending' },
+  }
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt fields
+});
+
+// Fix: Check if model exists before creating
+module.exports = mongoose.models.Order || mongoose.model('Order', orderSchema);

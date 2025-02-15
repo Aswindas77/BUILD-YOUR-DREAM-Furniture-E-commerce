@@ -599,3 +599,125 @@ form.addEventListener('submit', (event) => {
         alert('An error occurred. Please try again la.');
     });
 });
+
+
+
+
+// this is image zooming feature function 
+
+document.addEventListener('DOMContentLoaded', () => {
+  const carousel = document.querySelector('.s_Product_carousel');
+  const images = carousel.querySelectorAll('.single-prd-item img');
+
+
+  
+  images.forEach(image => {
+      const zoomContainer = document.createElement('div');
+      zoomContainer.classList.add('zoom-container');
+      image.parentNode.insertBefore(zoomContainer, image);
+      zoomContainer.appendChild(image);
+
+      const style = document.createElement('style');
+      style.textContent = `
+          .zoom-container {
+              position: relative;
+              overflow: hidden;
+              cursor: zoom-in;
+              width: 100%;
+              height: 100%;
+          }
+          .zoom-container img {
+              transition: transform 0.2s ease;
+              display: block;
+              width: 100%;
+              max-width: 100%;
+          }
+          .zoom-container.zoomed img {
+              transform: scale(2);
+          }
+      `;
+      document.head.appendChild(style);
+
+      zoomContainer.addEventListener('mousemove', function(e) {
+          if (!this.classList.contains('zoomed')) return;
+
+          const img = this.querySelector('img');
+          const rect = this.getBoundingClientRect();
+          
+          // Calculate precise mouse position percentage
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          
+          // Set transform origin exactly where mouse is
+          img.style.transformOrigin = `${x}% ${y}%`;
+      });
+
+      zoomContainer.addEventListener('click', function() {
+          this.classList.toggle('zoomed');
+      });
+
+      zoomContainer.addEventListener('mouseleave', function() {
+          this.classList.remove('zoomed');
+      });
+  });
+});
+
+
+document.querySelectorAll('.view-switcher button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.view-switcher button').forEach((b) => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+
+    const view = btn.dataset.view;
+    document.querySelector('#product-container').className = `product-${view} row`;
+  });
+});
+
+
+const priceRange = document.getElementById('priceRange');
+const priceDisplay = document.createElement('div');
+priceDisplay.className = 'text-center mt-2';
+priceRange.parentElement.appendChild(priceDisplay);
+
+priceRange.addEventListener('input', () => {
+  priceDisplay.textContent = `Up to $${priceRange.value}`;
+});
+
+// Initialize range slider
+const priceSlider = document.getElementById('priceSlider');
+noUiSlider.create(priceSlider, {
+  start: [1000, 5000],
+  connect: true,
+  range: {
+    'min': 0,
+    'max': 10000
+  },
+  step: 100
+});
+
+// Update price display
+priceSlider.noUiSlider.on('update', (values) => {
+  document.getElementById('priceDisplay').textContent = 
+    `₹${Math.round(values[0])} - ₹${Math.round(values[1])}`;
+});
+
+// Handle filter clearing
+document.querySelectorAll('.active-filters .fa-times').forEach(icon => {
+  icon.addEventListener('click', () => {
+    icon.parentElement.remove();
+  });
+});
+
+// Toggle view layout
+document.querySelectorAll('.view-switcher button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.view-switcher button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.view;
+    document.querySelector('.product-grid').classList.toggle('list-view', view === 'list');
+  });
+});

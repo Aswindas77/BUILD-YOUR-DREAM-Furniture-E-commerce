@@ -13,7 +13,7 @@
         }
 
         .form-container {
-            max-width: 600px;
+            max-width: 600px; 
             margin: 50px auto;
             background: #ffffff;
             padding: 30px;
@@ -52,13 +52,38 @@
             padding: 5px;
         }
     </style>
+    <style>
+        /* Container for the cropper */
+        .cropper-container {
+            width: 300px; /* Fixed width for the cropper */
+            height: 300px; /* Fixed height for the cropper */
+            margin-top: 10px;
+            border: 2px solid #ddd; /* Optional, just for visibility */
+            border-radius: 8px; /* Rounded corners */
+            overflow: hidden; /* Hide any overflow from the cropper */
+        }
+    
+        /* Image preview before cropping */
+        .cropper-preview {
+            width: 100%; /* Make the image fill the container */
+            height: 100%;
+            object-fit: cover; /* Ensures the image covers the area without stretching */
+        }
+    
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
         <div class="form-container">
             <h1>Add New Product</h1>
-            <form id="addProductForm" method="post" action="/admin/addProduct" onsubmit="productAdder(event)">
+            <form id="addProductForm" method="post" action="addProduct" onsubmit="return productAdder(event)">
                 <!-- Product Name -->
                 <div class="mb-3">
                     <label for="name" class="form-label">Product Name</label>
@@ -121,23 +146,46 @@
                 </div>
 
                 <!-- Image Upload -->
-                <div class="mb-3">
-                    <label>Image 1</label>
+                <!-- <div class="mb-3">
+                    
                     <input onchange="cropper(1)" id="image1" type="file" accept="image/*">
                     <img style="display: none;" src="" alt="" id="prev1">
                     <div class="error" id="image1Error">Please upload Image 1.</div>
 
-                    <label>Image 2</label>
+                    <label>Image 1</label>
                     <input onchange="cropper(2)" id="image2" type="file" accept="image/*">
                     <img style="display: none;" src="" alt="" id="prev2">
                     <div class="error" id="image2Error">Please upload Image 2.</div>
 
-                    <label>Image 3</label>
+                    <label>Image 2</label>
                     <input onchange="cropper(3)" id="image3" type="file" accept="image/*">
+                    <label>Image 3</label>
                     <img style="display: none;" src="" alt="" id="prev3">
                     <div class="error" id="image3Error">Please upload Image 3.</div>
+                </div> -->
+                <div class="mb-3 d-flex flex-column align-items-center">
+                    <label for="image1" class="text-center">Image 1</label>
+                    <input onchange="cropper(1)" id="image1" type="file" accept="image/*" class="form-control form-control-sm w-50">
+                    <div class="cropper-container text-center">
+                        <img id="prev1" class="cropper-preview" style="display: none; max-width: 100%;" />
+                    </div>
+                    <div class="error" id="image1Error" style="display: none;">Please upload Image 1.</div>
+                
+                    <label for="image2" class="text-center mt-3">Image 2</label>
+                    <input onchange="cropper(2)" id="image2" type="file" accept="image/*" class="form-control form-control-sm w-50">
+                    <div class="cropper-container text-center">
+                        <img id="prev2" class="cropper-preview" style="display: none; max-width: 100%;" />
+                    </div>
+                    <div class="error" id="image2Error" style="display: none;">Please upload Image 2.</div>
+                
+                    <label for="image3" class="text-center mt-3">Image 3</label>
+                    <input onchange="cropper(3)" id="image3" type="file" accept="image/*" class="form-control form-control-sm w-50">
+                    <div class="cropper-container text-center">
+                        <img id="prev3" class="cropper-preview" style="display: none; max-width: 100%;" />
+                    </div>
+                    <div class="error" id="image3Error" style="display: none;">Please upload Image 3.</div>
                 </div>
-
+                
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary w-100">Add Product</button>
             </form>
@@ -160,8 +208,13 @@
                     croppers[index].destroy();
                 }
                 croppers[index] = new Cropper(preview, {
-                    aspectRatio: NaN,
-                    cropBoxMovable: true,
+                    aspectRatio: 1, // Maintain a square crop area
+            viewMode: 1, // Restrict image within canvas
+            dragMode: 'move', // Allow moving the image
+            cropBoxMovable: true, // Allow moving the crop box
+            cropBoxResizable: true, // Allow resizing the crop box
+            zoomable: true, // Allow zooming in and out
+            scalable: true,
                 });
             }
         }
@@ -169,7 +222,7 @@
         function productAdder(e) {
             e.preventDefault(); // Prevent form submission
 
-            // Initialize validity flag
+            // Initialize validity flag 
             let isValid = true;
 
             // Get all input values
@@ -188,7 +241,7 @@
                 error.style.display = "none";
             });
 
-            // Validation rules
+            // Validation rules 
             if (name.length < 3) {
                 document.getElementById("nameError").style.display = "block";
                 isValid = false;
@@ -262,19 +315,19 @@
 
             // Send the form object as JSON via fetch
             fetch("/admin/addproduct", {
-                method: "POST",
+                method: "post",
                 body: JSON.stringify(formObject), // Convert object to JSON
                 headers: { "Content-Type": "application/json" }, // Set headers
             })
                 .then((r) => r.text())
                 .then((html) => {
-                    document.querySelector("body").innerHTML = html; // Update UI
+                    window.location.href = '/admin/productManagement' // Update UI
                 })
                 .catch((error) => {
                     console.error("Error during fetch:", error); // Handle errors
                 });
         }
-
+ 
 
     </script>
 </body>

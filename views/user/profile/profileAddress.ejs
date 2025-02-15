@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Update</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary-color: #FF6F00; /* Vibrant Orange */
+            --hover-color: #FF8F00; /* Lighter Orange for hover */
+            --bg-color: #ffffff; /* White background */
+            --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #1f2937;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            position: fixed;
+            height: 100vh;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .nav-menu {
+            padding: 1.5rem 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            text-decoration: none;
+            color: #4b5563;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 2rem;
+            padding-top: 2rem;
+        }
+
+        .nav-item.logout:hover {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .welcome-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .welcome-card p {
+            color: #6b7280;
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .stat-card h3 {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                z-index: 1001;
+                background: var(--primary-color);
+                color: white;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+            }
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: none; /* Hidden by default */
+        }
+
+        .profile-pic-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            width: 100%;
+            height: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-pic:hover .profile-pic-edit {
+            opacity: 1;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .stacked {
+            grid-column: 1 / -1; /* Make the stacked section span all columns */
+        }
+
+        .stacked .form-group {
+            margin-bottom: 1rem; /* Add spacing between stacked fields */
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .address-container {
+            padding: 2rem;
+        }
+        
+        .address-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .address-box {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .address-box:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .address-box.selected {
+            border-color: var(--primary-color);
+            background-color: #fff8f0;
+        }
+        
+        .address-box h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .address-details {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .address-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .address-actions button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        
+        .edit-btn:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .delete-btn {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .delete-btn:hover {
+            background-color: #fecaca;
+        }
+        
+        .add-address-box {
+            border: 2px dashed #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-address-box:hover {
+            border-color: var(--primary-color);
+            background-color: #fff8f0;
+        }
+        
+        .add-address-box i {
+            font-size: 2rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="/user/myProfile" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="/user/updateProfile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Update Profile</span>
+                </a>
+                <a href="/user/useraddress" class="nav-item active">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>My Address</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </a>
+                <a href="/user" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>home</span>
+                </a>
+            </nav>
+        </div>
+                <main class="main-content">
+                    <div class="address-container">
+                        <h2>Saved Addresses</h2>
+                        <div class="address-grid">
+                            <!-- Sample Address Box 1 -->
+                            <% if (addresses.length > 0) { %>
+                                <% addresses.forEach(address => { %>
+
+                                    <div class="address-box selected">
+                                        <h3>Address</h3>
+                                        <div class="address-details">
+                                            <p>House: <%= address.  houseNumber %></p>
+                                            <p>City: <%= address.city %></p>
+                                            <% if (address.landmark) { %>
+                                                 <p>Landmark: <%= address.landmark %></p>
+                                            <% } %>
+                                            <p>Country: <%= address.country %></p>
+                                                <p>pincode: <%= address.pincode %></p>
+                                            <p>Phone: <%= address.phone %></p>
+                                        </div>
+                                        <div class="address-actions">
+                                            <button class="edit-btn" onclick="editAddress('<%= address._id %>')">Edit</button>
+                                            <button class="delete-btn" onclick="deleteAddress('<%= address._id %>')">Delete</button>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            <% } else { %>
+                                <p style="color: #dc2626;">No addresses found.</p>
+                            <% } %>
+                            
+                            
+            
+                            
+            
+                            <!-- Add New Address Box -->
+                            <div class="add-address-box" onclick="addAddress()">
+                                <i class="fas fa-plus-circle"></i>
+                                <p>Add New Address</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            
+                <div class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+     
+    </div>     
+       
+   
+
+    <script>
+
+        function addAddress(){
+            window.location.href ="/user/addAddress"
+        }
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const profilePic = document.getElementById('profile-pic');
+            const profileUpload = document.getElementById('profile-upload');
+
+            // Open file input when profile picture is clicked
+            profilePic.addEventListener('click', () => {
+                profileUpload.click();
+            });
+
+            // Handle file selection
+            profileUpload.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        // Remove the initials
+                        profilePic.innerHTML = '';
+
+                        // Create and set the image
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        profilePic.appendChild(img);
+
+                        // Append the edit icon back
+                        const editIcon = document.createElement('div');
+                        editIcon.className = 'profile-pic-edit';
+                        editIcon.innerHTML = '<i class="fas fa-camera"></i>';
+                        profilePic.appendChild(editIcon);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+
+        function editAddress(addressId) {
+    window.location.href = `/user/editAddress?id=${addressId}`;
+}
+ 
+async function deleteAddress(addressId) {
+  
+    const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  });
+
+  // If user cancels, exit the function
+  if (!result.isConfirmed) return;
+  
+  fetch(`/user/deleteAddress?id=${addressId}`, {
+    method: "DELETE", 
+    headers: {
+      "Content-Type": "application/json", 
+    },
+    
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to delete address");
+      }
+      return response.json(); 
+    })
+    .then(() => {
+      
+      const addressElement = document.getElementById(`address-${addressId}`);
+      if (addressElement) {
+        addressElement.remove(); 
+      } else {
+        
+        window.location.reload();
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Failed to delete address. Please try again.");
+    });
+}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

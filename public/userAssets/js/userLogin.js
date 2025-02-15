@@ -14,13 +14,31 @@ document.getElementById("login-form").addEventListener("submit", (event) => {
     // Error Messages
     const emailError = document.getElementById("emailError");
     const passwordError = document.getElementById("passwordError");
+    const captchaError=document.getElementById("captchaError")
+    const recaptchaResponse = grecaptcha.getResponse();
     
-  
-    // Username Validation
+
+    let isValid = true;
+    // Check if reCAPTCHA is completed
+    if (recaptchaResponse.length === 0) {
+        captchaError.textContent="Please complete the reCAPTCHA";
+        captchaError.style.color ="red"
+        isValid=false;
+     }
+      else{
+          emailError.textContent = "";
+        }
+
+    
+    const loginData = {
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value, 
+      'g-recaptcha-response': recaptchaResponse
+  };
     
   
     // Email Validation
-    let isValid = true;
+    
 
     if(!emailRegex.test(email.value.trim())){
       emailError.textContent = "Invalid email format";
@@ -60,6 +78,7 @@ document.getElementById("login-form").addEventListener("submit", (event) => {
     const loginData = {
       email: email.value.trim(),
       password: password.value.trim(),
+      'g-recaptcha-response': recaptchaResponse
     };
     fetch("/user/login",{
       method:"POST", 

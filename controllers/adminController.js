@@ -156,6 +156,7 @@ const toggleBlockAccess = async (req, res) => {
           { isBlocked },
           { new: true, runValidators: true }
       );
+      req.session.user
 
       // Check if user exists
       if (!updatedUser) {

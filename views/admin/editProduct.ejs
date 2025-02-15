@@ -37,6 +37,31 @@
             background-color: #0056b3;
         }
     </style>
+    <style>
+        /* Container for the cropper */
+        .cropper-container {
+            width: 300px; /* Fixed width for the cropper */
+            height: 300px; /* Fixed height for the cropper */
+            margin-top: 10px;
+            border: 2px solid #ddd; /* Optional, just for visibility */
+            border-radius: 8px; /* Rounded corners */
+            overflow: hidden; /* Hide any overflow from the cropper */
+        }
+    
+        /* Image preview before cropping */
+        .cropper-preview {
+            width: 100%; /* Make the image fill the container */
+            height: 100%;
+            object-fit: cover; /* Ensures the image covers the area without stretching */
+        }
+    
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -44,7 +69,8 @@
         <div class="form-container">
             <h1>edit Product</h1>
             <form method="post" action="updateProduct" onsubmit="productAdder(event)" id="add-product-form">
-                <input hidden type="text" id="product-name" name="name" value="<%= product._id %>">
+                <input hidden type="text" id="product-name" name="id" value="<%= product._id %>">
+
                 <!-- Product Name -->
                 <div class="mb-3">
                     <label for="name" class="form-label">Product Name</label>
@@ -59,6 +85,17 @@
                 </div>
 
                 <!-- Category -->
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category">
+                        <% categories.forEach(category=> { %>
+                            <option value="<%= category._id %>">
+                                <%= category.name %>
+                            </option>
+                            <% }); %>
+                    </select>
+
+                </div>
 
                 <!-- Sales Price -->
                 <div class="mb-3">
@@ -91,26 +128,29 @@
                 </div>
 
                 <!-- Image Upload -->
-                <div class="mb-3">
+                <div class="mb-3 d-flex flex-column align-items-center">
+                    <label for="image1" class="text-center mb-2">Image 1</label>
+                    <input onchange="cropper(1)" id="image1" type="file" accept="image/*" class="form-control form-control-sm w-50 mb-2 text-center">
+                    <div class="cropper-container text-center">
+                        
+                        <img style="object-fit: cover;" src="<%= product.images[0] %>" alt="Image 1 Preview" id="prev1" class="mb-3 img-fluid">
+                    
+                    </div>
+                    <label for="image2" class="text-center mb-2">Image 2</label>
+                    <input onchange="cropper(2)" id="image2" type="file" accept="image/*" class="form-control form-control-sm w-50 mb-2 text-center">
+                    <div class="cropper-container text-center">
+                        <img style="object-fit: cover;" src="<%= product.images[1] %>" alt="Image 2 Preview" id="prev2" class="mb-3 img-fluid">
 
-
-                    <input onchange="cropper(1)" id="image1" type="file" accept="image/*">
-                    <img style="width: 200px;" src="<%= product.images[0]%>" alt="" id="prev1">
-
-
-                    <label>Image1</label>
-                    <input onchange="cropper(2)" id="image2" type="file" accept="image/*">
-                    <img style="width: 200px;" src="<%= product.images[0]%>" alt="" id="prev2">
-
-
-                    <label>Image2</label>
-                    <input onchange="cropper(3)" id="image3" type="file" accept="image/*">
-
-                    <img style="width: 200px;" src="<%= product.images[0]%>" alt="" id="prev3">
-                    <label>Image3</label>
-
+                    </div>
+                
+                    <label for="image3" class="text-center mb-2">Image 3</label>
+                    <input onchange="cropper(3)" id="image3" type="file" accept="image/*" class="form-control form-control-sm w-50 mb-2 text-center">
+                    <div class="cropper-container text-center">
+                        
+                        <img style="object-fit: cover;" src="<%= product.images[2] %>" alt="Image 3 Preview" id="prev3" class="mb-3 img-fluid">
+                    </div>
                 </div>
-
+                
                 <!-- Submit Button -->
                 <button type="submit" id="btn-submit" class="btn btn-primary w-100">update</button>
             </form>
@@ -181,14 +221,14 @@
             })
             console.log(formObject);
 
-            fetch('/admin/addproduct', {
+            fetch('/admin/updateProduct', {
                 method: 'post',
                 body: JSON.stringify(formObject),
                 headers: { 'Content-Type': 'application/json' },
             })
                 .then((r) => r.text())
                 .then((html) => {
-                    document.querySelector('body').innerHTML = html
+                    window.location.href = '/admin/productManagement'
                 })
                 .catch((error) => {
                     console.error('Error during fetch:', error)
@@ -198,4 +238,4 @@
     </script>
 </body>
 
-</html>
+</html> 

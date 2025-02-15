@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zxx" class="no-js">
+
+<head>
+    <!-- Mobile Specific Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Favicon-->
+    <link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
+    <!-- Author Meta -->
+    <meta name="author" content="CodePixar">
+    <!-- Meta Description -->
+    <meta name="description" content="">
+    <!-- Meta Keyword -->
+    <meta name="keywords" content="">
+    <!-- meta character set -->
+    <meta charset="UTF-8">
+    <!-- Site Title -->
+    <title>BUILD YOUR DREAM |Buy Modern Furniture Online</title>
+
+    <!--
+            CSS
+            ============================================= -->
+    <link rel="stylesheet" href="/public/userAssets/css/linearicons.css">
+    <link rel="stylesheet" href="/public/userAssets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/public/userAssets/css/themify-icons.css">
+    <link rel="stylesheet" href="/public/userAssets/css/bootstrap.css">
+    <link rel="stylesheet" href="/public/userAssets/css/owl.carousel.css">
+    <link rel="stylesheet" href="/public/userAssets/css/nice-select.css">
+    <link rel="stylesheet" href="/public/userAssets/css/nouislider.min.css">
+    <link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.css" />
+    <link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.skinFlat.css" />
+    <link rel="stylesheet" href="/public/userAssets/css/magnific-popup.css">
+    <link rel="stylesheet" href="/public/userAssets/css/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="/public/userAssets/css/custom.css">
+
+    <style>
+        .address-container {
+            padding: 2rem;
+        }
+
+        .address-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .address-box {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .address-box:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .address-box.selected {
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+        }
+
+        .address-box h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .address-details {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .address-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .address-actions button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .edit-btn:hover {
+            background-color: #e5e7eb;
+        }
+
+        .delete-btn {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .delete-btn:hover {
+            background-color: #fecaca;
+        }
+
+        .add-address-box {
+            border: 2px dashed #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-address-box:hover {
+            border-color: var(--primary-color);
+            background-color: #fff8f0;
+        }
+
+        .add-address-box i {
+            font-size: 2rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-item {
+            border: 1px dashed #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        .coupon-code {
+            font-weight: bold;
+            color: #ff6b6b;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .coupon-details p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .applied-coupon-box {
+            background: #f8f9fa;
+            border: 1px dashed #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .coupon-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .applied-code {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+
+        .discount-amount {
+            color: #666;
+        }
+
+        .cancel-coupon-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .cancel-coupon-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Start Header Area -->
+    <%- include("../partials/userPartial/userHeader") %>
+        <!-- End Header Area -->
+
+        <!-- Start Banner Area -->
+        <%- include('../partials/userPartial/breadcrumb', { pageTitle: 'Checkout page' , currentPage: 'Checkout' ,
+            parentPage: null, parentPath: null }) %>
+            <!-- End Banner Area -->
+
+            <!--================Checkout Area =================-->
+            <section class="checkout_area section_gap">
+                <div class="container">
+                    <div class="cupon_area">
+                        <div class="check_title">
+                            <h2>Have a coupon? <a href="javascript:void(0);" onclick="toggleCouponList()">Click here to
+                                    see
+                                    available coupons</a></h2>
+                        </div>
+                        <div id="availableCoupons" style="display: none;" class="mt-3">
+                            <h5>Available Coupons for Your Purchase:</h5>
+                            <div class="coupon-list"></div>
+                        </div>
+                        <div class="coupon-input-area mt-3">
+                            <input type="text" id="couponCode" placeholder="Enter coupon code">
+                            <a class="tp_btn" onclick="applyCoupon()">Apply Coupon</a>
+                        </div>
+                        <div id="appliedCouponArea" style="display: none;" class="mt-3">
+                            <div class="applied-coupon-box">
+                                <div class="coupon-info">
+                                    <span class="applied-code"></span>
+                                    <span class="discount-amount"></span>
+                                </div>
+                                <button onclick="removeCoupon()" class="cancel-coupon-btn">
+                                    <i class="fa fa-times"></i> Remove Coupon
+                                </button>
+                            </div>
+                        </div>
+                        <div id="couponMessage" class="mt-2"></div>
+                    </div>
+                    <div class="billing_details">
+                        <div class="row">
+                            <form action="#" id="paymentForm" method="post">
+                                <div class="col-lg-8">
+                                    <h3>Billing Details</h3>
+                                    <div class="address-grid">
+                                        <input type="hidden" value="<%=cart._id%>" name="carts">
+
+                                        <% if (addresses.length> 0) { %>
+                                            <% addresses.forEach(address=> { %>
+                                                <label class="address-box">
+                                                    <input type="radio" name="selectedAddress" class="radio-input"
+                                                        value="<%= address.id %>" <%=address.isDefault ? 'checked' : ''
+                                                        %>
+                                                    />
+                                                    <div class="custom-radio"></div>
+
+                                                    <div class="address-details">
+                                                        <h3>
+                                                            <%= address.addressType %>
+                                                        </h3>
+                                                        <p>housename : <%= address.houseNumber %>
+                                                        </p>
+                                                        <p>city : <%= address.city %>
+                                                        </p>
+                                                        <% if (address.landmark) { %>
+                                                            <p>Landmark : <%= address.landmark %>
+                                                            </p>
+                                                            <% } %>
+                                                                <p>country : <%= address.country %>
+                                                                </p>
+                                                                <p>pincode : <%= address.pincode %>
+                                                                </p>
+                                                                <p>Phone : <%= address.phone %>
+                                                                </p>
+                                                    </div>
+                                                </label>
+                                                <% }); %>
+                                                    <% } else { %>
+                                                        <p>No addresses found.</p>
+                                                        <% } %>
+
+                                                            <!-- Add New Address Box -->
+                                                            <div class="add-address-box" onclick="addAddress()">
+                                                                <i class="fas fa-plus-circle"></i>
+                                                                <p>Add New Address</p>
+                                                            </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="order_box">
+                                        <h2>Your Order</h2>
+                                        <ul class="list">
+                                            <li><a href="#">Product <span>Total</span></a></li>
+                                            <% cart.products.forEach(product=> { %>
+                                                <li><a href="#">
+                                                        <%=product.name%> <span class="middle">x <%=product.quantity%>
+                                                            </span> <span class="last">₹ <%=product.salesPrice %>
+                                                            </span>
+                                                    </a></li>
+                                                <% }) %>
+                                        </ul>
+                                        <ul class="list list_2">
+
+                                            <li><a href="#">Total <span>₹<%=grandTotal%></span></a></li>
+                                        </ul>
+                                        <div class="payment_item">
+                                            <div class="radion_btn">
+                                                <input type="radio" value="Cash on Delivery" id="f-option5"
+                                                    name="paymentMethod">
+                                                <label for="f-option5">Cash on Delivery</label>
+                                                <div class="check"></div>
+                                            </div>
+
+                                        </div>
+                                        <div class="payment_item active">
+                                            <div class="radion_btn">
+                                                <input type="radio" id="f-option6" value="paypal" name="paymentMethod">
+                                                <label for="f-option6">online payment (paypal)</label>
+                                                <img src="/public/userAssets/images/product/card.jpg" alt="">
+                                                <div class="check"></div>
+                                            </div>
+
+                                            <div class="payment_item active">
+                                                <div class="radion_btn">
+                                                    <input type="radio" id="f-option7" value="Wallet"
+                                                        name="paymentMethod">
+                                                    <label for="f-option7">Wallet </label>
+
+                                                    <div class="check"></div>
+                                                </div>
+
+                                            </div>
+                                            <div class="creat_account">
+                                                <input type="checkbox" id="f-option4" name="selector3">
+                                                <label for="f-option4">I've read and accept the </label>
+                                                <a href="#">terms & conditions*</a>
+                                            </div>
+
+                                            <input type="hidden" name="selectedAddressId" id="selectedAddressId"
+                                                value="">
+                                            <button class="primary-btn" type="submit">Buy now</button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+                </div>
+                </div>
+            </section>
+            <!--================End Checkout Area =================-->
+
+            <!-- start footer Area -->
+            <footer class="footer-area section_gap">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-3  col-md-6 col-sm-6">
+                            <div class="single-footer-widget">
+                                <h6>About Us</h6>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                    incididunt
+                                    ut labore dolore
+                                    magna aliqua.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4  col-md-6 col-sm-6">
+                            <div class="single-footer-widget">
+                                <h6>Newsletter</h6>
+                                <p>Stay update with our latest</p>
+                                <div class="" id="mc_embed_signup">
+
+                                    <form target="_blank" novalidate="true"
+                                        action="https://spondonit.us12.list-manage.com/subscribe/post?u=1462626880ade1ac87bd9c93a&amp;id=92a4423d01"
+                                        method="get" class="form-inline">
+
+                                        <div class="d-flex flex-row">
+
+                                            <input class="form-control" name="EMAIL" placeholder="Enter Email"
+                                                onfocus="this.placeholder = ''"
+                                                onblur="this.placeholder = 'Enter Email '" required="" type="email">
+
+
+                                            <button class="click-btn btn btn-default"><i class="fa fa-long-arrow-right"
+                                                    aria-hidden="true"></i></button>
+                                            <div style="position: absolute; left: -5000px;">
+                                                <input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1"
+                                                    value="" type="text">
+                                            </div>
+
+                                            <!-- <div class="col-lg-4 col-md-4">
+													<button class="bb-btn btn"><span class="lnr lnr-arrow-right"></span></button>
+												</div>  -->
+                                        </div>
+                                        <div class="info"></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3  col-md-6 col-sm-6">
+                            <div class="single-footer-widget mail-chimp">
+                                <h6 class="mb-20">Instragram Feed</h6>
+                                <ul class="instafeed d-flex flex-wrap">
+                                    <li><img src="img/i1.jpg" alt=""></li>
+                                    <li><img src="img/i2.jpg" alt=""></li>
+                                    <li><img src="img/i3.jpg" alt=""></li>
+                                    <li><img src="img/i4.jpg" alt=""></li>
+                                    <li><img src="img/i5.jpg" alt=""></li>
+                                    <li><img src="img/i6.jpg" alt=""></li>
+                                    <li><img src="img/i7.jpg" alt=""></li>
+                                    <li><img src="img/i8.jpg" alt=""></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-6 col-sm-6">
+                            <div class="single-footer-widget">
+                                <h6>Follow Us</h6>
+                                <p>Let us be social</p>
+                                <div class="footer-social d-flex align-items-center">
+                                    <a href="#"><i class="fa fa-facebook"></i></a>
+                                    <a href="#"><i class="fa fa-twitter"></i></a>
+                                    <a href="#"><i class="fa fa-dribbble"></i></a>
+                                    <a href="#"><i class="fa fa-behance"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-bottom d-flex justify-content-center align-items-center flex-wrap">
+                        <p class="footer-text m-0">
+                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                            Copyright &copy;
+                            <script>document.write(new Date().getFullYear());</script> All rights reserved | This
+                            template
+                            is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a
+                                href="https://colorlib.com" target="_blank">Colorlib</a>
+                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                        </p>
+                    </div>
+                </div>
+            </footer>
+            <!-- End footer Area -->
+
+            <script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+                integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+                crossorigin="anonymous"></script>
+            <script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
+            <script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
+            <script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
+            <script src="/public/userAssets/js/jquery.sticky.js"></script>
+            <script src="/public/userAssets/js/nouislider.min.js"></script>
+            <script src="/public/userAssets/js/countdown.js"></script>
+            <script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
+            <script src="/public/userAssets/js/owl.carousel.min.js"></script>
+            <!--gmaps Js-->
+            <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
+            <script src="/public/userAssets/js/gmaps.min.js"></script>
+            <script src="/public/userAssets/js/main.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                function addAddress() {
+                    window.location.href = "/user/addAddress"
+                }
+
+
+                // Single address selection
+                document.querySelectorAll('.address-box').forEach(box => {
+                    box.addEventListener('click', function () {
+                        // Remove selection from all addresses
+                        document.querySelectorAll('.address-box').forEach(b => {
+                            b.classList.remove('selected');
+                        });
+                        // Add selection to clicked address
+                        this.classList.add('selected');
+                    });
+                });
+
+
+                document.querySelectorAll(".address-box").forEach(box => {
+                    box.addEventListener("click", function () {
+                        document.querySelectorAll(".address-box").forEach(b => b.classList.remove("selected"));
+                        this.classList.add("selected");
+
+
+                        let addressId = this.getAttribute("data-id");
+                        document.getElementById("selectedAddressId").value = addressId;
+                    });
+                });
+                document.querySelector('#paymentForm').addEventListener('submit', function (e) {
+                    e.preventDefault(); // Prevent default form submission
+
+                    const selectedAddressId = document.querySelector('input[name="selectedAddress"]:checked')?.value;
+                    const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+                    const couponCode = document.getElementById("couponCode")?.value.trim(); // Get coupon code
+
+                    // Validate Address Selection
+                    if (!selectedAddressId) {
+                        Swal.fire("Please select an address");
+                        return;
+                    }
+
+                    // Validate Payment Method Selection
+                    if (!selectedPaymentMethod) {
+                        Swal.fire("Please select a payment method");
+                        return;
+                    }
+
+                    const grandTotal = ' <%= grandTotal %>';
+                    const cartId = '<%= cart._id %>';
+
+
+                    const requestData = {
+                        selectedAddressId,
+                        paymentMethod: selectedPaymentMethod,
+                        couponCode: couponCode || null,
+                        cartId: cartId,
+                        grandTotal: grandTotal
+                    };
+
+
+
+                    console.log("Sending request data:", requestData);
+
+
+                    fetch("/user/checkout", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(requestData)
+                    })
+                        .then(response => response.json()) 
+                        .then(data => {
+                            console.log(data, 'data data data dta data ')
+                            if (data.success) {
+                                console.log('inside the paypal frontend')
+                                console.log(data.paypalRedirectUrl, 'data.paypalRedirectUrl')
+                                if (requestData.paymentMethod === "paypal") {
+                                    console.log(requestData.paymentMethod, 'requestData')
+                                    console.log(data.paypalRedirectUrl, 'data.paypalRedirectUrl')
+                                    window.location.href = data.paypalRedirectUrl;
+                                } else if (requestData.paymentMethod === "Wallet") {
+
+                                    Swal.fire("Payment successful using Wallet");
+                                    window.location.href = "/user/orderPlace";
+                                } else if (requestData.paymentMethod === "Cash on Delivery") {
+
+                                    window.location.href = "/user/orderPlace";
+                                }
+                            } else {
+                                Swal.fire(data.message || "Failed to process checkout");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            Swal.fire("An error occurred during checkout");
+                        });
+
+                });
+
+
+                async function toggleCouponList() {
+                    const couponList = document.getElementById('availableCoupons');
+                    const grandTotal = '<%= grandTotal %>'; // Get the cart total
+
+                    if (couponList.style.display === 'none') {
+                        try {
+                            const response = await fetch(`/user/showCoupon?total=${grandTotal}`);
+                            const data = await response.json();
+
+                            const couponListDiv = couponList.querySelector('.coupon-list');
+                            couponListDiv.innerHTML = '';
+
+                            if (data.coupons && data.coupons.length > 0) {
+                                data.coupons.forEach(coupon => {
+                                    couponListDiv.innerHTML += `
+                        <div class="coupon-item">
+                            <div class="coupon-code">${coupon.code}</div>
+                            <div class="coupon-details">
+                                <p>${coupon.description}</p>
+                                <p>Min Purchase: ₹${coupon.minPurchase}</p>
+                                <p>Discount: ${coupon.discountPercentage}%</p>
+                                <button onclick="fillCouponCode('${coupon.code}')" class="btn btn-sm btn-primary">Use Code</button>
+                            </div>
+                        </div>
+                    `;
+                                });
+                            } else {
+                                couponListDiv.innerHTML = '<p>No coupons available for this purchase.</p>';
+                            }
+                        } catch (error) {
+                            console.error('Error fetching coupons:', error);
+                        }
+                    }
+                    couponList.style.display = couponList.style.display === 'none' ? 'block' : 'none';
+                }
+
+                function fillCouponCode(code) {
+                    document.getElementById('couponCode').value = code;
+                }
+
+                async function applyCoupon() {
+                    const couponCode = document.getElementById('couponCode').value;
+                    const cartId = '<%= cart._id %>';
+                    const grandTotal = ' <%= grandTotal %>';
+
+                    try {
+                        const response = await fetch('/user/applyCoupon', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                couponCode,
+                                cartId,
+                                grandTotal
+                            })
+                        });
+
+                        const data = await response.json();
+                        const messageDiv = document.getElementById('couponMessage');
+
+                        if (data.success) {
+                            // Show applied coupon area
+                            document.getElementById('appliedCouponArea').style.display = 'block';
+                            document.querySelector('.applied-code').textContent = `Applied Coupon: ${couponCode}`;
+                            document.querySelector('.discount-amount').textContent = `Discount: ₹${data.discount}`;
+
+                            // Disable coupon input
+                            document.getElementById('couponCode').disabled = true;
+                            document.querySelector('.tp_btn').style.display = 'none';
+
+                            // Update order summary
+                            updateOrderSummary(data.originalAmount, data.discount, data.finalAmount);
+
+                            messageDiv.innerHTML = `
+                            <div class="alert alert-success">
+                                Coupon applied successfully! You saved ₹${data.discount}
+                            </div>
+                        `;
+                        } else {
+                            messageDiv.innerHTML = `
+                            <div class="alert alert-danger">
+                                ${data.message}
+                            </div>
+                        `;
+                        }
+                    } catch (error) {
+                        console.error('Error applying coupon:', error);
+                    }
+                }
+
+                async function removeCoupon() {
+                    const cartId = '<%= cart._id %>';
+
+                    try {
+                        const response = await fetch('/user/remove-coupon', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ cartId })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Reset coupon input
+                            document.getElementById('couponCode').value = '';
+                            document.getElementById('couponCode').disabled = false;
+                            document.querySelector('.tp_btn').style.display = 'inline-block';
+
+                            // Hide applied coupon area
+                            document.getElementById('appliedCouponArea').style.display = 'none';
+
+                            // Update order summary
+                            updateOrderSummary(data.originalAmount, 0, data.originalAmount);
+
+                            // Show success message
+                            document.getElementById('couponMessage').innerHTML = `
+                            <div class="alert alert-success">
+                                Coupon removed successfully
+                            </div>
+                        `;
+                        } else {
+                            document.getElementById('couponMessage').innerHTML = `
+                            <div class="alert alert-danger">
+                                ${data.message}
+                            </div>
+                        `;
+                        }
+                    } catch (error) {
+                        console.error('Error removing coupon:', error);
+                    }
+                }
+
+                function updateOrderSummary(originalAmount, discount, finalAmount) {
+                    const orderBox = document.querySelector('.order_box');
+                    const listUl = orderBox.querySelector('.list_2');
+
+                    listUl.innerHTML = `
+        <li><a href="#">Subtotal <span>₹${originalAmount}</span></a></li>
+        <li><a href="#">Discount <span>-₹${discount}</span></a></li>
+        <li><a href="#">Total <span>₹${finalAmount}</span></a></li>
+    `;
+                }
+
+            </script>
+</body>
+
+</html>

@@ -1,123 +1,225 @@
-// require("../config/multer.js")
 const express = require('express');
 const session = require("express-session");
 const config = require("../config/config");
-const {isLogin,isBan} = require("../middlewares/userAuth")
+const { isLogin, isBan } = require("../middlewares/userAuth")
 const userController = require("../controllers/userController");
+const cartController = require("../controllers/cartController.js");
+const profileController = require("../controllers/profileController.js");
 const userRouter = express.Router();
 const multer = require('../config/multer.js');
-const googleAuth = require('../middlewares/googleAuth.js')
+const googleAuth = require('../middlewares/googleAuth.js');
 const passport = require('../middlewares/googleAuth.js');
+const orderController = require('../controllers/ordersController.js');
+const productController = require("../controllers/productController.js");
+const couponController = require("../controllers/couponController.js")
 
 
 userRouter.use(
-    session({ 
+    session({
         secret: "jdakxlhjk",
         saveUninitialized: false,
         resave: false,
     })
-); 
- 
-  
+);
+
+
 
 // default route
-userRouter.get("/",userController.loadHome);
-
+userRouter.get("/", isBan, userController.loadHome);
 
 // login route
 userRouter.get("/login", isLogin, userController.loadLogin);
-
-
 
 // userHome route
 userRouter.post("/login", isLogin, userController.verifyUser);
 
 
 // forgot passwordpage load
-userRouter.get("/forgot",isLogin,userController.ForgotPassword);
+userRouter.get("/forgot", isLogin, userController.ForgotPassword);
 
 // generate for forgot password 
-userRouter.post("/forgot",isLogin,userController.genOtpForgotPass);
+userRouter.post("/forgot", isLogin, userController.genOtpForgotPass);
 
-// load otp forgot password
-userRouter.get("/forgetPassOtp",isLogin,userController.loadOtpForgetPass);
 
-// verify otp forgot password
-userRouter.post("/forgetPassOtp",isLogin,userController.otpVerifyForgotPassword);
 
 // change password 
-userRouter.get("/changePassword",isLogin,userController.changePassword)
+userRouter.get("/changePassword", isLogin, userController.changePassword)
 
 // register route
-userRouter.get("/register", isLogin,userController.loadSingUp);
- 
+userRouter.get("/register",isLogin, userController.loadSingUp);
+
 
 // generate otp route
-userRouter.post("/register", userController.registration);
- 
+userRouter.post("/register",isLogin, userController.registration);
+
 // load otp
-userRouter.get('/otp',isLogin,userController.loadOtp);
+userRouter.get('/otp',isLogin, userController.loadOtp);
 
 // resend otp
-userRouter.get('/resendOtp',isLogin,userController.resendOtp)
+userRouter.get('/resendOtp',isLogin, userController.resendOtp)
 
 // verify otp
-userRouter.post("/otp", isLogin,userController.verifyOtp)
-
-// user home
-userRouter.get("/home",isBan,userController.userhome);
-
-// user profile
-userRouter.get("/myProfile",isBan,userController.userProfile);
-
-//==============================================================================================================================================================================================================================
-
-// pages routing section
+userRouter.post("/otp",isLogin, userController.verifyOtp)
 
 
 
-userRouter.get("/shop",userController.loadHome);
+// ==============================================================================================================================================================================================================================
 
-// shop-sofa route
-userRouter.get("/shop-Category/:cat",isBan, userController.loadShopCategory);
+// load user profile
+userRouter.get("/myProfile", isBan, profileController.userProfile);
 
-// shop-sofa route
-userRouter.get("/shop-beds",isBan, userController.loadShopBeds);
+// load user profile
+userRouter.get("/updateProfile", isBan, profileController.loadupdateProfile);
 
-// shop-sofa route
-userRouter.get("/shop-chairs",isBan,userController.loadShopChairs);
+// update user profile
+userRouter.patch("/updateProfile", isBan, profileController.updateProfile);
+
+// change password
+userRouter.get("/changePassword", isBan, profileController.loadChangePassword);
+userRouter.post("/updatePassword", isBan, profileController.updatePassword);
+
+
+
+// load user address
+userRouter.get("/useraddress", isBan, profileController.loaduserAddress);
+
+
+// load add user address
+userRouter.get("/addAddress", isBan, profileController.loadAddAddress);
+
+//  add address
+userRouter.post("/addAddress", isBan, profileController.addAddress);
+
+// load edit address
+userRouter.get("/editAddress", isBan, profileController.loadEditAddress);
+
+// load update address
+userRouter.post("/editAddress", isBan, profileController.updateAddress);
+
+//  delete address
+userRouter.delete("/deleteAddress", isBan, profileController.deleteAddress);
+
+// ==============================================================================================================================================================================================================================
+
+// cart
+
+// load cart route
+userRouter.get('/cart', isBan, cartController.loadCart);
+
+// add cart route
+userRouter.post('/cart', isBan, cartController.addcart);
+
+// update cart route
+userRouter.post('/update', isBan, cartController.updateCart)
+
+// cart delete
+userRouter.delete('/cartDelete', isBan, cartController.deleteCart)
+
+// load checkout
+userRouter.get('/checkout', isBan, cartController.loadCheckout)
+
+
+userRouter.post("/checkout", userController.buyNow)
+
+userRouter.post('/paypal/success',userController.paypalSuccess)
+
+userRouter.get('/orderCancel', orderController.orderCancel)
+
+
+// load whishlist
+userRouter.get('/whishList',userController.loadWhishList)
+
+userRouter.post('/whishList',userController.addWhishList)
+
+// load delete whishlist
+userRouter.delete('/removeWhishlist',userController.deleteWhishlist)
+
+
+// show coupon user side
+
+userRouter.get('/showCoupon',couponController.getAvailableCoupons)
+
+// apply coupon
+userRouter.post('/applyCoupon',couponController.applyCoupon)
+
+// cancel coupon 
+userRouter.post('/remove-coupon',couponController.removeCoupon)
+// ==============================================================================================================================================================================================================================
+
+// pages routing section 
+
+
+
+
+userRouter.get("/shop", userController.loadShop);
+
+// shop search route
+userRouter.get("/search", userController.searchProducts)
+
+// shop-category route
+userRouter.get("/shop-Category/:cat", isBan, userController.loadShopCategory);
+
+
 
 // contact route
-userRouter.get("/contact",isBan, userController.loadContact);
+userRouter.get("/productBan", isBan, userController.loadBanProduct);
 
-// logout section
+// contact route
+userRouter.get("/contact", isBan, userController.loadContact);
 
-userRouter.get("/logout",userController.logOut);
-
-
+// logout route 
+userRouter.get("/logout", userController.logOut);
 
 // product view
+userRouter.get('/product_view/:product_id', isBan, userController.loadProductView)
 
-userRouter.get('/product_view/:product_id',isBan,userController.loadProductView)
+
+userRouter.post("/checkout", isBan,userController.buyNow)
+
+userRouter.get("/orderPlace", userController.loadOrderPlaced)
+
+// Add this new route
+userRouter.get("/shop/filter", userController.filterProducts);
+
+// Order details route
+userRouter.get('/orderdetails/:orderId', isBan, profileController.getOrderDetails);
+
+// Cancel order route
+userRouter.get('/orderCancel/:orderId', isBan, orderController.orderCancel);
+
+
+
 
 
 
 // google auth
 
-userRouter.get('/auth/google', 
-    passport.authenticate('google', { 
-        scope: ['profile', 'email'] 
+userRouter.get('/auth/google', isLogin,
+    passport.authenticate('google', {
+        scope: ['profile', 'email']
     })
 );
 
 // Google callback route
-userRouter.get('/auth/google/callback',isLogin,
-    passport.authenticate('google', { 
-        failureRedirect: '/user/signup'  
-    }),userController.googleLogin  
+userRouter.get('/auth/google/callback', isLogin,
+    passport.authenticate('google', {
+        failureRedirect: '/user/signup'
+    }), userController.googleLogin
 );
 
 
+// 404
 
-module.exports = userRouter;  
+userRouter.get('*', (req, res) => {
+    try {
+        res.render('userError')
+    } catch (err) {
+        console.log(err.message)
+    }
+})
+
+
+
+
+module.exports = userRouter;
 

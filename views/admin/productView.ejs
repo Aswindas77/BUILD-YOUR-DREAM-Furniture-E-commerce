@@ -19,7 +19,7 @@
             margin: 0;
             padding: 0;
         }
- 
+
         .product-card {
             border: none;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -120,27 +120,31 @@
     <div class="container mt-5">
         <div class="product-card">
             <div class="card-header">
-                <h2><%= product.name || 'Product Name Not Available' %></h2>
+                <h2>
+                    <%= product.name || 'Product Name Not Available' %>
+                </h2>
             </div>
             <div class="card-body">
                 <div class="row">
                     <!-- Main Image Section -->
                     <div class="col-md-6 text-center">
                         <div class="product-image-container">
-                            <% if (product.images && product.images.length > 0) { %>
-                                <img id="mainImage" class="product-image" src="<%= product.images[0] %>" alt="<%= product.name || 'Product Image' %>">
-                            <% } else { %>
-                                <img id="mainImage" class="product-image" src="/path/to/default-placeholder.jpg" alt="Default Image">
-                            <% } %>
+                            <% if (product.images && product.images.length> 0) { %>
+                                <img id="mainImage" class="product-image" src="<%= product.images[0] %>"
+                                    alt="<%= product.name || 'Product Image' %>">
+                                <% } else { %>
+                                    <img id="mainImage" class="product-image" src="/path/to/default-placeholder.jpg"
+                                        alt="Default Image">
+                                    <% } %>
                         </div>
                         <div class="image-nav">
-                            <% if (product.images && product.images.length > 0) { %>
-                                <% product.images.forEach((image, index) => { %>
+                            <% if (product.images && product.images.length> 0) { %>
+                                <% product.images.forEach((image, index)=> { %>
                                     <img class="thumbnail" src="<%= image %>" alt="Thumbnail <%= index + 1 %>">
-                                <% }); %>
-                            <% } else { %>
-                                <p>No thumbnails available</p>
-                            <% } %>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <p>No thumbnails available</p>
+                                            <% } %>
                         </div>
                     </div>
 
@@ -149,23 +153,32 @@
                         <div class="product-details">
                             <p>
                                 <strong>Description:</strong>
-                                <span><%= product.description || 'No description available' %></span>
+                                <span>
+                                    <%= product.description || 'No description available' %>
+                                </span>
                             </p>
                             <p>
                                 <strong>Category:</strong>
-                                <span><%= product.category?.name || 'No category' %></span>
+                                <span>
+                                    <%= categoryname || 'No category' %>
+                                </span>
                             </p>
                             <p>
                                 <strong>Sales Price:</strong>
-                                <span class="text-success">₹<%= product.salesPrice ? product.salesPrice.toFixed(2) : '0.00' %></span>
+                                <span class="text-success">₹<%= product.salesPrice ? product.salesPrice.toFixed(2)
+                                        : '0.00' %></span>
                             </p>
                             <p>
                                 <strong>Product Offer:</strong>
-                                <span class="text-dark"><%= product.productOffer || 0 %>% OFF</span>
+                                <span class="text-dark">
+                                    <%= product.productOffer || 0 %>% OFF
+                                </span>
                             </p>
                             <p>
                                 <strong>Stock:</strong>
-                                <span><%= product.stock || 'Out of stock' %></span>
+                                <span>
+                                    <%= product.stock || 'Out of stock' %>
+                                </span>
                             </p>
                             <p>
                                 <strong>Status:</strong>

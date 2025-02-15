@@ -24,6 +24,9 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    phone:{
+        type:Number,
+    },
     createdAt: {
         type: Date,
         default: Date.now,
@@ -34,7 +37,7 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-// Ensure you keep uniqueness only on the `email` field
+
 UserSchema.index({ email: 1 }, { unique: true });
 
 const User = mongoose.model("User", UserSchema);

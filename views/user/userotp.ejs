@@ -15,7 +15,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      color: #fff; 
+      color: #fff;
     }
 
     .otp-container {
@@ -115,12 +115,14 @@
         onkeydown="handleBackspace(this, event, 'otp4')">
       <input type="text" id="otp6" maxlength="1" onkeydown="handleBackspace(this, event, 'otp5')">
     </div>
+    <p style="color: #fff;" id="ok"></p>
     <p style="color: #ffd30d;" id="errr"></p>
     <button onclick="verifyOtp()">Verify</button>
 
     <div>
-      <small>Didn’t receive the code? 
-        <a id="resendOtpLink" href="/user/resendOtp" style="color: gray; text-decoration: none; pointer-events: none;">Resend OTP</a>
+      <small>Didn’t receive the code?
+        <a id="resendOtpLink" href="/user/resendOtp"
+          style="color: gray; text-decoration: none; pointer-events: none;">Resend OTP</a>
       </small>
     </div>
   </div>
@@ -131,7 +133,7 @@
       if (current.value.length >= 1 && nextFieldId) {
         document.getElementById(nextFieldId).focus();
       }
-    } 
+    }
 
     // Function to handle backspace and move to the previous input
     function handleBackspace(current, event, previousFieldId) {
@@ -150,21 +152,24 @@
       let otp = '';
       otpInputs.forEach(input => otp += input.value);
       if (otp.length === 6) {
-        fetch('/user/otp', { method: 'post',
-         body: JSON.stringify({ otp }),
+        fetch('/user/otp', {
+          method: 'post',
+          body: JSON.stringify({ otp }),
           headers: { "Content-Type": "application/json" }
-         })
+        })
           .then((response) => {
             console.log(response)
-            if (response.ok) {
-              window.location = response.url
+            if (response.status === 200) {
+              document.getElementById('ok').innerHTML = "Account created successfully"
+              window.location = '/user'
+
             }
             else {
-              if(response.status===404){
-               document.getElementById('errr').innerHTML = "time expired "
+              if (response.status === 404) {
+                document.getElementById('errr').innerHTML = "time expired "
               }
 
-              if(response.status===400){
+              if (response.status === 400) {
                 document.getElementById('errr').innerHTML = 'invalid otp '
               }
 
@@ -173,35 +178,35 @@
           .catch(err => {
             console.error('Error:', err);
             document.getElementById('errr').innerHTML = 'Something went wrong, please try again.';
-        });
+          });
       } else {
         document.getElementById('errr').innerHTML = 'Please enter all 6 digits of the OTP.'
       }
     }
 
     // Wait for the page to load before executing
-  window.onload = function() {
-    const resendLink = document.getElementById('resendOtpLink');
-    
-    // Disable the link initially
-    resendLink.style.pointerEvents = "none"; // Prevent clicking
-    resendLink.style.color = "white";        // Change appearance to look disabled
-    resendLink.style.textDecoration = "none";
+    window.onload = function () {
+      const resendLink = document.getElementById('resendOtpLink');
 
-    let countdown = 60; // Set the countdown time in seconds
+      // Disable the link initially
+      resendLink.style.pointerEvents = "none"; // Prevent clicking
+      resendLink.style.color = "white";        // Change appearance to look disabled
+      resendLink.style.textDecoration = "none";
 
-    const timer = setInterval(() => {
-      if (countdown > 0) {
-        resendLink.textContent = `Resend OTP in ${countdown--} seconds`; // Show countdown text
-      } else {
-        clearInterval(timer); // Stop the timer when it reaches 0
-        resendLink.textContent = "Resend OTP"; // Restore original text
-        resendLink.style.pointerEvents = "auto"; // Enable clicking
-        resendLink.style.color = "#feb47b"; // Restore link appearance
-        resendLink.style.textDecoration = "underline";
-      }
-    }, 1000); // Execute every second
-  };
+      let countdown = 60; // Set the countdown time in seconds
+
+      const timer = setInterval(() => {
+        if (countdown > 0) {
+          resendLink.textContent = `Resend OTP in ${countdown--} seconds`; // Show countdown text
+        } else {
+          clearInterval(timer); // Stop the timer when it reaches 0
+          resendLink.textContent = "Resend OTP"; // Restore original text
+          resendLink.style.pointerEvents = "auto"; // Enable clicking
+          resendLink.style.color = "#feb47b"; // Restore link appearance
+          resendLink.style.textDecoration = "underline";
+        }
+      }, 1000); // Execute every second
+    };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

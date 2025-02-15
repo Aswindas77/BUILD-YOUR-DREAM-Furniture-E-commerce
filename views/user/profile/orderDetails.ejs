@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Order Details #<%= order._id.toString().slice(-8) %>
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #FF6F00;
+        }
+
+        .order-details-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tracking-container {
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .tracking-line {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .tracking-line-progress {
+            position: absolute;
+            height: 100%;
+            background: var(--primary-color);
+            width: 0;
+            transition: width 1.5s ease-in-out;
+        }
+
+        .tracking-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tracking-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 120px;
+        }
+
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 0.5rem;
+            transition: all 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-icon.completed {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-icon.current {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 111, 0, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 111, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 111, 0, 0);
+            }
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            color: #4a5568;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .completed .step-label {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .order-items {
+            margin-top: 2rem;
+        }
+
+        .item-card {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 1rem;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .delivery-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .info-box {
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-box h4 {
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .price-summary {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            border-top: 2px dashed #eee;
+            margin-top: 1rem;
+            padding-top: 1rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-processing {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .status-shipped {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-delivered {
+            background: #DCF7DC;
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .status-update {
+            animation: statusUpdate 0.5s ease-in-out;
+        }
+
+        @keyframes statusUpdate {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tracking-steps {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2rem;
+            }
+
+            .tracking-line {
+                left: 30px;
+                width: 3px;
+                height: 100%;
+                top: 0;
+            }
+
+            .tracking-step {
+                flex-direction: row;
+                width: 100%;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="order-details-container">
+        <div class="order-header">
+            <div>
+                <h2>Order #<%= order._id.toString().slice(-8) %>
+                </h2>
+                <p>Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric' , month: 'long'
+                        , year: 'numeric' }) %>
+                </p>
+            </div>
+            <span class="status-badge status-<%= order.status.toLowerCase() %>">
+                <%= order.status %>
+            </span>
+        </div>
+
+        <div class="tracking-container">
+            <div class="tracking-line">
+                <div class="tracking-line-progress"></div>
+            </div>
+            <div class="tracking-steps">
+                <div class="tracking-step">
+                    <div
+                        class="step-icon <%= ['Processing', 'Shipped', 'Delivered'].includes(order.status) ? 'completed' : '' %>">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <span>Order Placed</span>
+                </div>
+                <div class="tracking-step">
+                    <div class="step-icon <%= ['Shipped', 'Delivered'].includes(order.status) ? 'completed' : 
+                        order.status === 'Processing' ? 'current' : '' %>">
+                        <i class="fas fa-warehouse"></i>
+                    </div>
+                    <span>Processing</span>
+                </div>
+                <div class="tracking-step">
+                    <div class="step-icon <%= order.status === 'Delivered' ? 'completed' : 
+                        order.status === 'Shipped' ? 'current' : '' %>">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <span>Shipped</span>
+                </div>
+                <div class="tracking-step">
+                    <div class="step-icon <%= order.status === 'Delivered' ? 'completed' : '' %>">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <span>Delivered</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-items">
+            <h3>Order Items</h3>
+            <% order.items.forEach(item=> { %>
+                <div class="item-card">
+                    <img src="<%= item.productId.images[0] %>" alt="<%= item.productId.name %>" class="item-image">
+                    <div class="item-details">
+                        <h4>
+                            <%= item.productId.name %>
+                        </h4>
+                        <p>Quantity: <%= item.quantity %>
+                        </p>
+                        <p>Price: ₹<%= item.price.toFixed(2) %>
+                        </p>
+                    </div>
+                </div>
+                <% }); %>
+        </div>
+
+        <div class="delivery-info">
+            <div class="info-grid">
+
+                <div class="info-box">
+                    <h4>Payment Information</h4>
+                    <p>Method: <%= order.paymentMethod %>
+                    </p>
+                    <p>Status: <%= order.paymentStatus %>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="price-summary">
+            <div class="price-row">
+                <span>Subtotal</span>
+                <span>₹<%= order.totalAmount.toFixed(2) %></span>
+            </div>
+            <% if (order.discount> 0) { %>
+                <div class="price-row">
+                    <span>Discount</span>
+                    <span>-₹<%= order.discount.toFixed(2) %></span>
+                </div>
+                <% } %>
+                    <div class="price-row">
+                        <span>Shipping</span>
+                        <span>₹0.00</span>
+                    </div>
+                    <div class="price-row total-row">
+                        <span>Total</span>
+                        <span>₹<%= (order.totalAmount - order.discount).toFixed(2) %></span>
+                    </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the current order status
+            const currentStatus = '<%= order.status %>';
+
+            // Define status order
+            const statusOrder = ['Pending', 'Processing', 'Shipped', 'Delivered'];
+            const currentStatusIndex = statusOrder.indexOf(currentStatus);
+
+            // Calculate progress percentage
+            const progress = (currentStatusIndex + 1) * (100 / statusOrder.length);
+
+            // Animate progress line after a short delay
+            setTimeout(() => {
+                const progressLine = document.querySelector('.tracking-line-progress');
+                progressLine.style.width = `${progress}%`;
+            }, 500);
+
+            // Add completed class to steps
+            const steps = document.querySelectorAll('.tracking-step');
+            steps.forEach((step, index) => {
+                const stepIcon = step.querySelector('.step-icon');
+                const stepLabel = step.querySelector('span');
+
+                setTimeout(() => {
+                    if (index <= currentStatusIndex) {
+                        stepIcon.classList.add('completed');
+                        stepLabel.classList.add('completed');
+
+                        // Add animation for current step
+                        if (index === currentStatusIndex) {
+                            stepIcon.classList.add('current');
+                        }
+                    }
+                }, index * 600); // Stagger the animations
+            });
+
+            // Function to update status
+            window.updateOrderStatus = function (newStatus) {
+                const statusBadge = document.querySelector('.status-badge');
+                statusBadge.className = `status-badge status-${newStatus.toLowerCase()} status-update`;
+                statusBadge.textContent = newStatus;
+
+                // Update progress based on new status
+                const newStatusIndex = statusOrder.indexOf(newStatus);
+                const newProgress = (newStatusIndex + 1) * (100 / statusOrder.length);
+
+                const progressLine = document.querySelector('.tracking-line-progress');
+                progressLine.style.width = `${newProgress}%`;
+
+                // Update step icons
+                steps.forEach((step, index) => {
+                    const stepIcon = step.querySelector('.step-icon');
+                    const stepLabel = step.querySelector('span');
+
+                    if (index <= newStatusIndex) {
+                        stepIcon.classList.add('completed');
+                        stepLabel.classList.add('completed');
+                    } else {
+                        stepIcon.classList.remove('completed');
+                        stepLabel.classList.remove('completed');
+                    }
+
+                    // Update current step
+                    if (index === newStatusIndex) {
+                        stepIcon.classList.add('current');
+                    } else {
+                        stepIcon.classList.remove('current');
+                    }
+                });
+            };
+        });
+
+        // Add this if you want to test status updates
+        function simulateStatusUpdate() {
+            const statusOrder = ['Pending', 'Processing', 'Shipped', 'Delivered'];
+            let currentIndex = statusOrder.indexOf('<%= order.status %>');
+
+            const interval = setInterval(() => {
+                currentIndex++;
+                if (currentIndex >= statusOrder.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                updateOrderStatus(statusOrder[currentIndex]);
+            }, 3000);
+        }
+
+        // Uncomment to test animation
+        // simulateStatusUpdate();
+    </script>
+</body>
+
+</html>

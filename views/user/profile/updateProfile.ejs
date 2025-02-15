@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Update</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary-color: #FF6F00;
+            /* Vibrant Orange */
+            --hover-color: #FF8F00;
+            /* Lighter Orange for hover */
+            --bg-color: #ffffff;
+            /* White background */
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #1f2937;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            position: fixed;
+            height: 100vh;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .nav-menu {
+            padding: 1.5rem 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            text-decoration: none;
+            color: #4b5563;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 2rem;
+            padding-top: 2rem;
+        }
+
+        .nav-item.logout:hover {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .welcome-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .welcome-card p {
+            color: #6b7280;
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .stat-card h3 {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                z-index: 1001;
+                background: var(--primary-color);
+                color: white;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+            }
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .profile-pic-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            width: 100%;
+            height: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-pic:hover .profile-pic-edit {
+            opacity: 1;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .stacked {
+            grid-column: 1 / -1;
+        }
+
+        .stacked .form-group {
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .modal-content .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="/user/myProfile" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="/user/updateProfile" class="nav-item active">
+                    <i class="fas fa-user"></i>
+                    <span>Update Profile</span>
+                </a>
+                <a href="/user/useraddress" class="nav-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>My Address</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </a>
+                <a href="/user" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>home</span>
+                </a>
+            </nav>
+        </div>
+        <main class="main-content">
+            <div class="profile-header">
+                <div class="profile-pic" id="profile-pic">
+                    <!-- Default initials -->
+                    <h6> profile</h6>
+                    <!-- Edit icon -->
+                    <div class="profile-pic-edit">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <!-- File input for uploading images -->
+                    <input type="file" id="profile-upload" accept="image/*" style="display: none;" />
+                </div>
+                <div class="profile-info">
+                    <h1>👋 Hello, <%= user.username %>
+                    </h1>
+                </div>
+            </div>
+
+            <div class="profile-form">
+                <h2>Personal Information</h2>
+                <form class="form-grid">
+                    <input type="hidden" id="userId" value="<%= user._id %>">
+                    <!-- Stacked First Name and Last Name -->
+                    <div class="stacked">
+                        <div class="form-group">
+                            <label>username</label>
+                            <input type="text" value="<%=user.username   %>" />
+                        </div>
+
+                    </div>
+
+                    <!-- Other fields -->
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" value="<%=user.email  %>" />
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" value="<%= typeof user !== 'undefined' && user.phone ? user.phone : '' %>"
+                            placeholder="Enter phone number" />
+
+                    </div>
+                </form>
+
+                <button class="btn">Save Changes</button>
+                <button id="i" type="button" class="btn">Change Password</button>
+
+            </div>
+        </main>
+    </div>
+
+    <div class="modal" id="saveChangesModal">
+        <div class="modal-content">
+            <h3>Confirm Password</h3>
+            <div class="form-group">
+                <label for="confirmSavePassword">Enter your password to save changes</label>
+                <input type="password" id="confirmSavePassword" placeholder="Enter your password">
+                <span class="error-message" id="savePasswordError"></span>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn" onclick="verifyAndSaveChanges()">Confirm</button>
+                <button type="button" class="btn-cancel" onclick="closeModal('saveChangesModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <h3>Change Password</h3>
+            <div class="form-group">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+                <span class="error-message" id="currentPasswordError"></span>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+                <span class="error-message" id="newPasswordError"></span>
+            </div>
+            <div class="form-group">
+                <label for="confirmNewPassword">Confirm New Password</label>
+                <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
+                <span class="error-message" id="confirmPasswordError"></span>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn" onclick="changePassword()">Change Password</button>
+                <button type="button" class="btn-cancel" onclick="closeModal('changePasswordModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const profilePic = document.getElementById('profile-pic');
+            const profileUpload = document.getElementById('profile-upload');
+
+            // Open file input when profile picture is clicked
+            profilePic.addEventListener('click', () => {
+                profileUpload.click();
+            });
+
+            // Handle file selection
+            profileUpload.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        // Remove the initials
+                        profilePic.innerHTML = '';
+
+                        // Create and set the image
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        profilePic.appendChild(img);
+
+                        // Append the edit icon back
+                        const editIcon = document.createElement('div');
+                        editIcon.className = 'profile-pic-edit';
+                        editIcon.innerHTML = '<i class="fas fa-camera"></i>';
+                        profilePic.appendChild(editIcon);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+        // Update your button click handlers
+        document.addEventListener('DOMContentLoaded', function () {
+            // Save changes button
+            document.querySelector('.btn').addEventListener('click', () => {
+                showModal('saveChangesModal');
+            });
+
+            // Change password button
+            document.getElementById('i').addEventListener('click', function (e) {
+                e.preventDefault(); // Prevent any default action
+                showModal('changePasswordModal');
+            });
+        });
+
+        // Modal functions
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+                // Clear previous inputs and errors
+                modal.querySelectorAll('input').forEach(input => input.value = '');
+                modal.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
+            } else {
+                console.error(`Modal with id ${modalId} not found`);
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Verify password and save changes
+        function verifyAndSaveChanges() {
+            const password = document.getElementById('confirmSavePassword').value;
+            const errorElement = document.getElementById('savePasswordError');
+
+            // Get updated profile data
+            const updatedData = {
+                username: document.querySelector('input[type="text"]').value,
+                email: document.querySelector('input[type="email"]').value,
+                phone: document.querySelector('input[type="tel"]').value,
+                password: password
+            };
+
+            fetch('/user/updateProfile', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Profile updated successfully');
+                        closeModal('saveChangesModal');
+                        location.reload();
+                    } else {
+                        errorElement.textContent = data.message || 'Incorrect password';
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorElement.textContent = 'Error updating profile';
+                    errorElement.style.display = 'block';
+                });
+        }
+
+        // Change password functionality
+        function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmNewPassword').value;
+
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
+
+            // Validate passwords
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showError('currentPasswordError', 'All fields are required');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showError('confirmPasswordError', 'New passwords do not match');
+                return;
+            }
+
+            // Send password change request
+            fetch('/user/updatePassword', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword,
+                    confirmPassword
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonColor: '#FF6F00'
+                        }).then(() => {
+                            closeModal('changePasswordModal');
+                        });
+                    } else {
+                        showError('currentPasswordError', data.message || 'Failed to change password');
+                    }
+                })
+                .catch(error => {
+                    showError('currentPasswordError', 'Error changing password');
+                    console.error('Error:', error);
+                });
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>

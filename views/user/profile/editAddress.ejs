@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Update</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary-color: #FF6F00; /* Vibrant Orange */
+            --hover-color: #FF8F00; /* Lighter Orange for hover */
+            --bg-color: #ffffff; /* White background */
+            --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #1f2937;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            position: fixed;
+            height: 100vh;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .nav-menu {
+            padding: 1.5rem 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            text-decoration: none;
+            color: #4b5563;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 2rem;
+            padding-top: 2rem;
+        }
+
+        .nav-item.logout:hover {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .welcome-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .welcome-card p {
+            color: #6b7280;
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .stat-card h3 {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                z-index: 1001;
+                background: var(--primary-color);
+                color: white;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+            }
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4A90E2;
+}
+
+.form-group input.error {
+    border-color: #ff0000;
+}
+
+.error-message {
+    color: #ff0000;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+/* Style for required field indicator */
+.form-group label::after {
+    content: "*";
+    color: #ff0000;
+    margin-left: 4px;
+}
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .stacked {
+            grid-column: 1 / -1; /* Make the stacked section span all columns */
+        }
+
+        .stacked .form-group {
+            margin-bottom: 1rem; /* Add spacing between stacked fields */
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+}
+input.error {
+    border: 1px solid red;
+}
+    </style>
+</head>
+<body> 
+    <div class="container">
+        <div class="sidebar">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="/user/myProfile" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="/user/updateProfile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Update Profile</span>
+                </a>
+                <a href="/user/useraddress" class="nav-item active">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>My Address</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </a>
+                <a href="/user" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>home</span>
+                </a>
+            </nav>
+        </div>
+        <main class="main-content">
+            
+            <div class="profile-form">
+                <h2 style="margin-bottom: 1.5rem;">edit Address Details</h2>
+                
+
+                <form class="form-grid" id="editAddressForm" method="post" action="/user/editAddress" onsubmit="return validateForm(event)">
+                    <input type="hidden" name="addressId" value="<%= address._id %>">
+                    
+                    <div class="stacked">
+                        
+                        <div class="form-group">
+                            <label for="houseNumber">House name/no.</label>
+                            <input type="text" id="houseNumber" name="houseNumber" value="<%= address.houseNumber %>" required>
+                            <small class="error-message"></small>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="landmark">Landmark</label>
+                            <input type="text" id="landmark" name="landmark" value="<%= address.landmark %>">
+                            <small class="error-message"></small>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" value="<%= address.city %>" required>
+                            <small class="error-message"></small>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" id="country" name="country" 
+                            value="<%= address.country %>" required>
+                            <small class="error-message"></small>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="pincode">Pincode</label>
+                            <input type="text" id="pincode" name="pincode" value="<%= address.pincode %>" pattern="[0-9]{5,10}" required>
+                            <small class="error-message"></small>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" value="<%= address.phone %>" pattern="^[6-9]\d{9}$" required>
+                            <small class="error-message"></small>
+                        </div>
+                
+                    </div>
+                    <button type="submit" class="btn" >Update Address</button>
+                </form>
+                
+                
+                
+            </div>
+        </main>
+    </div>
+
+    <div class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <script>
+
+function addAddress(event) {
+    event.preventDefault(); // Prevent form submission
+
+    let isValid = true;
+    const fields = [
+        { id: "houseNumber", message: "House name/number is required" },
+        { id: "landmark", message: "Landmark is required" },
+        { id: "city", message: "City is required" },
+        { id: "country", message: "Country is required" },
+        { id: "pincode", message: "Pincode must be 5-10 digits", pattern: /^[0-9]{5,10}$/ },
+        { id: "phone", message: "Phone number is invalid", pattern:/^[6-9]\d{9}$/ }
+    ];
+
+    fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const errorMessage = input.nextElementSibling; // Selects the next sibling (e.g., <small> tag for error)
+
+        if (!input.value.trim()) {
+            isValid = false;
+            input.classList.add("error");
+            errorMessage.textContent = field.message; // Show error message
+        } else if (field.pattern && !field.pattern.test(input.value.trim())) {
+            isValid = false;
+            input.classList.add("error");
+            errorMessage.textContent = field.message; // Show error message
+        } else {
+            input.classList.remove("error");
+            errorMessage.textContent = ""; // Clear the error message
+        }
+    });
+
+    // If form is valid, proceed with the fetch request
+    if (isValid) {
+        const formData = {
+            houseNumber: document.getElementById("houseNumber").value.trim(),
+            landmark: document.getElementById("landmark").value.trim(),
+            city: document.getElementById("city").value.trim(),
+            country: document.getElementById("country").value.trim(),
+            pincode: document.getElementById("pincode").value.trim(),
+            phone: document.getElementById("phone").value.trim()
+        };
+
+        // Send data to backend
+        fetch("/user/editAddress", {
+            method: "POST",
+            body: JSON.stringify(formData),
+            headers: { "Content-Type": "application/json" },
+        })
+        .then(data => {
+            alert('Address saved successfully!');
+            window.location.href = '/user/useraddress';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to save address. Please try again.');
+        });
+    }
+}
+
+function clearErrors() {
+    const inputs = document.querySelectorAll('.form-group input');
+    inputs.forEach(input => input.classList.remove('error'));
+
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(span => span.textContent = '');
+}
+
+
+
+
+        
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const profilePic = document.getElementById('profile-pic');
+            const profileUpload = document.getElementById('profile-upload');
+
+            // Open file input when profile picture is clicked
+            profilePic.addEventListener('click', () => {
+                profileUpload.click();
+            });
+
+            // Handle file selection
+            profileUpload.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        // Remove the initials
+                        profilePic.innerHTML = '';
+
+                        // Create and set the image
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        profilePic.appendChild(img);
+
+                        // Append the edit icon back
+                        const editIcon = document.createElement('div');
+                        editIcon.className = 'profile-pic-edit';
+                        editIcon.innerHTML = '<i class="fas fa-camera"></i>';
+                        profilePic.appendChild(editIcon);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

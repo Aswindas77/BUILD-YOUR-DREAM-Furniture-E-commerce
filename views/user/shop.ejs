@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zxx" class="no-js">
+
+<head>
+	<!-- Mobile Specific Meta -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<!-- Favicon-->
+	<link rel="shortcut icon" href="/public/userAssets/images/favicon.png/">
+	<!-- Author Meta -->
+	<meta name="author" content="CodePixar">
+	<!-- Meta Description -->
+	<meta name="description" content="">
+	<!-- Meta Keyword -->
+	<meta name="keywords" content="">
+	<!-- meta character set -->
+	<meta charset="UTF-8">
+	<!-- Site Title -->
+	<title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/public/userAssets/css/linearicons.css">
+	<link rel="stylesheet" href="/public/userAssets/css/font-awesome.min.css">
+	<link rel="stylesheet" href="/public/userAssets/css/themify-icons.css">
+	<link rel="stylesheet" href="/public/userAssets/css/bootstrap.css">
+	<link rel="stylesheet" href="/public/userAssets/css/owl.carousel.css">
+	<link rel="stylesheet" href="/public/userAssets/css/nice-select.css">
+	<link rel="stylesheet" href="/public/userAssets/css/nouislider.min.css">
+	<link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.css" />
+	<link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.skinFlat.css" />
+	<link rel="stylesheet" href="/public/userAssets/css/magnific-popup.css">
+	<link rel="stylesheet" href="/public/userAssets/css/main.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+	<link href="css/font-awesome.css" rel="stylesheet">
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
+	<link rel="stylesheet" href="/public/userAssets/css/custom.css">
+	```
+
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: system-ui, -apple-system, sans-serif;
+			background-color: #f3f4f6;
+		}
+
+		.container {
+			width: 100vw;
+			max-width: 100%;
+			padding: 0 15px;
+			/* Add some padding to avoid content touching the edges */
+		}
+
+		/* Updated Product Card Styles */
+		.product-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 3rem;
+			padding: 2rem;
+		}
+
+		.product-card {
+			background: #fff;
+			border-radius: 18px;
+			overflow: hidden;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 6px 8px rgba(0, 0, 0, 0.05);
+			position: relative;
+		}
+
+		.product-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+		}
+
+		.product-image-wrap {
+			position: relative;
+			overflow: hidden;
+			padding-top: 100%;
+			background: #f8f9fa;
+		}
+
+		.product-image-slider {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.product-image {
+			flex: 0 0 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: opacity 0.3s ease;
+		}
+
+		.product-card:hover .product-image-slider {
+			transform: translateX(-100%);
+		}
+
+		.product-badge {
+			position: absolute;
+			top: 1rem;
+			left: 1rem;
+			z-index: 2;
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+
+		.badge {
+			padding: 0.5rem 1rem;
+			border-radius: 25px;
+			font-weight: 600;
+			text-transform: uppercase;
+			font-size: 0.75rem;
+			letter-spacing: 0.5px;
+		}
+
+		.badge-danger {
+			background: linear-gradient(45deg, #ff4d4d, #ff1a1a);
+		}
+
+		.badge-primary {
+			background: linear-gradient(45deg, #4d88ff, #1a5cff);
+		}
+
+		.badge-success {
+			background: linear-gradient(45deg, #4dffb8, #1aff94);
+		}
+
+		.product-info {
+			padding: 1.5rem;
+			position: relative;
+		}
+
+		.product-title {
+			font-size: 1.25rem;
+			font-weight: 700;
+			margin-bottom: 0.75rem;
+			color: #2d3748;
+			line-height: 1.3;
+		}
+
+		.product-title a {
+			color: inherit;
+			text-decoration: none;
+			transition: color 0.2s ease;
+		}
+
+		.product-title a:hover {
+			color: #FF6F00;
+		}
+
+		.product-price {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			margin: 1rem 0;
+		}
+
+		.price-sale {
+			font-size: 1.5rem;
+			font-weight: 800;
+			color: #FF6F00;
+		}
+
+		.price-original {
+			font-size: 1rem;
+			color: #718096;
+			text-decoration: line-through;
+		}
+
+		.product-actions {
+			position: absolute;
+			top: 1rem;
+			right: 1rem;
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+		}
+
+		.product-card:hover .product-actions {
+			opacity: 1;
+		}
+
+		.action-btn {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.9);
+			border: none;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+			color: #2d3748;
+			transition: all 0.2s ease;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.action-btn:hover {
+			background: #FF6F00;
+			color: white;
+			transform: scale(1.1);
+		}
+
+		.add-to-cart {
+			width: 100%;
+			padding: 1rem;
+			background: linear-gradient(45deg, #FF6F00, #FF8F00);
+			border: none;
+			color: white;
+			border-radius: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			transition: transform 0.2s ease;
+		}
+
+		.add-to-cart:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+		}
+
+		.product-rating {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			margin: 0.5rem 0;
+		}
+
+		.stars {
+			color: #FFD700;
+			display: flex;
+			gap: 0.1rem;
+		}
+
+		.rating-count {
+			font-size: 0.875rem;
+			color: #718096;
+		}
+
+		/* New Hover Overlay */
+		.product-hover-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.4);
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.product-card:hover .product-hover-overlay {
+			opacity: 1;
+		}
+
+		.quick-view-btn {
+			padding: 0.75rem 2rem;
+			background: white;
+			border: none;
+			border-radius: 30px;
+			font-weight: 600;
+			color: #FF6F00;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+			transition: all 0.2s ease;
+		}
+
+		.quick-view-btn:hover {
+			transform: scale(1.05);
+			background: #FF6F00;
+			color: white;
+		}
+
+		.top-bar {
+			background: white;
+			padding: 1rem 1.5rem;
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			border-bottom: 1px solid #e5e7eb;
+			position: sticky;
+			top: 0;
+			z-index: 10;
+		}
+
+		.search-container {
+			flex: 1;
+			max-width: 600px;
+			position: relative;
+		}
+
+		.search-input {
+			width: 100%;
+			padding: 0.75rem 1rem;
+			padding-left: 2.75rem;
+			border: 1px solid #e5e7eb;
+			border-radius: 8px;
+			background-color: #f9fafb;
+		}
+
+		.search-icon {
+			position: absolute;
+			left: 1rem;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #9ca3af;
+		}
+
+		.filter-trigger {
+			padding: 0.75rem 1.25rem;
+			background: #f3f4f6;
+			border: none;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			cursor: pointer;
+			font-size: 0.875rem;
+			color: #374151;
+		}
+
+		.filter-trigger:hover {
+			background: #e5e7eb;
+		}
+
+		/* Modal Styles */
+		.modal-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(0, 0, 0, 0.5);
+			display: none;
+			place-items: center;
+			z-index: 50;
+		}
+
+		.modal-overlay.active {
+			display: grid;
+		}
+
+		.modal {
+			background: white;
+			width: 90%;
+			max-width: 600px;
+			border-radius: 12px;
+			overflow: hidden;
+			animation: slideUp 0.3s ease-out;
+		}
+
+		@keyframes slideUp {
+			from {
+				transform: translateY(30px);
+				opacity: 0;
+			}
+
+			to {
+				transform: translateY(0);
+				opacity: 1;
+			}
+		}
+
+		.modal-header {
+			padding: 1rem 1.5rem;
+			border-bottom: 1px solid #e5e7eb;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.modal-title {
+			font-size: 1.125rem;
+			font-weight: 600;
+			color: #111827;
+		}
+
+		.close-button {
+			background: none;
+			border: none;
+			color: #6b7280;
+			cursor: pointer;
+			padding: 0.5rem;
+		}
+
+		.modal-body {
+			padding: 1.5rem;
+			max-height: 70vh;
+			overflow-y: auto;
+		}
+
+		.filter-section {
+			margin-bottom: 2rem;
+		}
+
+		.filter-section:last-child {
+			margin-bottom: 0;
+		}
+
+		.section-title {
+			font-size: 0.875rem;
+			font-weight: 600;
+			color: #374151;
+			margin-bottom: 1rem;
+		}
+
+		.price-inputs {
+			display: flex;
+			gap: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.price-input {
+			flex: 1;
+			position: relative;
+		}
+
+		.price-input input {
+			width: 100%;
+			padding: 0.75rem 1rem;
+			padding-left: 1.75rem;
+			border: 1px solid #e5e7eb;
+			border-radius: 6px;
+		}
+
+		.currency {
+			position: absolute;
+			left: 0.75rem;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #6b7280;
+		}
+
+		.checkbox-group {
+			display: grid;
+			gap: 0.75rem;
+		}
+
+		.checkbox-label {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			cursor: pointer;
+		}
+
+		.checkbox-label input {
+			width: 1.125rem;
+			height: 1.125rem;
+			border-radius: 4px;
+		}
+
+		.modal-footer {
+			padding: 1rem 1.5rem;
+			border-top: 1px solid #e5e7eb;
+			display: flex;
+			justify-content: flex-end;
+			gap: 1rem;
+			background: #f9fafb;
+		}
+
+		.reset-btn {
+			padding: 0.75rem 1.5rem;
+			background: white;
+			border: 1px solid #e5e7eb;
+			border-radius: 6px;
+			color: #374151;
+			cursor: pointer;
+		}
+
+		.apply-btn {
+			padding: 0.75rem 1.5rem;
+			background: #2563eb;
+			border: none;
+			border-radius: 6px;
+			color: white;
+			cursor: pointer;
+		}
+
+		.apply-btn:hover {
+			background: #1d4ed8;
+		}
+
+		.sort-select {
+			padding: 0.75rem 1rem;
+			border: 1px solid #e5e7eb;
+			border-radius: 8px;
+			background-color: #f9fafb;
+			color: #374151;
+			cursor: pointer;
+		}
+	</style>
+</head>
+
+<body id="category">
+
+	<!-- Start Header Area -->
+	<%- include("../partials/userPartial/userHeader") %>
+		<!-- End Header Area -->
+
+		<%- include('../partials/userPartial/breadcrumb', { pageTitle: 'shopping page' , currentPage: 'Shop' , parentPage:
+			null, parentPath: null }) %>
+
+			<!-- Centered Container -->
+			<div style="margin-top: 50px;" class="container-centered">
+				<div class="container">
+					<div class="row">
+
+
+						<!-- Main Content -->
+						<div class="col-xl-9 col-lg-8 col-md-7 mx-auto">
+							<!-- Advanced Filter Bar with Search and Filters -->
+
+							<div class="top-bar">
+								<div class="search-container">
+									<input type="text" class="search-input" id="searchInput"
+										placeholder="Search products..." value="<%= filters?.search || '' %>">
+									<svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+										stroke="currentColor" stroke-width="2">
+										<circle cx="11" cy="11" r="8"></circle>
+										<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+									</svg>
+								</div>
+
+								<select class="sort-select" id="sortSelect">
+									<option value="">Sort By</option>
+									<option value="nameAsc" <%=filters?.sort==='nameAsc' ? 'selected' : '' %>>Name (A-Z)
+									</option>
+									<option value="nameDesc" <%=filters?.sort==='nameDesc' ? 'selected' : '' %>>Name
+										(Z-A)
+									</option>
+									<option value="priceAsc" <%=filters?.sort==='priceAsc' ? 'selected' : '' %>>Price:
+										Low
+										to High</option>
+									<option value="priceDesc" <%=filters?.sort==='priceDesc' ? 'selected' : '' %>>Price:
+										High to Low</option>
+								</select>
+
+								<select class="sort-select" id="categorySelect">
+									<option value="">All Categories</option>
+									<% categories.forEach(category=> { %>
+										<option value="<%= category.name %>" <%=filters?.category===category.name
+											? 'selected' : '' %>>
+											<%= category.name %>
+										</option>
+										<% }) %>
+								</select>
+
+								<button class="filter-trigger"
+									onclick="document.getElementById('filterModal').classList.add('active')">
+									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+										stroke-width="2">
+										<path d="M4 21v-7m0-4V3M12 21v-9m0-4V3M20 21v-5m0-4V3M1 14h6M9 8h6M17 16h6" />
+									</svg>
+									Filters
+								</button>
+							</div>
+
+							<!-- Filter Modal -->
+							<div class="modal-overlay" id="filterModal">
+								<div class="modal">
+									<div class="modal-header">
+										<h3 class="modal-title">Filter Products</h3>
+										<button class="close-button"
+											onclick="document.getElementById('filterModal').classList.remove('active')">
+											<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+												stroke="currentColor" stroke-width="2">
+												<path d="M18 6L6 18M6 6l12 12" />
+											</svg>
+										</button>
+									</div>
+
+									<div class="modal-body">
+										<!-- Price Range -->
+										<div class="filter-section">
+											<h4 class="section-title">Price Range</h4>
+											<div class="price-inputs">
+												<div class="price-input">
+													<span class="currency">₹</span>
+													<input type="number" id="minPrice" placeholder="Min"
+														value="<%= filters?.minPrice || '' %>">
+												</div>
+												<div class="price-input">
+													<span class="currency">₹</span>
+													<input type="number" id="maxPrice" placeholder="Max"
+														value="<%= filters?.maxPrice || '' %>">
+												</div>
+											</div>
+										</div>
+
+										<!-- Categories -->
+										<div class="filter-section">
+											<h4 class="section-title">Categories</h4>
+											<div class="checkbox-group">
+												<label class="checkbox-label">
+													<input type="checkbox"> Furniture
+												</label>
+												<label class="checkbox-label">
+													<input type="checkbox"> Decor
+												</label>
+												<label class="checkbox-label">
+													<input type="checkbox"> Lighting
+												</label>
+												<label class="checkbox-label">
+													<input type="checkbox"> Kitchen
+												</label>
+											</div>
+										</div>
+
+										<!-- Ratings -->
+										<div class="filter-section">
+											<h4 class="section-title">Rating</h4>
+											<div class="checkbox-group">
+												<label class="checkbox-label">
+													<input type="checkbox"> 4★ & above
+												</label>
+												<label class="checkbox-label">
+													<input type="checkbox"> 3★ & above
+												</label>
+												<label class="checkbox-label">
+													<input type="checkbox"> 2★ & above
+												</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="modal-footer">
+										<button class="reset-btn">Reset</button>
+										<button class="apply-btn">Apply Filters</button>
+									</div>
+								</div>
+							</div>
+
+							<!-- Product Grid -->
+							<div class="container">
+								<div class="product-grid">
+									<% products.forEach(product=> { %>
+										<div class="product-card">
+											<div class="product-badge">
+												<% if (product.productOffer> 0) { %>
+													<span class="badge badge-danger">SAVE <%= product.productOffer %>
+															%</span>
+													<% } %>
+														<% if (product.isNew) { %>
+															<span class="badge badge-primary">NEW ARRIVAL</span>
+															<% } %>
+																<% if (product.isBestSeller) { %>
+																	<span class="badge badge-success">BESTSELLER</span>
+																	<% } %>
+											</div>
+
+											<div class="product-image-wrap">
+												<% if (product.images && product.images.length> 0) { %>
+													<div class="product-image-slider">
+														<% product.images.slice(0, 3).forEach(image=> { %>
+															<img src="<%= image %>" alt="<%= product.name %>"
+																class="product-image">
+															<% }) %>
+													</div>
+													<% } else { %>
+														<img src="/default-product.jpg" alt="<%= product.name %>"
+															class="product-image">
+														<% } %>
+
+															<div class="product-hover-overlay">
+																<button class="quick-view-btn"
+																	onclick="quickView('<%= product._id %>')">
+																	View Product</button>
+															</div>
+											</div>
+
+											<div class="product-info">
+												<div class="product-rating">
+													<div class="stars">
+														<% for(let i=1; i <=5; i++) { %>
+															<i
+																class="fa fa-star<%= i <= product.ratings ? '' : '-o' %>"></i>
+															<% } %>
+													</div>
+													<span class="rating-count">(<%= product.reviewCount || 0 %>
+															reviews)</span>
+												</div>
+
+												<h3 class="product-title">
+													<a onclick="quickView('<%= product._id %>')">
+														<%= product.name %>
+													</a>
+												</h3>
+
+												<div class="product-price">
+													<% if (product.productOffer> 0) { %>
+														<span class="price-sale">₹<%= product.salesPrice.toFixed(2) %>
+														</span>
+														<span class="price-original">₹<%= (product.salesPrice / (1 -
+																product.productOffer / 100)).toFixed(2) %></span>
+														<% } else { %>
+															<span class="price-sale">₹<%= product.salesPrice.toFixed(2)
+																	%>
+															</span>
+															<% } %>
+												</div>
+
+												<button class="add-to-cart" onclick="addToCart('<%= product._id %>')">
+													<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
+												</button>
+											</div>
+
+											<div class="product-actions">
+												<button class="action-btn wishlist"
+													onclick="addToWhishList('<%= product._id %>')">
+													<i class="fa fa-heart-o"></i>
+												</button>
+												<button class="action-btn compare" title="Compare">
+													<i class="fa fa-refresh"></i>
+												</button>
+											</div>
+										</div>
+										<% }); %>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Start related-product Area -->
+				<section class="related-product-area section_gap">
+					<div class="container">
+						<div class="row justify-content-center">
+							<div class="col-lg-6 text-center">
+								<div class="section-title">
+									<h1>Deals of the Week</h1>
+									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+										incididunt ut labore et dolore magna aliqua.</p>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-lg-9">
+								<div class="row">
+									<!-- Repeat for related products -->
+								</div>
+							</div>
+							<div class="col-lg-3">
+								<div class="ctg-right">
+									<a href="#" target="_blank">
+										<img class="img-fluid d-block mx-auto" src="img/category/c5.jpg" alt="">
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<!-- End related-product Area -->
+
+				<!-- Start footer Area -->
+				<footer class="footer-area section_gap">
+					<div class="container">
+						<div class="row">
+							<!-- Footer content -->
+						</div>
+					</div>
+				</footer>
+				<!-- End footer Area -->
+
+				<!-- Modal Quick Product View -->
+				<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="container relative">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+							<div class="product-quick-view">
+								<div class="row align-items-center">
+									<div class="col-lg-6">
+										<div class="quick-view-carousel">
+											<!-- Carousel items -->
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="quick-view-content">
+											<!-- Quick view content -->
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Scripts -->
+				<script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
+				<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+					integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+					crossorigin="anonymous"></script>
+				<script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
+				<script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
+				<script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
+				<script src="/public/userAssets/js/jquery.sticky.js"></script>
+				<script src="/public/userAssets/js/nouislider.min.js"></script>
+				<script src="/public/userAssets/js/countdown.js"></script>
+				<script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
+				<script src="/public/userAssets/js/owl.carousel.min.js"></script>
+				<!--gmaps Js-->
+				<script
+					src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
+				<script src="/public/userAssets/js/gmaps.min.js"></script>
+				<script src="/public/userAssets/js/main.js"></script>
+				<script>
+
+					function quickView(productId) {
+						window.location.href = `/user/product_view/${productId}`;
+					}
+
+					function addToCart(productId) {
+						console.log(productId)
+						fetch("/user/cart", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({
+								productId,
+								quantity: 1
+							})
+						})
+							.then(response => response.json())
+							.then(data => {
+								if (data.success) {
+									showToast("Product added to cart.", "success");
+								} else {
+									showToast("Already exists in cart", "error");
+								}
+							})
+							.catch(error => {
+								showToast("Something went wrong.", "error");
+							});
+					}
+
+					function showToast(message, type) {
+						Toastify({
+							text: message,
+							duration: 3000,
+							gravity: "top",
+							position: "center",
+							close: true,
+							style: {
+								background: "orange",
+								color: "white",
+								fontWeight: "bold",
+								borderRadius: "8px",
+							},
+						}).showToast();
+					}
+
+
+					// Close modal when clicking outside
+					document.getElementById('filterModal').addEventListener('click', function (e) {
+						if (e.target === this) {
+							this.classList.remove('active');
+						}
+					});
+
+
+					// search bar
+					document.getElementById("searchBox").addEventListener("input", async function () {
+						let query = this.value.trim();
+						console.log("Search Query:", query);
+
+
+
+						// Send request only if query is not empty
+						if (query.length > 0) {
+							const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+							const products = await response.json();
+
+							// Update the product list
+							let productList = document.getElementById("productList");
+							productList.innerHTML = ""; // Clear existing products
+
+							products.forEach(product => {
+								let item = `<div class="product-item">
+							<h3>${product.name}</h3>
+							<p>${product.price}</p>
+						</div>`;
+								productList.innerHTML += item;
+							});
+						}
+					});
+
+				</script>
+
+				<script>
+					// Function to update URL with filter parameters
+					function updateFilters() {
+						const searchValue = document.getElementById('searchInput').value;
+						const sortValue = document.getElementById('sortSelect').value;
+						const categoryValue = document.getElementById('categorySelect').value;
+						const minPrice = document.getElementById('minPrice')?.value;
+						const maxPrice = document.getElementById('maxPrice')?.value;
+
+						const params = new URLSearchParams();
+						if (searchValue) params.set('search', searchValue);
+						if (sortValue) params.set('sort', sortValue);
+						if (categoryValue) params.set('category', categoryValue);
+						if (minPrice) params.set('minPrice', minPrice);
+						if (maxPrice) params.set('maxPrice', maxPrice);
+
+						window.location.href = `/user/shop?${params.toString()}`;
+					}
+
+					// Add event listeners
+					document.getElementById('searchInput').addEventListener('keyup', function (e) {
+						if (e.key === 'Enter') updateFilters();
+					});
+
+					document.getElementById('sortSelect').addEventListener('change', updateFilters);
+					document.getElementById('categorySelect').addEventListener('change', updateFilters);
+
+					// Update price filter modal
+					document.querySelector('.apply-btn').addEventListener('click', function () {
+						updateFilters();
+						document.getElementById('filterModal').classList.remove('active');
+					});
+
+					// Reset filters
+					document.querySelector('.reset-btn').addEventListener('click', function () {
+						window.location.href = '/user/shop';
+					});
+				</script>
+
+				<script>
+					// Debounce function to limit API calls
+					function debounce(func, wait) {
+						let timeout;
+						return function executedFunction(...args) {
+							const later = () => {
+								clearTimeout(timeout);
+								func(...args);
+							};
+							clearTimeout(timeout);
+							timeout = setTimeout(later, wait);
+						};
+					}
+
+					// Function to handle search and filters
+					const handleFilters = debounce(async () => {
+						try {
+							const searchValue = document.getElementById('searchInput').value;
+							const sortValue = document.getElementById('sortSelect').value;
+							const categoryValue = document.getElementById('categorySelect').value;
+							const minPrice = document.getElementById('minPrice')?.value;
+							const maxPrice = document.getElementById('maxPrice')?.value;
+
+							// Build query parameters
+							const params = new URLSearchParams();
+							if (searchValue) params.set('search', searchValue);
+							if (sortValue) params.set('sort', sortValue);
+							if (categoryValue) params.set('category', categoryValue);
+							if (minPrice) params.set('minPrice', minPrice);
+							if (maxPrice) params.set('maxPrice', maxPrice);
+
+							// Show loading state
+							document.querySelector('.product-grid').innerHTML = '<div class="text-center w-100"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
+
+							// Fetch filtered products
+							const response = await fetch(`/user/shop/filter?${params.toString()}`);
+							const data = await response.json();
+
+							if (!data.success) {
+								throw new Error(data.message);
+							}
+
+							// Update product grid
+							displayProducts(data.products);
+
+							// Update URL without page reload
+							const newUrl = `${window.location.pathname}?${params.toString()}`;
+							window.history.pushState({ path: newUrl }, '', newUrl);
+
+						} catch (error) {
+							console.error('Error:', error);
+							showToast('Error filtering products', 'error');
+						}
+					}, 300); // 300ms delay
+
+					// Function to display products
+					function displayProducts(products) {
+						const productGrid = document.querySelector('.product-grid');
+
+						if (!products.length) {
+							productGrid.innerHTML = `
+						<div class="text-center w-100">
+							<h3>No products found</h3>
+						</div>
+					`;
+							return;
+						}
+
+						productGrid.innerHTML = products.map(product => `
+			<div class="product-card">
+				<div class="product-badge">
+					${product.productOffer > 0 ? `<span class="badge badge-danger">SAVE ${product.productOffer}%</span>` : ''}
+					${product.isNew ? '<span class="badge badge-primary">NEW ARRIVAL</span>' : ''}
+					${product.isBestSeller ? '<span class="badge badge-success">BESTSELLER</span>' : ''}
+				</div>
+
+				<div class="product-image-wrap">
+					${product.images && product.images.length > 0 ? `
+						<div class="product-image-slider">
+							${product.images.slice(0, 3).map(image => `
+								<img src="${image}" alt="${product.name}" class="product-image">
+							`).join('')}
+						</div>
+					` : `
+						<img src="/default-product.jpg" alt="${product.name}" class="product-image">
+					`}
+					
+					<div class="product-hover-overlay">
+						<button class="quick-view-btn" onclick="quickView('${product._id}')">QUICK VIEW</button>
+					</div>
+				</div>
+			</div>
+		`).join('');
+					}
+
+					// Add event listeners
+					document.getElementById('searchInput').addEventListener('keyup', function (e) {
+						if (e.key === 'Enter') updateFilters();
+					});
+
+					document.getElementById('sortSelect').addEventListener('change', updateFilters);
+					document.getElementById('categorySelect').addEventListener('change', updateFilters);
+
+					// Close modal when clicking outside
+					document.getElementById('filterModal').addEventListener('click', function (e) {
+						if (e.target === this) {
+							closeFilterModal();
+						}
+					});
+
+
+					// add to whishList
+
+					function addToWhishList(productId) {
+
+						console.log("shoo", productId);
+
+						fetch(`/user/whishList`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({ productId })
+						})
+							.then(response => response.json())
+							.then(data => {
+								if (data.success) {
+									console.log("blaaaam");
+									showToast("product whislisted")
+								} else {
+									alert("❌ " + data.message);
+								}
+
+							});
+
+
+					}
+				</script>
+</body>
+
+</html>
