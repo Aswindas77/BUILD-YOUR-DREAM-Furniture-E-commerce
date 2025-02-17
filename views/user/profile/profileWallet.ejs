@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet - Profile</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary-color: #ffc107;
+            /* Vibrant Orange */
+            --hover-color: #FF8F00;
+            /* Lighter Orange for hover */
+            --bg-color: #ffffff;
+            /* White background */
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #1f2937;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            position: fixed;
+            height: 100vh;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .nav-menu {
+            padding: 1.5rem 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            text-decoration: none;
+            color: #4b5563;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 2rem;
+            padding-top: 2rem;
+        }
+
+        .nav-item.logout:hover {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+        :root {
+            --primary-color: #ffc107;
+            --hover-color: #FF8F00;
+            --bg-color: #ffffff;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Your existing sidebar styles */
+        .sidebar {
+            width: 280px;
+            background: white;
+            box-shadow: var(--card-shadow);
+            position: fixed;
+            height: 100vh;
+            transition: transform 0.3s ease;
+        }
+
+        /* Wallet specific styles */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .wallet-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .wallet-header-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-balance {
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-amount {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .wallet-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .action-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .transactions-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .transaction-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            transform: translateX(5px);
+            background: #f0f0f0;
+        }
+
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .credit .transaction-icon {
+            background: rgba(40, 199, 111, 0.2);
+            color: #28c76f;
+        }
+
+        .debit .transaction-icon {
+            background: rgba(234, 84, 85, 0.2);
+            color: #ea5455;
+        }
+
+        .transaction-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .transaction-date {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .credit .transaction-amount {
+            color: #28c76f;
+        }
+
+        .debit .transaction-amount {
+            color: #ea5455;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .balance-amount {
+                font-size: 2.5rem;
+            }
+
+            .wallet-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        
+        <div class="sidebar">
+            <div class="dashboard-header">
+                <h2><i class=""></i>Profile</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item ">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/user/myProfile" class="nav-item ">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="/user/updateProfile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Update Profile</span>
+                </a>
+                <a href="/user/useraddress" class="nav-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>My Address</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </a>
+                <a href="/user" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>home</span>
+                </a>
+            </nav>
+        </div>
+        <main class="main-content">
+            <div class="wallet-container">
+                <div class="wallet-header-card">
+                    <div class="wallet-balance">
+                        <div class="balance-label">Available Balance</div>
+                        <div class="balance-amount">₹<%= walletBalance.toFixed(2) %>
+                        </div>
+                        <div class="wallet-actions">
+                            <button class="action-button">
+                                <i class="fas fa-plus"></i>
+                                Add Money
+                            </button>
+                            <button class="action-button">
+                                <i class="fas fa-exchange-alt"></i>
+                                Transfer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transactions-card">
+                    <div class="transactions-header">
+                        <h3>Recent Transactions</h3>
+                    </div>
+                    <div class="transaction-list">
+                        <% walletHistory.forEach(transaction=> { %>
+                            <div class="transaction-item <%= transaction.type %>">
+                                <div class="transaction-info">
+                                    <div class="transaction-icon">
+                                        <i
+                                            class="fas <%= transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
+                                    </div>
+                                    <div class="transaction-details">
+                                        <div class="transaction-title">
+                                            <%= transaction.description || (transaction.type==='credit' ? 'Money Added'
+                                                : 'Purchase' ) %>
+                                        </div>
+                                        <div class="transaction-date">
+                                            <%= new Date(transaction.date).toLocaleDateString('en-US', { year: 'numeric'
+                                                , month: 'short' , day: 'numeric' , hour: '2-digit' , minute: '2-digit'
+                                                }) %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="transaction-amount">
+                                    <%= transaction.type==='credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Your existing sidebar toggle script
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+        }
+    </script>
+</body>
+
+</html>

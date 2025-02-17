@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require("express-session");
 const config = require("../config/config");
-const { isLogin, isBan } = require("../middlewares/userAuth")
+const { isLogin, isBan,payment } = require("../middlewares/userAuth")
 const userController = require("../controllers/userController");
 const cartController = require("../controllers/cartController.js");
 const profileController = require("../controllers/profileController.js");
@@ -76,6 +76,8 @@ userRouter.patch("/updateProfile", isBan, profileController.updateProfile);
 
 // change password
 userRouter.get("/changePassword", isBan, profileController.loadChangePassword);
+
+// update password
 userRouter.post("/updatePassword", isBan, profileController.updatePassword);
 
 
@@ -100,6 +102,9 @@ userRouter.post("/editAddress", isBan, profileController.updateAddress);
 userRouter.delete("/deleteAddress", isBan, profileController.deleteAddress);
 
 // ==============================================================================================================================================================================================================================
+
+// wallet controller
+// userRouter.get("/wallet",isBan,profileController.loadWallet) 
 
 // cart
 
@@ -145,6 +150,7 @@ userRouter.post('/applyCoupon',couponController.applyCoupon)
 // cancel coupon 
 userRouter.post('/remove-coupon',couponController.removeCoupon)
 // ==============================================================================================================================================================================================================================
+
 
 // pages routing section 
 

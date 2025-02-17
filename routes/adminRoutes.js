@@ -6,6 +6,7 @@ const categoryController = require('../controllers/categoryController');
 const productController = require("../controllers/productController");
 const orderController = require("../controllers/ordersController");
 const couponController = require("../controllers/couponController");
+const salesController = require("../controllers/salesController");
 const adminRouter = express.Router();
 
 
@@ -64,7 +65,8 @@ adminRouter.patch("/admin/list/:categoryId/:action", categoryController.toggleLi
 
 
 
-
+// load sales report
+adminRouter.get('/salesReport', adminAuth.isLogin, salesController.filterSalesReport);
 
 // load admin product management
 adminRouter.get('/productManagement', adminAuth.isLogin, productController.loadProducts)
@@ -120,16 +122,18 @@ adminRouter.post('/addCoupon', adminAuth.isLogin, couponController.addCoupon);
 adminRouter.get('/editCoupon/:id', couponController.editCoupon);
 
 // update coupon
-adminRouter.put('/updateCoupon/:id',couponController.updateCoupon);
+adminRouter.put('/updateCoupon/:id', couponController.updateCoupon);
 
 // delete coupon
-adminRouter.delete('/deleteCoupon/:id',couponController.deleteCoupon);
+adminRouter.delete('/deleteCoupon/:id', couponController.deleteCoupon);
 
 
 
 
 // logout route
 adminRouter.get("/logout", adminAuth.isLogin, adminController.logout);
+
+
 
 
 

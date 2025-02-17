@@ -52,7 +52,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentStatus: {
     type: String,
-    enum: ['Pending', 'Paid', 'Failed','Processing'],
+    enum: ['Pending', 'Paid', 'Failed', 'Processing'],
     default: 'Pending',
   },
   isPaid: {
@@ -61,18 +61,18 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['Credit Card', 'Debit Card', 'paypal', 'Cash on Delivery'],
+    enum: ['Credit Card', 'Debit Card', 'paypal', 'Cash on Delivery', 'razorpay'],
 
   },
   shippingDetails: {
     origin: { type: String, default: "India" },
     estimatedArrival: { type: Date, default: new Date('2025-02-15') },
     actualArrival: { type: Date, default: null },
-    status: { type: String, enum: ['Pending', 'Shipped', 'Cancelled', 'Processing', 'Delivered'], default: 'Pending' },
+    status: { type: String, enum: ['Pending', 'Shipped', 'Cancelled','Processing', 'Delivered'], default: 'Pending' },
   }
 }, {
-  timestamps: true, // Automatically adds createdAt and updatedAt fields
+  timestamps: true, 
 });
 
-// Fix: Check if model exists before creating
+
 module.exports = mongoose.models.Order || mongoose.model('Order', orderSchema);

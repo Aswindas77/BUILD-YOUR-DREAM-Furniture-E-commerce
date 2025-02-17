@@ -16,12 +16,15 @@ const WhishList = require("../models/whishlistModel")
 const Cart = require("../models/cartModel")
 const { createPayPalOrder } = require("../services/paypalService");
 const { capturePayPalOrder } = require("../services/paypalService");
-
 const saltRounds = 10;
+
+
+
 
 // default loadHome page
 
 // ==================================================================================================================================================== 
+
 const loadHome = async (req, res) => {
 
     const user = req.session?.User
@@ -51,28 +54,12 @@ const loadHome = async (req, res) => {
     const categories = await Category.find({ isDeleted: false, isListed: false })
 
 
-    // Pass categories to the frontend
+
     res.render('home', { categories, user, products });
 };
 
 
-// ====================================================================================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// loadLogin page
+// load login page
 
 // ====================================================================================================================================================
 
@@ -92,12 +79,10 @@ const loadLogin = async (req, res) => {
     }
 };
 
+
+//  verifyUser load
+
 // ====================================================================================================================================================
-
-//  verifyUser page load
-
-// ====================================================================================================================================================
-
 
 const verifyUser = async (req, res) => {
     try {
@@ -170,11 +155,6 @@ const verifyUser = async (req, res) => {
 };
 
 
-
-//====================================================================================================================================================
-
-
-
 // forgot password page load
 
 //====================================================================================================================================================
@@ -191,10 +171,7 @@ const ForgotPassword = async (req, res) => {
     } catch (err) {
         console.error(err.message)
     }
-}
-
-//====================================================================================================================================================
-
+};
 
 
 // otp load for forgot password page  
@@ -230,11 +207,7 @@ const genOtpForgotPass = async (req, res) => {
         console.log(err.message);
 
     }
-}
-
-
-//====================================================================================================================================================
-
+};
 
 
 // load otp verify for forgot password page 
@@ -248,11 +221,7 @@ const loadOtpForgetPass = async (req, res) => {
     } catch (err) {
         console.error(err.message);
     }
-}
-
-
-//====================================================================================================================================================
-
+};
 
 
 // load otp verify for forgot password page 
@@ -265,10 +234,7 @@ const changePassword = async (req, res) => {
     } catch (err) {
         console.log(err)
     }
-}
-
-//====================================================================================================================================================
-
+};
 
 
 // otp verify for forgot password page 
@@ -284,11 +250,7 @@ const otpVerifyForgotPassword = async (req, res) => {
     } catch (err) {
         console.error(err.message)
     }
-}
-
-
-//====================================================================================================================================================
-
+};
 
 
 // sign up page load (register page)
@@ -310,16 +272,13 @@ const loadSingUp = async (req, res) => {
     }
 };
 
-//====================================================================================================================================================
-
-
 
 // register user  
 
 //====================================================================================================================================================
 
-
 const registration = async (req, res) => {
+
     try {
 
         console.log('this is the data', req.body)
@@ -328,13 +287,13 @@ const registration = async (req, res) => {
         req.session.checkPass = "singUp"
         const existingUser = await User.findOne({ email });
         console.log("Existing User:", existingUser);
+
         if (existingUser) {
             return res.status(400).json({
                 success: false,
                 emailError: "Email already exists. Please use a different email."
             });
         }
-
 
         else {
             const otp = generateOtp()
@@ -362,10 +321,6 @@ const registration = async (req, res) => {
 };
 
 
-//====================================================================================================================================================
-
-
-
 // otp page load
 
 //====================================================================================================================================================
@@ -378,10 +333,6 @@ const loadOtp = async (req, res) => {
         console.log(err.message);
     }
 }
-
-
-//====================================================================================================================================================
-
 
 
 // otp sending
@@ -421,11 +372,9 @@ async function sendotp(otp, email) {
 }
 
 
-
 // otp generator 
 
 //====================================================================================================================================================
-
 
 const generateOtp = () => {
 
@@ -434,10 +383,6 @@ const generateOtp = () => {
     return otp.toString();
 
 };
-
-
-//====================================================================================================================================================
-
 
 
 // load otp verify section 
@@ -528,11 +473,10 @@ const verifyOtp = async (req, res) => {
     }
 }
 
-//====================================================================================================================================================
-
-
 
 // resend otp
+
+//====================================================================================================================================================
 
 const resendOtp = async (req, res) => {
     try {
@@ -590,9 +534,6 @@ const resendOtp = async (req, res) => {
 }
 
 
-//====================================================================================================================================================
-
-
 // load Category based Shop page
 
 //====================================================================================================================================================
@@ -616,7 +557,6 @@ const loadShopCategory = async (req, res) => {
     }
 }
 
-//====================================================================================================================================================
 
 // load Category based Shop page
 
@@ -626,7 +566,7 @@ const loadShop = async (req, res) => {
     try {
         const user = req.session?.User;
 
-        // Get filter parameters from query string
+        
         const { search, category, minPrice, maxPrice, sort } = req.query;
 
 
@@ -636,19 +576,19 @@ const loadShop = async (req, res) => {
             stock: { $gt: 0 }
         };
 
-        // Add search filter if present
+       
         if (search) {
             query.name = { $regex: new RegExp(search, 'i') };
         }
 
-        // Add price filter if present
+        
         if (minPrice || maxPrice) {
             query.salesPrice = {};
             if (minPrice) query.salesPrice.$gte = parseFloat(minPrice);
             if (maxPrice) query.salesPrice.$lte = parseFloat(maxPrice);
         }
 
-        // Build the aggregation pipeline
+        
         const pipeline = [
             {
                 $lookup: {
@@ -670,7 +610,7 @@ const loadShop = async (req, res) => {
             }
         ];
 
-        // Add category filter if present
+        
         if (category) {
             pipeline.push({
                 $match: {
@@ -679,7 +619,7 @@ const loadShop = async (req, res) => {
             });
         }
 
-        // Add sorting if present
+        
         if (sort) {
             let sortObj = {};
             switch (sort) {
@@ -719,24 +659,24 @@ const loadShop = async (req, res) => {
     }
 }
 
-//====================================================================================================================================================
-
 
 // shop products search
+
+//====================================================================================================================================================
 
 const searchProducts = async (req, res) => {
     try {
         let searchQuery = req.query.q;
-        if (!searchQuery) return res.json([]); // Return empty if no search term
+        if (!searchQuery) return res.json([]); 
         console.log(searchQuery)
-        // Search products by name (case-insensitive)
+        
         const products = await Products.find({
             name: { $regex: searchQuery, $options: "i" },
             isDeleted: false,
             isListed: false
         });
 
-        res.json(products); // Send JSON response
+        res.json(products); 
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ error: "Server error" });
@@ -744,11 +684,9 @@ const searchProducts = async (req, res) => {
 };
 
 
-
 // product-view 
 
 //====================================================================================================================================================
-
 
 const loadProductView = async (req, res) => {
     try {
@@ -768,9 +706,6 @@ const loadProductView = async (req, res) => {
 }
 
 
-//====================================================================================================================================================
-
-
 // loadAbout page
 
 //====================================================================================================================================================
@@ -783,10 +718,10 @@ const loadAbout = async (req, res) => {
     }
 }
 
-//====================================================================================================================================================
-
 
 // loadContact page
+
+//====================================================================================================================================================
 
 const loadContact = async (req, res) => {
     try {
@@ -799,11 +734,6 @@ const loadContact = async (req, res) => {
         console.log(err.message);
     }
 }
-
-//====================================================================================================================================================
-
-
-
 
 
 // load logout controller
@@ -825,9 +755,6 @@ const logOut = async (req, res) => {
 }
 
 
-//====================================================================================================================================================
-
-
 // load google login
 
 //====================================================================================================================================================
@@ -836,18 +763,16 @@ const googleLogin = async (req, res) => {
     try {
         console.log(req.user);
 
-        // Check if the user exists in the database
         const user = await User.findOne({ email: req.user.email });
 
         if (!user) {
-            // If the user doesn't exist, handle accordingly (you may create the user or show an error)
 
 
 
             return res.redirect('/user/login');
         }
 
-        // Check if the user is blocked
+        
         if (user.isBlocked) {
             req.session.gerrmessage = "Your google account has been blocked. Please contact support."
             const categories = await Category.find({ isDeleted: false })
@@ -855,13 +780,13 @@ const googleLogin = async (req, res) => {
             return res.redirect('/user/login')
         }
 
-        // Set the session with user info
+        
         req.session.User = {
             username: user.username,
             email: user.email
         };
 
-        // If the user is logged in and not blocked, redirect to home
+        
         res.redirect('/user');
 
     } catch (error) {
@@ -894,21 +819,21 @@ const loadBanProduct = async (req, res) => {
 //====================================================================================================================================================
 
 
- 
+
 
 
 const buyNow = async (req, res) => {
     try {
         const { selectedAddressId, paymentMethod, cartId, } = req.body;
         const userId = req.session.User._id;
-        
-        
 
-        // Fetch user details
+
+
+        
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        // Fetch Cart details
+        
         const cart = await Cart.findById(cartId).populate("products.productId");
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
@@ -922,7 +847,7 @@ const buyNow = async (req, res) => {
             price: item.salesPrice,
         }));
 
-       
+
         if (paymentMethod.toLowerCase() === "wallet") {
             if (user.walletBalance >= totalAmount) {
                 user.walletBalance -= totalAmount;
@@ -953,22 +878,22 @@ const buyNow = async (req, res) => {
                 });
             }
         }
-        
+
         if (paymentMethod.toLowerCase() === "paypal") {
             console.log('inside the paypal anpunt')
             console.log(totalAmount, 'inside the paypal; paypal');
             console.log(paymentMethod, 'method inside the payoap')
-            const { orderId, approvalLink} = await createPayPalOrder(totalAmount, userId);
-            console.log(approvalLink, 'paypal order inside paypal approvalLinkapprovalLinkapprovalLink');
+            const { orderId, paypalRedirectUrl } = await createPayPalOrder(totalAmount, userId);
+            console.log(paypalRedirectUrl, 'paypal order inside paypal approvalLinkapprovalLinkapprovalLink');
             return res.status(200).json({
                 success: true,
                 message: "Redirect to PayPal",
                 orderId: orderId,
-                paypalRedirectUrl: approvalLink
+                paypalRedirectUrl: paypalRedirectUrl
             });
         }
 
-        // ✅ **Cash on Delivery Handling**
+        
         if (paymentMethod.toLowerCase() === "cash on delivery") {
             const newOrder = new ordermodel({
                 userId,
@@ -990,7 +915,32 @@ const buyNow = async (req, res) => {
             });
         }
 
-        return res.status(400).json({ success: false, message: "Invalid payment method selected" });
+        if (paymentMethod.toLowerCase() === "razorpay") {
+            const newOrder = new ordermodel({
+                userId,
+                items: orderItems,
+                billingAddress: selectedAddressId,
+                paymentMethod,
+                totalAmount,
+                paymentStatus: "Pending",
+                orderStatus: "Pending",
+            });
+
+            await newOrder.save();
+            await Cart.findByIdAndDelete(cartId);
+
+            return res.status(200).json({
+                success: true,
+                message: "Order placed successfully. Pay on delivery.",
+                orderId: newOrder._id,
+            });
+
+
+        }
+
+
+
+
 
     } catch (error) {
         console.error("Error in buyNow:", error);
@@ -1001,7 +951,7 @@ const buyNow = async (req, res) => {
 
 // paypal success
 
-const paypalSuccess = async (req,res)=>{
+const paypalSuccess = async (req, res) => {
     const { token } = req.query;
     try {
         const captureResponse = await capturePayPalOrder(token);
@@ -1111,7 +1061,7 @@ const filterProducts = async (req, res) => {
     }
 };
 
- 
+
 // load whishlist page
 const loadWhishList = async (req, res) => {
     try {
@@ -1122,27 +1072,27 @@ const loadWhishList = async (req, res) => {
 
         const categories = await Category.find({ isDeleted: false, isListed: false });
 
-        const cart =await Cart.findOne({userId: user._id}).populate("products.productId")
-        console.log("shoo",cart)
+        const cart = await Cart.findOne({ userId: user._id }).populate("products.productId")
+        console.log("shoo", cart)
 
         const cartProductIds = cart ? cart.products.map(p => p.productId._id.toString()) : [];
 
-        
+
         const wishlist = await WhishList.findOne({ userId: user._id })
             .populate({
                 path: 'products.productId',
                 model: 'Product',
-                select: 'name images salesPrice stock', 
+                select: 'name images salesPrice stock',
                 match: { isDeleted: false, isListed: false }
             });
 
-            if (wishlist) {
-                wishlist.products = wishlist.products.filter(p => 
-                    p.productId && !cartProductIds.includes(p.productId._id.toString())
-                );
-            }
-    
-            console.log("Filtered wishlist (excluding cart items):", wishlist);
+        if (wishlist) {
+            wishlist.products = wishlist.products.filter(p =>
+                p.productId && !cartProductIds.includes(p.productId._id.toString())
+            );
+        }
+
+        console.log("Filtered wishlist (excluding cart items):", wishlist);
 
         res.render("whishList", { user, categories, wishlist });
     } catch (error) {
@@ -1189,18 +1139,18 @@ const addWhishList = async (req, res) => {
                     message: "Product already in wishlist"
                 });
             }
-        
+
             // Add new product to existing wishlist
             wishlist.products.push({ productId });
-        
+
         } else {
-            
+
             wishlist = new WhishList({
                 userId,
                 products: [{ productId }]
             });
         }
- 
+
         await wishlist.save();
         console.log("Saved wishlist:", wishlist);
 
@@ -1219,20 +1169,20 @@ const addWhishList = async (req, res) => {
     }
 };
 
-const deleteWhishlist =async(req,res)=>{
+const deleteWhishlist = async (req, res) => {
     try {
-        const productId=req.query.id
-    const userId = req.session?.User;
-    console.log(productId)
+        const productId = req.query.id
+        const userId = req.session?.User;
+        console.log(productId)
 
-    const whishlist = await WhishList.findOne({ userId });
-    console.log(whishlist)
+        const whishlist = await WhishList.findOne({ userId });
+        console.log(whishlist)
 
-    if (! whishlist|| !whishlist.products || whishlist.products.length === 0) {
-        return res.status(400).json({ success: false, message: "Whishlist is empty" });
-    }
+        if (!whishlist || !whishlist.products || whishlist.products.length === 0) {
+            return res.status(400).json({ success: false, message: "Whishlist is empty" });
+        }
 
-    const productIndex = whishlist.products.findIndex(item => item.productId.toString() === productId);
+        const productIndex = whishlist.products.findIndex(item => item.productId.toString() === productId);
 
         if (productIndex === -1) {
             return res.status(404).json({ success: false, message: "Product not found in whishlist" });
@@ -1243,12 +1193,15 @@ const deleteWhishlist =async(req,res)=>{
         await whishlist.save();
         return res.status(200).json({ success: true, message: "Product removed from wishlist" });
 
-        
+
     } catch (error) {
         console.log(error.message)
         return res.status(500).json({ success: false, message: "Server error" });
     }
 }
+
+
+
 
 module.exports = {
 

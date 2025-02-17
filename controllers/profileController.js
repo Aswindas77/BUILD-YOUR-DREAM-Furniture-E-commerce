@@ -6,7 +6,7 @@ const Category = require("../models/categoryModel");
 const Address = require('../models/addressModel')
 const bcrypt = require('bcrypt');
 const { Types } = require('mongoose');
-const Order = require('../models/ordermodel');
+const Order = require('../models/orderModel');
 const { log } = require("console");
 const { logOut } = require("./userController");
 
@@ -16,7 +16,7 @@ const { logOut } = require("./userController");
 
 
 
-//! load user profile dash
+// load user profile 
 
 // ====================================================================================================================================================
 
@@ -29,12 +29,12 @@ const userProfile = async (req, res) => {
         const userId = req.session.User._id;
         const user = req.session.User;
 
-        // Fetch and populate orders
+
         const orders = await Order.find({ userId })
             .populate('items.productId')
-            .lean(); // Convert to plain JavaScript object
+            .lean();
 
-        // Add totalAmount if missing
+
         orders.forEach(order => {
             if (!order.totalAmount) {
                 order.totalAmount = 0;
@@ -50,9 +50,6 @@ const userProfile = async (req, res) => {
 };
 
 
-// ====================================================================================================================================================
-
-
 //load update profile 
 
 // ====================================================================================================================================================
@@ -64,9 +61,8 @@ const loadupdateProfile = async (req, res) => {
     } else {
         res.redirect("login")
     }
-}
+};
 
-// ====================================================================================================================================================
 
 //load update profile 
 
@@ -116,10 +112,7 @@ const updateProfile = async (req, res) => {
     } catch (error) {
         console.log(error.message)
     }
-}
-
-// ====================================================================================================================================================
-
+};
 
 
 //load load user Address
@@ -148,22 +141,19 @@ const loaduserAddress = async (req, res) => {
             return res.render("profile/profileAddress", { addresses: [] });
         }
 
-
         const activeAddresses = userAddresses.address.filter(addr => addr.isDeleted === false);
 
         console.log("Active Addresses:", activeAddresses);
 
         res.render("profile/profileAddress", { addresses: activeAddresses });
 
-
     } catch (error) {
         console.error(error.message)
     }
-}
+};
 
-// ====================================================================================================================================================
 
-//load load user Address
+//load add Address
 
 //  ====================================================================================================================================================
 
@@ -174,9 +164,7 @@ const loadAddAddress = async (req, res) => {
     } else {
         res.redirect("login")
     }
-}
-
-// ====================================================================================================================================================
+};
 
 
 //load load user Address
@@ -237,6 +225,11 @@ const addAddress = async (req, res) => {
     }
 };
 
+
+// load edit address
+
+//====================================================================================================================================================
+
 const loadEditAddress = async (req, res) => {
     try {
         const addressId = req.query.id;
@@ -273,10 +266,10 @@ const loadEditAddress = async (req, res) => {
 }
 
 
-
-//  ====================================================================================================================================================
-
 // update address
+
+//====================================================================================================================================================
+
 const updateAddress = async (req, res) => {
     try {
         const { addressId, houseNumber, city, landmark, country, pincode, phone } = req.body;
@@ -301,14 +294,14 @@ const updateAddress = async (req, res) => {
             return res.status(404).json("Address not found");
         }
 
-        // Find the specific address inside the array
+        
         const addressToUpdate = userAddress.address.find(addr => addr._id.toString() === addressId);
 
         if (!addressToUpdate) {
             return res.status(404).json("Address not found in user document");
         }
 
-        // Update the fields
+        
         addressToUpdate.houseNumber = houseNumber;
         addressToUpdate.city = city;
         addressToUpdate.landmark = landmark;
@@ -316,7 +309,7 @@ const updateAddress = async (req, res) => {
         addressToUpdate.pincode = pincode;
         addressToUpdate.phone = phone;
 
-        // Save the updated document
+        
         await userAddress.save();
 
         console.log("Updated Address:", addressToUpdate);
@@ -331,7 +324,10 @@ const updateAddress = async (req, res) => {
     }
 }
 
+
 //  delete address
+
+//====================================================================================================================================================
 
 const deleteAddress = async (req, res) => {
     try {
@@ -365,6 +361,10 @@ const deleteAddress = async (req, res) => {
     }
 }
 
+// load channge password
+
+//====================================================================================================================================================
+
 const loadChangePassword = async (req, res) => {
     try {
         if (req.session.User) {
@@ -378,6 +378,11 @@ const loadChangePassword = async (req, res) => {
     }
 };
 
+
+// update password
+
+//====================================================================================================================================================
+
 const updatePassword = async (req, res) => {
     try {
         if (!req.session.User) {
@@ -387,12 +392,12 @@ const updatePassword = async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const userId = req.session.User._id;
 
-        // Validate password match
+        
         if (newPassword !== confirmPassword) {
             return res.status(400).json({ success: false, message: 'New passwords do not match' });
         }
 
-        // Password strength validation
+        
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
         if (!passwordRegex.test(newPassword)) {
             return res.status(400).json({
@@ -406,16 +411,16 @@ const updatePassword = async (req, res) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // Verify current password
+       
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Current password is incorrect' });
         }
 
-        // Hash new password
+        
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update password
+        
         user.password = hashedPassword;
         await user.save();
 
@@ -426,14 +431,17 @@ const updatePassword = async (req, res) => {
     }
 };
 
-// order controller
+
+// get order details
+
+//====================================================================================================================================================
 
 const getOrderDetails = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         const userId = req.session.User._id;
 
-        // Fetch order with populated data
+        
         const order = await Order.findOne({ _id: orderId, userId })
             .populate('items.productId')
             .populate('billingAddress')
@@ -446,21 +454,21 @@ const getOrderDetails = async (req, res) => {
             });
         }
 
-        // Calculate total amount if it's undefined
+        
         if (!order.totalAmount) {
             order.totalAmount = order.items.reduce((total, item) => {
                 return total + (item.price * item.quantity);
             }, 0);
         }
 
-        // Add order timeline/tracking data
+        
         const orderTimeline = [];
         const progressPercentage =
             order.status === 'Delivered' ? 100 :
                 order.status === 'Shipped' ? 66 :
                     order.status === 'Processing' ? 33 : 0;
 
-        // Format the order data with safe defaults
+       
         const formattedOrder = {
             _id: order._id,
             status: order.status || 'Pending',
@@ -488,10 +496,10 @@ const getOrderDetails = async (req, res) => {
             timeline: orderTimeline
         };
 
-        console.log('Formatted Order:', formattedOrder); // For debugging
+        console.log('Formatted Order:', formattedOrder); 
 
-        // Render the order details page
-        res.render('user/profile/orderDetails', {
+        
+        res.render('profile/orderDetails', {
             order: formattedOrder,
             user: req.session.User
         });
@@ -501,6 +509,9 @@ const getOrderDetails = async (req, res) => {
         res.status(500).send('Error loading order details');
     }
 };
+
+
+
 
 module.exports = {
     userProfile,

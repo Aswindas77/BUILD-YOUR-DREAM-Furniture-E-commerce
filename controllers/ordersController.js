@@ -1,8 +1,6 @@
 const express =require("express")
 const mongoose = require("mongoose");
 const Product = require("../models/productModel");
-const Category = require("../models/categoryModel");
-const Address = require('../models/addressModel')
 const Orders = require("../models/ordermodel");
 const Cart = require('../models/cartModel')
 const User = require("../models/userModel");
@@ -11,7 +9,9 @@ const paypalClient =require("../config/paypal");
 
 
 
-// load order management
+// load order page
+
+//====================================================================================================================================================
 
 const loadOrderPage = async (req, res) => {
     try {
@@ -46,9 +46,14 @@ const loadOrderPage = async (req, res) => {
 };
 
 
+// update order
+
+//====================================================================================================================================================
+
 const updateOrderStatus = async (req, res) => {
     try {
         const { orderId, status } = req.body;
+       
 
         const order = await Orders.findByIdAndUpdate(
             orderId,
@@ -73,13 +78,18 @@ const updateOrderStatus = async (req, res) => {
             order: order  
         });
     } catch (error) {
-        console.log("Error updating order status:", error.message);
+        console.error("Error updating order status:", error.stack);
         res.status(500).json({
             success: false,
             message: 'Error updating order status'
         });
     }
 };
+
+
+// get order details
+
+//====================================================================================================================================================
 
 const getOrderDetails = async (req, res) => {
     try {
@@ -107,6 +117,11 @@ const getOrderDetails = async (req, res) => {
         });
     }
 };
+
+
+// order cancel
+
+//====================================================================================================================================================
 
 const orderCancel = async (req, res) => {
     try {

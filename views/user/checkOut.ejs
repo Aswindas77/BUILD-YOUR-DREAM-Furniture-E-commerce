@@ -266,7 +266,7 @@
                                 <div class="col-lg-8">
                                     <h3>Billing Details</h3>
                                     <div class="address-grid">
-                                        <input type="hidden" value="<%=cart._id%>" name="carts">
+                                        <input type="hidden" value="<%=cart?._id%>" name="carts">
 
                                         <% if (addresses.length> 0) { %>
                                             <% addresses.forEach(address=> { %>
@@ -317,7 +317,7 @@
                                         <h2>Your Order</h2>
                                         <ul class="list">
                                             <li><a href="#">Product <span>Total</span></a></li>
-                                            <% cart.products.forEach(product=> { %>
+                                            <% cart?.products.forEach(product=> { %>
                                                 <li><a href="#">
                                                         <%=product.name%> <span class="middle">x <%=product.quantity%>
                                                             </span> <span class="last">₹ <%=product.salesPrice %>
@@ -345,12 +345,20 @@
                                                 <img src="/public/userAssets/images/product/card.jpg" alt="">
                                                 <div class="check"></div>
                                             </div>
+                                            <div class="radion_btn">
+
+                                                <input type="radio" id="f-option7" value="razorpay" name="paymentMethod">
+                                                <label for="f-option7">online payment (razorpay)</label>
+                                                <img src="/public/userAssets/images/product/card.jpg" alt="">
+                                                <div class="check"></div>
+
+                                            </div>
 
                                             <div class="payment_item active">
                                                 <div class="radion_btn">
-                                                    <input type="radio" id="f-option7" value="Wallet"
+                                                    <input type="radio" id="f-option8" value="Wallet"
                                                         name="paymentMethod">
-                                                    <label for="f-option7">Wallet </label>
+                                                    <label for="f-option8">Wallet </label>
 
                                                     <div class="check"></div>
                                                 </div>
@@ -483,6 +491,7 @@
             <script src="/public/userAssets/js/gmaps.min.js"></script>
             <script src="/public/userAssets/js/main.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
             <script>
                 function addAddress() {
                     window.location.href = "/user/addAddress"
@@ -532,7 +541,7 @@
                     }
 
                     const grandTotal = ' <%= grandTotal %>';
-                    const cartId = '<%= cart._id %>';
+                    const cartId = '<%= cart?._id %>';
 
 
                     const requestData = {
@@ -555,19 +564,22 @@
                     })
                         .then(response => response.json()) 
                         .then(data => {
-                            console.log(data, 'data data data dta data ')
+                           
                             if (data.success) {
-                                console.log('inside the paypal frontend')
-                                console.log(data.paypalRedirectUrl, 'data.paypalRedirectUrl')
+                                
+                                console.log(data.orderId)
                                 if (requestData.paymentMethod === "paypal") {
-                                    console.log(requestData.paymentMethod, 'requestData')
-                                    console.log(data.paypalRedirectUrl, 'data.paypalRedirectUrl')
+                                   
                                     window.location.href = data.paypalRedirectUrl;
                                 } else if (requestData.paymentMethod === "Wallet") {
 
                                     Swal.fire("Payment successful using Wallet");
                                     window.location.href = "/user/orderPlace";
-                                } else if (requestData.paymentMethod === "Cash on Delivery") {
+                                }else if(requestData.paymentMethod === "razorpay"){
+
+                                    razorpay(data.orderId, requestData.grandTotal)
+                                }
+                                 else if (requestData.paymentMethod === "Cash on Delivery") {
 
                                     window.location.href = "/user/orderPlace";
                                 }
@@ -625,7 +637,7 @@
 
                 async function applyCoupon() {
                     const couponCode = document.getElementById('couponCode').value;
-                    const cartId = '<%= cart._id %>';
+                    const cartId = '<%= cart?._id %>';
                     const grandTotal = ' <%= grandTotal %>';
 
                     try {
@@ -675,7 +687,7 @@
                 }
 
                 async function removeCoupon() {
-                    const cartId = '<%= cart._id %>';
+                    const cartId = '<%= cart?._id %>';
 
                     try {
                         const response = await fetch('/user/remove-coupon', {
@@ -729,7 +741,38 @@
     `;
                 }
 
+          
+
+
+
+
+
+
+                function razorpay(orderId,amount) {
+            var options = {
+                "key": "rzp_test_av7bn0QCiETOX0",  
+                "amount": amount*100,  
+                "currency": "INR",
+                "name": "Build Your Dream",
+                "description": "Test Transaction",
+                "handler":  function (response) {
+                    console.log("hii",response)
+                    window.location.href = "/user/orderPlace";
+                },
+                "prefill": {
+                    "name": "John Doe",
+                    "email": "johndoe@example.com",
+                    "contact": "9999999999"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                }
+            };
+            var rzp = new Razorpay(options);
+            rzp.open();
+        }
             </script>
+            
 </body>
 
 </html>

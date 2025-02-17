@@ -1,10 +1,7 @@
 const Products = require("../models/productModel");
-const multer = require("../config/multer")
-
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
-const { Module } = require("module");
 const Categories = require("../models/categoryModel");
 const { log } = require("console");
 const Category = require("../models/categoryModel");
@@ -14,25 +11,27 @@ const { updateCategory } = require("./categoryController");
 
 
 
+// load product page
+
 //====================================================================================================================================================
 
 const loadProducts = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Current page number, default is 1
-    const limit = 4; // Number of products per page
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4; 
     const skip = (page - 1) * limit;
 
-    // Fetch total product count for pagination
+    
     const totalProducts = await Products.countDocuments({ isDeleted: false });
 
-    // Fetch products for the current page
+    
     const products = await Products.find({ isDeleted: false })
       .populate('category', 'name description')
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    // Calculate total pages 
+    
     const totalPages = Math.ceil(totalProducts / limit);
 
     res.render("productManagement", {
@@ -46,10 +45,10 @@ const loadProducts = async (req, res) => {
   }
 };
 
+
+// load product view
+
 //====================================================================================================================================================
-
-
-// product view
 
 const loadProductView = async (req, res) => {
 
@@ -69,8 +68,7 @@ const loadProductView = async (req, res) => {
   }
 }
 
-
-
+ 
 // load product page
 
 //====================================================================================================================================================
@@ -85,23 +83,23 @@ const loadAddProducts = async (req, res) => {
   }
 }
 
-//====================================================================================================================================================
 
 
 // add product page
 
 //====================================================================================================================================================
+
 const addProducts = async (req, res) => {
   try {
-    // Step 1: Insert product (without images)
+   
     const newProduct = await Products.create(req.body);
     console.log(newProduct);
 
-    // Step 2: Create directory for product images using the product ID
+    
     const dirPath = `./public/uploads/products/${newProduct._id}`;
     fs.mkdirSync(dirPath, { recursive: true });
 
-    // Step 3: Process images and save to folder
+    
     const imgArray = [req.body.image0, req.body.image1, req.body.image2];
     const imagePaths = [];
 
@@ -121,13 +119,10 @@ const addProducts = async (req, res) => {
       }
     });
 
-    // Step 4: Update the existing product document with the image paths
     newProduct.images = imagePaths;
 
-    // Save the updated product document
     await newProduct.save();
 
-    // Step 5: Respond with success
     res.status(201).redirect("/admin/productManagement");
   } catch (error) {
     console.log(error.message);
@@ -136,18 +131,9 @@ const addProducts = async (req, res) => {
 };
 
 
-
-
-
-
-
-
+// load edit product
 
 //====================================================================================================================================================
-
-
-
-// load edit product
 
 const loadEditProduct = async (req, res) => {
   try {
@@ -162,6 +148,8 @@ const loadEditProduct = async (req, res) => {
 
 // edit product 
 
+//====================================================================================================================================================
+
 const editProduct = async (req, res) => {
 
   try {
@@ -171,16 +159,9 @@ const editProduct = async (req, res) => {
     const product = await Products.findById(productId)
     const categories = await Categories.find({ isDeleted: false })
 
-
-
-
-
     if (!product) return res.send("product not found")
 
     res.render("editproduct", { product, categories })
-
-
-
 
   } catch (error) {
     console.log(error.message);
@@ -191,9 +172,13 @@ const editProduct = async (req, res) => {
 
 
 // update product
+
+//====================================================================================================================================================
+
 const updateProduct = async (req, res) => {
   console.log('Updating product...');
   try {
+
     const { id, name, description, salesPrice, category, productOffer, stock, status } = req.body;
 
     
@@ -248,6 +233,8 @@ const updateProduct = async (req, res) => {
 
 //  delete product 
 
+//====================================================================================================================================================
+
 const deleteProduct = async (req, res) => {
   try {
 
@@ -275,12 +262,14 @@ const deleteProduct = async (req, res) => {
 
 // product list || unlist
 
+//====================================================================================================================================================
+
 const toggleListProduct = async (req, res) => {
   try {
     const { productId, action } = req.params;
     console.log("blaaaaaaaaaaaaaaaaaaaaaaaaaaa", productId);
 
-    // Validate category
+    
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       console.log("Invalid userId:", productId);
       return res.status(400).json({
@@ -289,7 +278,7 @@ const toggleListProduct = async (req, res) => {
       });
     }
 
-    // Validate action
+    
     if (!["block", "unblock"].includes(action)) {
       console.log("Invalid action:", action);
       return res.status(400).json({
@@ -300,14 +289,14 @@ const toggleListProduct = async (req, res) => {
 
     const isListed = action === 'block';
 
-    // Update category and get updated document
+    
     const updateProduct = await Products.findByIdAndUpdate(
       productId,
       { isListed },
       { new: true, runValidators: true }
     );
 
-    // Check if user exists
+    
     if (!updateProduct) {
       console.log("Category not found in database for ID:", productId);
       return res.status(404).json({
@@ -317,7 +306,7 @@ const toggleListProduct = async (req, res) => {
     }
     console.log("User updated successfully:", updateProduct);
 
-    // Send success response
+   
     return res.status(200).json({
       success: true,
       message: `Product list ${action}ed successfully`,
@@ -355,7 +344,4 @@ module.exports = {
   updateProduct,
   deleteProduct,
   toggleListProduct,
-
-
-
 }

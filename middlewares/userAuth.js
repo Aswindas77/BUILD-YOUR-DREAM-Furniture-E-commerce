@@ -56,6 +56,24 @@ const isBan = async(req,res,next)=>{
 
 }
 
+const payment = async(req,res,next) =>{
+
+    try {
+        const {cartid} =req.body
+    console.log("card id middle",cartid)
+      
+    if(!cartid){
+        res.redirect('/user/')
+    }
+    else{
+        next()
+    }
+    } catch (error) {
+        console.log(error.message)
+    }
+
+}
+
 
 
 
@@ -63,7 +81,8 @@ const isBan = async(req,res,next)=>{
 module.exports = {
     isLogin,
     isLOgut,
-    isBan
+    isBan,
+    payment,
     
     
 };

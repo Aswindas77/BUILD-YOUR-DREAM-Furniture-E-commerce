@@ -2,16 +2,14 @@ const mongoose = require("mongoose");
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const Address = require('../models/addressModel')
-const Orders = require("../models/ordermodel");
 const Cart = require('../models/cartModel')
-const USER = require("../models/userModel");
+
 
 
 
 // loadCart page 
 
 //====================================================================================================================================================
-
 
 const loadCart = async (req, res) => {
     try {
@@ -45,13 +43,12 @@ const loadCart = async (req, res) => {
     }
 };
 
-
 //====================================================================================================================================================
-
 
 // add cart
 
 //====================================================================================================================================================
+
 const addcart = async (req, res) => {
     try {
 
@@ -98,7 +95,6 @@ const addcart = async (req, res) => {
     }
 };
 
-
 //====================================================================================================================================================
 
 // updaate cart
@@ -114,14 +110,14 @@ const updateCart = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid request' });
         }
 
-        // Fetch the product stock
+        
         const product = await Product.findById(cart.productId);
 
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        // Check if the product is out of stock
+        
         if (product.stock === 0) {
             return res.status(400).json({
                 success: false,
@@ -129,7 +125,7 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Check if requested quantity is greater than available stock
+        
         if (cart.currentQty > product.stock) {
             return res.status(401).json({
                 success: false,
@@ -137,7 +133,7 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Check if quantity exceeds 5
+        
         if (cart.currentQty > 5) {
             return res.status(400).json({
                 success: false,
@@ -145,7 +141,7 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Update cart quantity if stock is available
+       
         const updatedOrder = await Cart.findOneAndUpdate(
             { userId: userId._id, 'products.productId': cart.productId },
             { $set: { 'products.$.quantity': cart.currentQty } },
@@ -164,7 +160,11 @@ const updateCart = async (req, res) => {
     }
 };
 
+
 // delete cart product
+
+//====================================================================================================================================================
+
 const deleteCart = async (req, res) => {
 
     try {
@@ -199,16 +199,23 @@ const deleteCart = async (req, res) => {
     }
 
 
-}
+};
 
 // load checkout page
+
+//====================================================================================================================================================
 
 const loadCheckout = async (req, res) => {
     try {
         const Id = req.query.id;
         const grandTotal = req.query.total;
-
         const cartId = new mongoose.Types.ObjectId(Id);
+        const user = req.session?.User;
+        const { _id } = req.session?.User;
+        const userId = new mongoose.Types.ObjectId(_id);
+        const products = await Product.find({ isDeleted: false, isListed: false });
+        const categories = await Category.find({ isDeleted: false, isListed: false });
+        const userAddresses = await Address.findOne({ userId: userId }).populate("userId");
 
 
 
@@ -223,25 +230,9 @@ const loadCheckout = async (req, res) => {
                 select: 'name salesPrice quantity'
             })
             .exec();
-
-
-
-
-
-        const user = req.session?.User;
-        const { _id } = req.session?.User;
-        const userId = new mongoose.Types.ObjectId(_id);
-
-        const products = await Product.find({ isDeleted: false, isListed: false });
-        const categories = await Category.find({ isDeleted: false, isListed: false });
-        const userAddresses = await Address.findOne({ userId: userId }).populate("userId");
-
         if (userAddresses) {
             userAddresses.address = userAddresses.address.filter(addr => !addr.isDeleted);
         }
-
-       
-
         res.render("checkOut", {
             user,
             products,
@@ -270,6 +261,6 @@ module.exports = {
     updateCart,
     loadCheckout,
     deleteCart,
-    
-    
+
+
 }

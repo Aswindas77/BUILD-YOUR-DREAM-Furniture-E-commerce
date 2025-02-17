@@ -1,30 +1,30 @@
 const multer = require('multer');
 const path = require('path');
 
-// Set storage engine
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/products'); // Folder to store uploads
+        cb(null, 'public/uploads/products');
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
+        cb(null, `${Date.now()}-${file.originalname}`);
     }
 });
 
-// File filter to validate file type
+
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true); // Accept the file
+        cb(null, true);
     } else {
-        cb(new Error('Please upload only JPG, JPEG, or PNG files.'), false); // Reject the file
+        cb(new Error('Please upload only JPG, JPEG, or PNG files.'), false);
     }
 };
 
-// Initialize multer upload
+
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: fileFilter
 });
 

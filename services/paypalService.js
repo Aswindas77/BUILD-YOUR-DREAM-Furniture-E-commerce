@@ -27,6 +27,11 @@ const createPayPalOrder = async (totalAmount, userId) => {
                 description: `Order for ${userId}`
             }],
             application_context: {
+                brand_name: "Build your dream",
+                landing_page: "LOGIN",  
+                user_action: "CONTINUE", 
+                return_url: "https://yourwebsite.com/payment-success",
+                cancel_url: "https://yourwebsite.com/payment-cancel",
                 shipping_preference: 'NO_SHIPPING'
             }
         });
@@ -42,13 +47,13 @@ const createPayPalOrder = async (totalAmount, userId) => {
         const order = await client.execute(request);
         console.log(order.result.id, 'order order order odxerd')
         const orderId = order.result.id;
-        const approvalLink = order.result.links.find(link => link.rel === "approve")?.href;
+        const paypalRedirectUrl = order.result.links.find(link => link.rel === "approve")?.href;
 
-        if (!approvalLink) {
+        if (!paypalRedirectUrl) {
             throw new Error("PayPal approval link not found");
         }
 
-        return { orderId, approvalLink };
+        return { orderId, paypalRedirectUrl };
         // res.json({
         //     success: true,
         //     orderId: order.result.id
@@ -88,6 +93,7 @@ const capturePayPalOrder = async (req, res) => {
                 transactionId: orderId
             });
 
+
             // Clear cart
             // await Cart.findByIdAndDelete(orderDetails.cartId);
 
@@ -97,7 +103,8 @@ const capturePayPalOrder = async (req, res) => {
             res.json({
                 success: true,
                 orderId: newOrder._id,
-                message: 'Payment successful'
+                message: 'Payment successful',
+                paypalRedirectUrl,
             });
         } else {
             throw new Error('Payment not completed');
