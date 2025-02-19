@@ -116,7 +116,7 @@ adminRouter.post('/update-order-status', orderController.updateOrderStatus);
 adminRouter.get('/coupon', couponController.loadCoupon);
 
 //add coupon 
-adminRouter.post('/addCoupon', adminAuth.isLogin, couponController.addCoupon);
+adminRouter.post('/addCoupon', couponController.addCoupon);
 
 // edit coupon
 adminRouter.get('/editCoupon/:id', couponController.editCoupon);
@@ -126,6 +126,14 @@ adminRouter.put('/updateCoupon/:id', couponController.updateCoupon);
 
 // delete coupon
 adminRouter.delete('/deleteCoupon/:id', couponController.deleteCoupon);
+
+
+
+// return order management
+adminRouter.get('/returnOrders', orderController.loadReturnOrder)
+
+// update return status
+adminRouter.put('/updateReturnStatus/:returnId', orderController.updateReturnStatus);
 
 
 

@@ -17,6 +17,7 @@ const Cart = require("../models/cartModel")
 const { createPayPalOrder } = require("../services/paypalService");
 const { capturePayPalOrder } = require("../services/paypalService");
 const saltRounds = 10;
+const Coupon= require('../models/couponModel');
 
 
 
@@ -566,7 +567,7 @@ const loadShop = async (req, res) => {
     try {
         const user = req.session?.User;
 
-        
+
         const { search, category, minPrice, maxPrice, sort } = req.query;
 
 
@@ -576,19 +577,19 @@ const loadShop = async (req, res) => {
             stock: { $gt: 0 }
         };
 
-       
+
         if (search) {
             query.name = { $regex: new RegExp(search, 'i') };
         }
 
-        
+
         if (minPrice || maxPrice) {
             query.salesPrice = {};
             if (minPrice) query.salesPrice.$gte = parseFloat(minPrice);
             if (maxPrice) query.salesPrice.$lte = parseFloat(maxPrice);
         }
 
-        
+
         const pipeline = [
             {
                 $lookup: {
@@ -610,7 +611,7 @@ const loadShop = async (req, res) => {
             }
         ];
 
-        
+
         if (category) {
             pipeline.push({
                 $match: {
@@ -619,7 +620,7 @@ const loadShop = async (req, res) => {
             });
         }
 
-        
+
         if (sort) {
             let sortObj = {};
             switch (sort) {
@@ -667,16 +668,16 @@ const loadShop = async (req, res) => {
 const searchProducts = async (req, res) => {
     try {
         let searchQuery = req.query.q;
-        if (!searchQuery) return res.json([]); 
+        if (!searchQuery) return res.json([]);
         console.log(searchQuery)
-        
+
         const products = await Products.find({
             name: { $regex: searchQuery, $options: "i" },
             isDeleted: false,
             isListed: false
         });
 
-        res.json(products); 
+        res.json(products);
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ error: "Server error" });
@@ -772,7 +773,7 @@ const googleLogin = async (req, res) => {
             return res.redirect('/user/login');
         }
 
-        
+
         if (user.isBlocked) {
             req.session.gerrmessage = "Your google account has been blocked. Please contact support."
             const categories = await Category.find({ isDeleted: false })
@@ -780,13 +781,13 @@ const googleLogin = async (req, res) => {
             return res.redirect('/user/login')
         }
 
-        
+
         req.session.User = {
             username: user.username,
             email: user.email
         };
 
-        
+
         res.redirect('/user');
 
     } catch (error) {
@@ -829,11 +830,11 @@ const buyNow = async (req, res) => {
 
 
 
-        
+
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        
+
         const cart = await Cart.findById(cartId).populate("products.productId");
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
@@ -893,7 +894,7 @@ const buyNow = async (req, res) => {
             });
         }
 
-        
+
         if (paymentMethod.toLowerCase() === "cash on delivery") {
             const newOrder = new ordermodel({
                 userId,
@@ -927,6 +928,11 @@ const buyNow = async (req, res) => {
             });
 
             await newOrder.save();
+
+            await Coupon.findOneAndUpdate(
+                
+                { $push: { usedBy: userId } }
+            );
             await Cart.findByIdAndDelete(cartId);
 
             return res.status(200).json({
@@ -979,87 +985,83 @@ const loadOrderPlaced = async (req, res) => {
     }
 }
 
+
+
 const filterProducts = async (req, res) => {
     try {
-        const { search, category, minPrice, maxPrice, sort } = req.query;
+        const { search, category, sort, minPrice, maxPrice } = req.query;
 
+        
         let query = {
             isDeleted: false,
             isListed: false
         };
 
+       
         if (search) {
-            query.name = { $regex: new RegExp(search, 'i') };
+            query.name = { $regex: search, $options: 'i' };
         }
 
+       
+        if (category && category !== 'all') {
+            const categoryData = await Category.findOne({ name: category });
+            if (categoryData) {
+                query.category = categoryData._id; 
+            } else {
+                return res.status(404).json({ success: false, message: "Category not found" });
+            }
+        }
+
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+
+        // Add price filter
         if (minPrice || maxPrice) {
             query.salesPrice = {};
             if (minPrice) query.salesPrice.$gte = parseFloat(minPrice);
             if (maxPrice) query.salesPrice.$lte = parseFloat(maxPrice);
         }
 
-        const pipeline = [
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "category",
-                    foreignField: "_id",
-                    as: "categoryDetails"
-                }
-            },
-            {
-                $match: {
-                    ...query,
-                    "categoryDetails.isListed": false,
-                    "categoryDetails.isDeleted": false
-                }
-            },
-            {
-                $unwind: "$categoryDetails"
-            }
-        ];
-
-        if (category) {
-            pipeline.push({
-                $match: {
-                    "categoryDetails.name": category
-                }
-            });
-        }
-
+        // Set up sort options
+        let sortOption = {};
         if (sort) {
-            let sortObj = {};
             switch (sort) {
-                case 'nameAsc':
-                    sortObj = { name: 1 };
-                    break;
-                case 'nameDesc':
-                    sortObj = { name: -1 };
-                    break;
                 case 'priceAsc':
-                    sortObj = { salesPrice: 1 };
+                    sortOption = { salesPrice: 1 };
                     break;
                 case 'priceDesc':
-                    sortObj = { salesPrice: -1 };
+                    sortOption = { salesPrice: -1 };
+                    break;
+                case 'nameAsc':
+                    sortOption = { name: 1 };
+                    break;
+                case 'nameDesc':
+                    sortOption = { name: -1 };
                     break;
             }
-            pipeline.push({ $sort: sortObj });
         }
 
-        const products = await Products.aggregate(pipeline);
+        // Get filtered products
+        const products = await Products.find(query)
+            .sort(sortOption)
+            .populate('category');
 
         res.json({
             success: true,
-            products
+            products: products
         });
-    } catch (err) {
-        console.log('Error in filterProducts:', err.message);
+
+    } catch (error) {
+        console.error('Filter error:', error);
         res.status(500).json({
             success: false,
-            message: "Error filtering products"
+            message: 'Error filtering products'
         });
     }
 };
+
+
 
 
 // load whishlist page

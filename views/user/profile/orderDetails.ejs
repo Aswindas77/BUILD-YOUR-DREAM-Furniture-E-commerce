@@ -550,12 +550,12 @@
 
         .stacked {
             grid-column: 1 / -1;
-            
+
         }
 
         .stacked .form-group {
             margin-bottom: 1rem;
-            
+
         }
 
         @media (max-width: 768px) {
@@ -617,6 +617,371 @@
             transition: all 0.2s;
         }
 
+        .return-section {
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+
+        .return-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .return-header {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .return-header i {
+            font-size: 1.5rem;
+        }
+
+        .return-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .return-content {
+            padding: 2rem;
+        }
+
+        .return-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .return-policy {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .return-note {
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .reason-select {
+            margin-bottom: 1.5rem;
+        }
+
+        .reason-select select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .reason-select select:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+            outline: none;
+        }
+
+        .return-description textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .return-description textarea:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+            outline: none;
+        }
+
+        .return-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline {
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+        }
+
+        .btn-return {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-outline:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .btn-return:hover {
+            background: #ff5252;
+        }
+
+        @media (max-width: 768px) {
+            .return-content {
+                padding: 1.5rem;
+            }
+
+            .return-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Return Button Style */
+        .return-trigger-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+        }
+
+        .return-trigger-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Modal Styles */
+        .return-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .return-modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+        }
+
+        .return-modal-header {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .return-modal-header i {
+            font-size: 1.5rem;
+        }
+
+        .return-modal-header h4 {
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+        }
+
+        .return-modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .reason-options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .reason-option {
+            cursor: pointer;
+        }
+
+        .reason-option input {
+            display: none;
+        }
+
+        .reason-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .reason-content i {
+            font-size: 1.5rem;
+            color: #ff6b6b;
+        }
+
+        .reason-content h6 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+        }
+
+        .reason-content p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .reason-option input:checked+.reason-content {
+            border-color: #ff6b6b;
+            background: #fff8f8;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: #ff6b6b;
+            outline: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-secondary,
+        .btn-primary {
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: #f1f1f1;
+            border: none;
+            color: #333;
+        }
+
+        .btn-primary {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+        }
+
+        .btn-secondary:hover,
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .return-modal-content {
+                width: 95%;
+                margin: 20px auto;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .btn-secondary,
+            .btn-primary {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -626,7 +991,7 @@
 
         <div class="order-header">
             <div>
-                <h2>Order #<%= order._id.toString().slice(-8) %>
+                <h2>Order id: #<%= order._id.toString().slice(-8) %>
                 </h2>
                 <p>Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric' , month: 'long'
                         , year: 'numeric' }) %>
@@ -728,21 +1093,103 @@
                                 <i class="fas fa-arrow-left me-2"></i>Back to Orders
                             </button>
 
-                            
+
                         </div>
-                        <div style="display: flex; justify-content: center; margin-top: -52px;">
-                            <button type="button" class="btn btn-danger ms-3" onclick="ReturnOrder()">
-                                <i class="fas fa-undo me-2"></i>Return Order
-                            </button>
+                        <div style="display: flex; justify-content: center; margin: 20px 0;">
+                            <% if (order.status === 'Delivered') { %>
+                                <% if (returnOrder && returnOrder.returnStatus === 'Rejected') { %>
+                                    <button type="button" class="return-trigger-btn btn-danger">
+                                        <i class="fas fa-undo-alt"></i>
+                                        Your return was rejected
+                                    </button>
+                                <% } else { %>
+                                    <button type="button" class="return-trigger-btn" onclick="openReturnModal()">
+                                        <i class="fas fa-undo-alt"></i>
+                                        Return Order
+                                    </button>
+                                <% } %>
+                            <% } %>
                         </div>
                     </div>
         </div>
     </div>
-    </div>
+
+    <!-- Return Modal -->
+    <div id="returnModal" class="return-modal">
+        <div class="return-modal-content">
+            <div class="return-modal-header">
+                <i class="fas fa-box-open"></i>
+                <h4>Request Return</h4>
+                <button class="close-modal" onclick="closeReturnModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="return-modal-body">
+                <form id="returnForm" onsubmit="submitReturn(event)">
+                    <input type="hidden" name="orderId" value="<%= order._id %>">
+
+                    <div class="form-group">
+                        <label>Select Return Reason</label>
+                        <div class="reason-options">
+                            <label class="reason-option">
+                                <input type="radio" name="returnReason" value="wrong_item" required>
+                                <span class="reason-content">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <div>
+                                        <h6>Wrong Item</h6>
+                                        <p>Received different item than ordered</p>
+                                    </div>
+                                </span>
+                            </label>
+
+                            <label class="reason-option">
+                                <input type="radio" name="returnReason" value="damaged">
+                                <span class="reason-content">
+                                    <i class="fas fa-bomb"></i>
+                                    <div>
+                                        <h6>Damaged/Defective</h6>
+                                        <p>Item arrived damaged or not working</p>
+                                    </div>
+                                </span>
+                            </label>
+
+                            
+
+                            <label class="reason-option">
+                                <input type="radio" name="returnReason" value="quality">
+                                <span class="reason-content">
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <div>
+                                        <h6>Quality Issue</h6>
+                                        <p>Quality not as expected</p>
+                                    </div>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Details</label>
+                        <textarea name="description"
+                            placeholder="Please provide more details about your return request..." required></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="closeReturnModal()">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            Submit Return Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
-        
+
 
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -832,13 +1279,66 @@
             }, 3000);
         }
 
-        
+
         function backToOrder() {
             window.location.href = ('/user/myProfile')
         }
 
-        function ReturnOrder(){
-            
+        function openReturnModal() {
+            document.getElementById('returnModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReturnModal() {
+            document.getElementById('returnModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function submitReturn(event) {
+    event.preventDefault(); 
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const orderId ='<%= order._id %>';
+
+    const returnData = {
+        orderId: orderId,  
+        returnReason: formData.get('returnReason'),
+        description: formData.get('description')
+    };
+
+
+    console.log("Return Data Sent:", returnData); 
+
+    if (confirm('Are you sure you want to request a return?')) {
+        fetch('/user/request-return', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(returnData)  
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Server Response:", data); 
+            if (data.success) {
+                alert('Return request submitted successfully!');
+                window.location.reload();
+            } else {
+                alert('Failed to submit return request: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            alert('Failed to submit return request');
+        });
+    }
+}
+        
+        window.onclick = function (event) {
+            if (event.target == document.getElementById('returnModal')) {
+                closeReturnModal();
+            }
         }
     </script>
 </body>

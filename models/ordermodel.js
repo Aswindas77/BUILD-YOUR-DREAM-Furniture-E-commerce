@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema({
     quantity: {
       type: Number,
 
-      min: [1, 'Quantity must be at least 1'], // Ensures there's at least one product
+      min: [1, 'Quantity must be at least 1'], 
     },
     price: {
       type: Number,

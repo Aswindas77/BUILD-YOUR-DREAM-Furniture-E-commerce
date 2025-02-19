@@ -13,7 +13,7 @@
             --primary-color: #4a90e2;
             --secondary-color: #f8f9fa;
         }
-
+ 
         body {
             background-color: #f4f6f8;
             font-family: 'Segoe UI', sans-serif;
@@ -307,7 +307,7 @@
                                             <% } else if(data.orderGrowth < 0) { %>
                                                 <span class="text-danger">↓ <%= Math.abs(data.orderGrowth) %>%</span>
                                                 <% } else { %>
-                                                    <span>--</span>
+                                                    <span></span>
                                                     <% } %>
                                     </small>
                             </td>
@@ -319,7 +319,7 @@
                                             <% } else if(data.salesGrowth < 0) { %>
                                                 <span class="text-danger">↓ <%= Math.abs(data.salesGrowth) %>%</span>
                                                 <% } else { %>
-                                                    <span>--</span>
+                                                    <span></span>
                                                     <% } %>
                                     </small>
                             </td>

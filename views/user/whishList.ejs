@@ -132,7 +132,7 @@
         <!-- Start footer Area -->
         <%- include("../partials/userPartial/userFooter") %>
             <!-- End footer Area -->
-
+ 
             <!-- Scripts -->
             <script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
@@ -162,7 +162,9 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
+
                                 showToast("Product added to cart.", "success");
+                                document.getElementById(`wishlist-item-${productId}`).remove(); 
                             } else {
                                 showToast("Already exists in cart", "error");
                             }

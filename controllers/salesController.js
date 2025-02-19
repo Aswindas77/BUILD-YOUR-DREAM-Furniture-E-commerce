@@ -1,6 +1,6 @@
-const express = require("express")
+const express = require("express");
 const mongoose = require("mongoose");
-const Order = require('../models/orderModel');
+const Order = require('../models/ordermodel');
 const User = require('../models/userModel');
 const Product = require('../models/productModel');
 

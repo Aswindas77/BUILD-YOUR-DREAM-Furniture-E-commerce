@@ -66,6 +66,8 @@ const loadDash = async (req, res) => {
 
 const dashboad = async (req, res) => {
   try {
+    
+
     res.render("adminDashboard")
   } catch (err) {
     console.error(err.message)

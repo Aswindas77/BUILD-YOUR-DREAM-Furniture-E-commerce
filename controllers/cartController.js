@@ -3,6 +3,7 @@ const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const Address = require('../models/addressModel')
 const Cart = require('../models/cartModel')
+const Coupon = require('../models/couponModel');
 
 
 
@@ -110,14 +111,14 @@ const updateCart = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid request' });
         }
 
-        
+
         const product = await Product.findById(cart.productId);
 
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        
+
         if (product.stock === 0) {
             return res.status(400).json({
                 success: false,
@@ -125,7 +126,7 @@ const updateCart = async (req, res) => {
             });
         }
 
-        
+
         if (cart.currentQty > product.stock) {
             return res.status(401).json({
                 success: false,
@@ -133,7 +134,7 @@ const updateCart = async (req, res) => {
             });
         }
 
-        
+
         if (cart.currentQty > 5) {
             return res.status(400).json({
                 success: false,
@@ -141,7 +142,7 @@ const updateCart = async (req, res) => {
             });
         }
 
-       
+
         const updatedOrder = await Cart.findOneAndUpdate(
             { userId: userId._id, 'products.productId': cart.productId },
             { $set: { 'products.$.quantity': cart.currentQty } },
@@ -213,11 +214,22 @@ const loadCheckout = async (req, res) => {
         const user = req.session?.User;
         const { _id } = req.session?.User;
         const userId = new mongoose.Types.ObjectId(_id);
+
+        // Fetch active coupons
+        const validCoupons = await Coupon.find({
+            isActive: true,
+            validUntil: { $gt: new Date() },
+            validFrom: { $lte: new Date() },
+            $or: [
+                { usageLimit: { $exists: false } }, 
+                { usedCount: { $lt: "$usageLimit" } } 
+            ],
+            minPurchase: { $lte: grandTotal }
+        });
+
         const products = await Product.find({ isDeleted: false, isListed: false });
         const categories = await Category.find({ isDeleted: false, isListed: false });
         const userAddresses = await Address.findOne({ userId: userId }).populate("userId");
-
-
 
         if (!cartId) {
             console.log("Cart ID missing!");
@@ -230,15 +242,19 @@ const loadCheckout = async (req, res) => {
                 select: 'name salesPrice quantity'
             })
             .exec();
+
         if (userAddresses) {
             userAddresses.address = userAddresses.address.filter(addr => !addr.isDeleted);
         }
+
         res.render("checkOut", {
             user,
             products,
             categories,
             addresses: userAddresses ? userAddresses.address : [],
-            cart
+            cart,
+            coupons: validCoupons,
+            grandTotal
         });
 
     } catch (error) {
@@ -247,13 +263,54 @@ const loadCheckout = async (req, res) => {
     }
 };
 
+// Add coupon validation endpoint
+const validateCoupon = async (req, res) => {
+    try {
+        const { couponCode, total } = req.body;
+        const userId = req.session?.User._id;
 
-// checkout Page
+        const coupon = await Coupon.findOne({
+            code: couponCode.toUpperCase(),
+            isActive: true,
+            validUntil: { $gt: new Date() },
+            validFrom: { $lte: new Date() },
+            usedCount: { $lt: mongoose.expr({ $ifNull: ['$usageLimit', Infinity] }) }
+        });
 
+        if (!coupon) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid coupon code'
+            });
+        }
 
+        if (total < coupon.minPurchase) {
+            return res.status(400).json({
+                success: false,
+                message: `Minimum purchase amount of ₹${coupon.minPurchase} required`
+            });
+        }
 
+        // Calculate discount
+        const discountAmount = Math.min(
+            (total * coupon.discount) / 100,
+            coupon.maxDiscount
+        );
 
+        res.json({
+            success: true,
+            discount: discountAmount,
+            message: 'Coupon applied successfully'
+        });
 
+    } catch (error) {
+        console.error('Error validating coupon:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
 
 module.exports = {
     loadCart,
@@ -261,6 +318,5 @@ module.exports = {
     updateCart,
     loadCheckout,
     deleteCart,
-
-
-}
+    validateCoupon
+};

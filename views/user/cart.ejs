@@ -319,7 +319,7 @@
 
                         currentQty += quantity;
 
-                        // Ensure quantity does not exceed available stock or max allowed quantity
+                        
                         if (currentQty > stockAvailable) {
                             showToast("Not enough stock available!", "error");
                             return;
@@ -331,7 +331,7 @@
                         if (currentQty === maxQuantity && quantity === 1 && originalQty !== maxQuantity) {
                             Swal.fire({
                                 title: "Maximum Quantity Reached",
-                                text: `You can't add more than ${maxQuantity} items`,
+                                text: `You can't add more than 4 items`,
                                 icon: "warning"
                             }).then(() => {
                                 window.location.reload();

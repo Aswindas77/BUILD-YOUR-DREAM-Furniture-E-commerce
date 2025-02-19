@@ -12,6 +12,7 @@ const passport = require('../middlewares/googleAuth.js');
 const orderController = require('../controllers/ordersController.js');
 const productController = require("../controllers/productController.js");
 const couponController = require("../controllers/couponController.js")
+const walletController = require("../controllers/walletController.js");
 
 
 userRouter.use(
@@ -104,7 +105,7 @@ userRouter.delete("/deleteAddress", isBan, profileController.deleteAddress);
 // ==============================================================================================================================================================================================================================
 
 // wallet controller
-// userRouter.get("/wallet",isBan,profileController.loadWallet) 
+userRouter.get("/wallet",isBan,walletController.loadWallet) 
 
 // cart
 
@@ -188,7 +189,10 @@ userRouter.get("/orderPlace", userController.loadOrderPlaced)
 userRouter.get("/shop/filter", userController.filterProducts);
 
 // Order details route
-userRouter.get('/orderdetails/:orderId', isBan, profileController.getOrderDetails);
+userRouter.get('/orderdetails/:orderId', profileController.getOrderDetails);
+
+// return order details
+userRouter.post('/request-return',isBan,orderController.requestReturn)
 
 // Cancel order route
 userRouter.get('/orderCancel/:orderId', isBan, orderController.orderCancel);

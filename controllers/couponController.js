@@ -202,7 +202,9 @@ const applyCoupon = async (req, res) => {
         const { couponCode, cartId, grandTotal } = req.body;
         const userId = req.session.User._id;
 
-        
+        console.log("joo",userId)
+
+       
         const coupon = await Coupon.findOne({
             code: couponCode,
             startDate: { $lte: new Date() },
@@ -218,6 +220,15 @@ const applyCoupon = async (req, res) => {
         }
 
         
+        if (coupon.usedBy && coupon.usedBy.some(id => id.toString() === userId.toString())) {
+            return res.json({
+                success: false,
+                message: 'You have already used this coupon'
+            });
+        }
+        
+
+        
         if (grandTotal < coupon.minPurchase) {
             return res.json({
                 success: false,
@@ -225,7 +236,7 @@ const applyCoupon = async (req, res) => {
             });
         }
 
-        
+       
         const discountAmount = (grandTotal * coupon.discountPercentage) / 100;
         const finalAmount = grandTotal - discountAmount;
 
@@ -236,6 +247,9 @@ const applyCoupon = async (req, res) => {
             finalAmount: finalAmount
         });
 
+        
+
+        
         res.json({
             success: true,
             originalAmount: grandTotal,
@@ -253,15 +267,17 @@ const applyCoupon = async (req, res) => {
 };
 
 
+
 // remove coupon
 
 //====================================================================================================================================================
 
 const removeCoupon = async (req, res) => {
     try {
-        const { cartId } = req.body;
+        const { cartId ,grandTotal} = req.body;
 
-        
+        console.log("gooo",grandTotal)
+
         const cart = await Cart.findById(cartId);
 
         if (!cart) {
@@ -281,7 +297,7 @@ const removeCoupon = async (req, res) => {
         res.json({
             success: true,
             message: 'Coupon removed successfully',
-            originalAmount: cart.totalAmount
+            originalAmount: grandTotal
         });
 
     } catch (error) {

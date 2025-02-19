@@ -63,7 +63,8 @@ const payment = async(req,res,next) =>{
     console.log("card id middle",cartid)
       
     if(!cartid){
-        res.redirect('/user/')
+
+        res.redirect('/user/cart')
     }
     else{
         next()

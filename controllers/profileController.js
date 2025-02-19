@@ -6,9 +6,12 @@ const Category = require("../models/categoryModel");
 const Address = require('../models/addressModel')
 const bcrypt = require('bcrypt');
 const { Types } = require('mongoose');
-const Order = require('../models/orderModel');
+const Order = require('../models/ordermodel');
 const { log } = require("console");
 const { logOut } = require("./userController");
+const Wallet = require("../models/walletModel");
+const Return =require("../models/returnModel");
+
 
 
 
@@ -32,7 +35,8 @@ const userProfile = async (req, res) => {
 
         const orders = await Order.find({ userId })
             .populate('items.productId')
-            .lean();
+            .lean()
+            .sort({ createdAt: -1 })
 
 
         orders.forEach(order => {
@@ -438,8 +442,9 @@ const updatePassword = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
     try {
-        const orderId = req.params.orderId;
-        const userId = req.session.User._id;
+        const orderId = req.params?.orderId;
+        const userId = req.session.User?._id;
+
 
         
         const order = await Order.findOne({ _id: orderId, userId })
@@ -469,6 +474,10 @@ const getOrderDetails = async (req, res) => {
                     order.status === 'Processing' ? 33 : 0;
 
        
+        const returnRequest =await Return.findOne({orderId,userId}).lean();
+
+       console.log("noo",returnRequest)
+
         const formattedOrder = {
             _id: order._id,
             status: order.status || 'Pending',
@@ -493,7 +502,8 @@ const getOrderDetails = async (req, res) => {
             totalAmount: order.totalAmount || 0,
             discount: order.discount || 0,
             progress: progressPercentage,
-            timeline: orderTimeline
+            timeline: orderTimeline,
+            returnRequest
         };
 
         console.log('Formatted Order:', formattedOrder); 
@@ -501,6 +511,7 @@ const getOrderDetails = async (req, res) => {
         
         res.render('profile/orderDetails', {
             order: formattedOrder,
+            returnOrder:returnRequest,
             user: req.session.User
         });
 
@@ -509,6 +520,7 @@ const getOrderDetails = async (req, res) => {
         res.status(500).send('Error loading order details');
     }
 };
+
 
 
 
@@ -526,6 +538,6 @@ module.exports = {
     loadChangePassword,
     updatePassword,
     getOrderDetails,
-
+    
 }
 
