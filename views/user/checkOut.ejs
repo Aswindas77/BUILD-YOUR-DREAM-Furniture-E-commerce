@@ -295,7 +295,9 @@
                                                                 </p>
                                                                 <p>Phone : <%= address.phone %>
                                                                 </p>
-                                                                <button  style="border-radius: 2px; border: 1px solid;" class="edit-btn" onclick="editAddress('<%= address._id %>')">Edit</button>
+                                                                <button style="border-radius: 2px; border: 1px solid;"
+                                                                    class="edit-btn"
+                                                                    onclick="editAddress('<%= address._id %>')">Edit</button>
                                                     </div>
                                                 </label>
                                                 <% }); %>
@@ -348,7 +350,8 @@
                                             </div>
                                             <div class="radion_btn">
 
-                                                <input type="radio" id="f-option7" value="razorpay" name="paymentMethod">
+                                                <input type="radio" id="f-option7" value="razorpay"
+                                                    name="paymentMethod">
                                                 <label for="f-option7">online payment (razorpay)</label>
                                                 <img src="/public/userAssets/images/product/card.jpg" alt="">
                                                 <div class="check"></div>
@@ -499,8 +502,8 @@
                 }
 
                 function editAddress(addressId) {
-    window.location.href = `/user/editAddress?id=${addressId}`;
-}
+                    window.location.href = `/user/editAddress?id=${addressId}`;
+                }
                 // Single address selection
                 document.querySelectorAll('.address-box').forEach(box => {
                     box.addEventListener('click', function () {
@@ -565,24 +568,24 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(requestData)
                     })
-                        .then(response => response.json()) 
+                        .then(response => response.json())
                         .then(data => {
-                           
+
                             if (data.success) {
-                                
+
                                 console.log(data.orderId)
                                 if (requestData.paymentMethod === "paypal") {
-                                   
+
                                     window.location.href = data.paypalRedirectUrl;
                                 } else if (requestData.paymentMethod === "Wallet") {
 
                                     Swal.fire("Payment successful using Wallet");
                                     window.location.href = "/user/orderPlace";
-                                }else if(requestData.paymentMethod === "razorpay"){
+                                } else if (requestData.paymentMethod === "razorpay") {
 
                                     razorpay(data.orderId, requestData.grandTotal)
                                 }
-                                 else if (requestData.paymentMethod === "Cash on Delivery") {
+                                else if (requestData.paymentMethod === "Cash on Delivery") {
 
                                     window.location.href = "/user/orderPlace";
                                 }
@@ -699,7 +702,7 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ cartId,grandTotal })
+                            body: JSON.stringify({ cartId, grandTotal })
                         });
 
                         const data = await response.json();
@@ -745,38 +748,39 @@
     `;
                 }
 
-          
 
 
 
 
 
 
-                function razorpay(orderId,amount) {
-            var options = {
-                "key": "rzp_test_av7bn0QCiETOX0",  
-                "amount": amount*100,  
-                "currency": "INR",
-                "name": "Build Your Dream",
-                "description": "Test Transaction",
-                "handler":  function (response) {
-                    console.log("hii",response)
-                    window.location.href = "/user/orderPlace";
-                },
-                "prefill": {
-                    "name": "John Doe",
-                    "email": "johndoe@example.com",
-                    "contact": "9999999999"
-                },
-                "theme": {
-                    "color": "#3399cc"
+
+                function razorpay(orderId, amount) {
+                    var options = {
+                        "key": "rzp_test_av7bn0QCiETOX0",
+                        "amount": amount * 100,
+                        "currency": "INR",
+                        "name": "Build Your Dream",
+                        "description": "Test Transaction",
+                        "handler": function (response) {
+                            console.log("hii", response)
+                            window.location.href = "/user/orderPlace";
+                        },
+                        "prefill": {
+                            "name": "John Doe",
+                            "email": "johndoe@example.com",
+                            "contact": "9999999999"
+                        },
+                        "theme": {
+                            "color": "#3399cc"
+                        }
+                    };
+                    var rzp = new Razorpay(options);
+                    rzp.open();
                 }
-            };
-            var rzp = new Razorpay(options);
-            rzp.open();
-        }
+
             </script>
-            
+
 </body>
 
 </html>

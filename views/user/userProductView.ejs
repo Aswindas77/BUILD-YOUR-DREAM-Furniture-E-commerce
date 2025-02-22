@@ -595,53 +595,43 @@
             }
 
             function addToCart(productId) {
-                console.log(productId);
-                fetch("/user/cart", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        productId,
-                        quantity: 1
-                    })
-                })
-                    .then(response => response.text()) // Read response as text first
-                    .then(text => {
-                        try {
-                            const data = JSON.parse(text); // Try parsing JSON
-                            if (data.success) {
-                                showToast("Product added to cart.", "success");
-                            } else {
-                                showToast("Already exists in cart.", "error");
-                            }
-                        } catch (e) {
-                            // If JSON parsing fails, assume it's HTML and replace the page
-                            document.documentElement.innerHTML = text;
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                        showToast("Something went wrong.", "error");
-                    });
-            }
+						console.log(productId)
+						fetch("/user/cart", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({
+								productId,
+								quantity: 1
+							})
+						})
+							.then(response => response.json())
+							.then(data => {
+								if (data.message) {
+									showToast(data.message);
+								} 
+							})
+							.catch(error => {
+								showToast("Something went wrong.", "error");
+							});
+					}
 
-            function showToast(message, type) {
-                Toastify({
-                    text: message,
-                    duration: 3000,
-                    gravity: "top",
-                    position: "center",
-                    close: true,
-                    style: {
-                        background: "orange",
-                        color: "white",
-                        fontWeight: "bold",
-                        borderRadius: "8px",
-                    },
-                }).showToast();
-            }
-
+					function showToast(message, type) {
+						Toastify({
+							text: message,
+							duration: 3000,
+							gravity: "top",
+							position: "center",
+							close: true,
+							style: {
+								background: "orange",
+								color: "white",
+								fontWeight: "bold",
+								borderRadius: "8px",
+							},
+						}).showToast();
+					}
             function handleQuantityChange(action) {
                 const input = document.getElementById('sst');
                 let value = parseInt(input.value) || 1;

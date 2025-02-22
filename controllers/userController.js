@@ -156,7 +156,7 @@ const verifyUser = async (req, res) => {
 };
 
 
-// forgot password page load
+// forgot password page load 
 
 //====================================================================================================================================================
 
@@ -457,7 +457,7 @@ const verifyOtp = async (req, res) => {
 
             else {
                 if (req.session.otp === req.body.otp) {
-                    console.log('laaaa');
+                    
 
                     return res.render('changePassword')
                 }
@@ -559,29 +559,29 @@ const loadShopCategory = async (req, res) => {
 }
 
 
-// load Category based Shop page
+// load Category based Shop page 
 
 //====================================================================================================================================================
 
 const loadShop = async (req, res) => {
     try {
         const user = req.session?.User;
-
-
-        const { search, category, minPrice, maxPrice, sort } = req.query;
-
+        const { search = "", category, minPrice, maxPrice, sort, page = 1 } = req.query;
+        const limit =6;
+        const skip =(page-1)*limit;
 
         let query = {
             isDeleted: false,
             isListed: false,
             stock: { $gt: 0 }
         };
+        
 
 
         if (search) {
             query.name = { $regex: new RegExp(search, 'i') };
         }
-
+        if (category)query.category =category;
 
         if (minPrice || maxPrice) {
             query.salesPrice = {};
@@ -590,69 +590,42 @@ const loadShop = async (req, res) => {
         }
 
 
-        const pipeline = [
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "category",
-                    foreignField: "_id",
-                    as: "categoryDetails"
-                }
-            },
-            {
-                $match: {
-                    ...query,
-                    "categoryDetails.isListed": false,
-                    "categoryDetails.isDeleted": false
-                }
-            },
-            {
-                $unwind: "$categoryDetails"
-            }
-        ];
-
-
-        if (category) {
-            pipeline.push({
-                $match: {
-                    "categoryDetails.name": category
-                }
-            });
+        let sortOption ={};
+        switch (sort) {
+            case 'nameAsc': sortOption = { name: 1 }; break;
+            case 'nameDesc': sortOption = { name: -1 }; break;
+            case 'priceAsc': sortOption = { salesPrice: 1 }; break;
+            case 'priceDesc': sortOption = { salesPrice: -1 }; break;
         }
+       
+        const totalProducts = await Products.countDocuments(query);
+        const totalPages =Math.ceil(totalProducts/limit);
 
+        const products =await Products.find(query)
+        .populate({
+            path:"category",
+            match:{isListed:false,isDeleted:false},
+        })
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limit);
 
-        if (sort) {
-            let sortObj = {};
-            switch (sort) {
-                case 'nameAsc':
-                    sortObj = { name: 1 };
-                    break;
-                case 'nameDesc':
-                    sortObj = { name: -1 };
-                    break;
-                case 'priceAsc':
-                    sortObj = { salesPrice: 1 };
-                    break;
-                case 'priceDesc':
-                    sortObj = { salesPrice: -1 };
-                    break;
-            }
-            pipeline.push({ $sort: sortObj });
-        }
+      const filteredProducts = products.filter(product => product.category);
+      const categories = await Category.find({ isDeleted: false, isListed: false });
 
-        // console.log('Search Query:', search); 
-        // console.log('Pipeline:', JSON.stringify(pipeline, null, 2));
-
-        const products = await Products.aggregate(pipeline);
-        const categories = await Category.find({ isDeleted: false, isListed: false });
-
+        
+        
+          
         console.log('Found Products:', products.length);
 
         res.render("shop", {
             categories,
             user,
-            products,
-            filters: { search, category, minPrice, maxPrice, sort }
+            products:filteredProducts,
+            filters: { search, category, minPrice, maxPrice, sort },
+            currentPage:parseInt(page),
+            searchQuery:search,
+            totalPages,
         });
     } catch (err) {
         console.log('Error in loadShop:', err.message);
@@ -674,9 +647,10 @@ const searchProducts = async (req, res) => {
         const products = await Products.find({
             name: { $regex: searchQuery, $options: "i" },
             isDeleted: false,
-            isListed: false
+            isListed: false,
+            
         });
-
+        
         res.json(products);
     } catch (err) {
         console.log(err.message);
@@ -829,7 +803,7 @@ const buyNow = async (req, res) => {
         const userId = req.session.User._id;
 
 
-
+        console.log("joo",selectedAddressId )
 
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -840,7 +814,7 @@ const buyNow = async (req, res) => {
 
         let totalAmount = cart.products.reduce((total, item) => total + item.quantity * item.salesPrice, 0);
         if (cart.discount) totalAmount -= cart.discount;
-        console.log(totalAmount, 'totalAmounttotalAmounttotalAmounttotalAmount')
+        console.log(totalAmount, 'totalAmount')
 
         const orderItems = cart.products.map(item => ({
             productId: item.productId._id,
@@ -1103,7 +1077,7 @@ const loadWhishList = async (req, res) => {
     }
 };
 
-// add to whishlist
+// add to whishlist 
 
 
 const addWhishList = async (req, res) => {

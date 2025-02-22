@@ -18,7 +18,7 @@ const filterSalesReport = async (req, res) => {
         const { type = 'year', year = new Date().getFullYear(), month, week, startDate, endDate } = req.body;
         let query = {};
 
-        // Set date range based on filter type
+       
         switch (type) {
             case 'year':
                 query.createdAt = {
@@ -51,13 +51,13 @@ const filterSalesReport = async (req, res) => {
                 break;
         }
 
-        // Fetch and aggregate data
+       
         const orders = await Order.find(query)
             .populate('userId', 'username')
             .populate('items.productId', 'name price')
             .sort({ createdAt: -1 });
 
-        // Generate revenue data based on filter type
+        
         let revenueData = {
             labels: [],
             values: []
@@ -113,7 +113,7 @@ const filterSalesReport = async (req, res) => {
                 };
         }
 
-        // Generate product performance data
+        
         const productSales = {};
         orders.forEach(order => {
             order.items.forEach(item => {
@@ -130,7 +130,7 @@ const filterSalesReport = async (req, res) => {
             });
         });
 
-        // Get top 5 products by revenue
+       
         const topProducts = Object.values(productSales)
             .sort((a, b) => b.revenue - a.revenue)
             .slice(0, 5);
@@ -140,21 +140,21 @@ const filterSalesReport = async (req, res) => {
             values: topProducts.map(product => product.revenue)
         };
 
-        // Calculate totals
+        
         const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
         const totalOrders = orders.length;
         const totalProducts = orders.reduce((sum, order) => sum + order.items.length, 0);
         const uniqueCustomers = new Set(orders.map(order => order.userId._id)).size;
 
-        // Calculate total statistics
+       
         const totalStats = {
             orders: totalOrders,
             products: totalProducts,
             revenue: totalRevenue,
-            avgGrowth: 0 // You can calculate this if needed
+            avgGrowth: 0 
         };
 
-        // Aggregate sales data by date
+       
         const salesByDate = orders.reduce((acc, order) => {
             const date = order.createdAt.toLocaleDateString();
             if (!acc[date]) {
@@ -170,7 +170,7 @@ const filterSalesReport = async (req, res) => {
             return acc;
         }, {});
 
-        // Convert to array and calculate growth
+        
         const salesData = Object.entries(salesByDate).map(([date, data], index, array) => {
             const prevData = array[index - 1]?.[1];
             return {

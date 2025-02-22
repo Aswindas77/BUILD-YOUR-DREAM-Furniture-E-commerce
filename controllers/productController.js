@@ -267,7 +267,7 @@ const deleteProduct = async (req, res) => {
 const toggleListProduct = async (req, res) => {
   try {
     const { productId, action } = req.params;
-    console.log("blaaaaaaaaaaaaaaaaaaaaaaaaaaa", productId);
+    
 
     
     if (!mongoose.Types.ObjectId.isValid(productId)) {

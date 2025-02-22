@@ -8,12 +8,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root {
             --primary-color: #4a90e2;
             --secondary-color: #f8f9fa;
         }
- 
+
         body {
             background-color: #f4f6f8;
             font-family: 'Segoe UI', sans-serif;
@@ -272,9 +275,17 @@
                 </div>
 
                 <!-- Export Button -->
-                <div class="col-md-2">
+                <!-- <div class="col-md-2">
                     <button class="export-btn w-100" onclick="exportReport()">
                         <i class="fas fa-download me-2"></i>Export
+                    </button>
+                </div> -->
+
+                <!-- PDF Download Button -->
+                <div class="col-md-2">
+                    <button class="export-btn w-100" onclick="downloadPDF()"
+                        style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                        <i class="fas fa-file-pdf me-2"></i>PDF
                     </button>
                 </div>
             </div>
@@ -547,6 +558,41 @@
         const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+
+        async function downloadPDF() {
+            try {
+                // Get the report container element
+                const element = document.querySelector('.report-container');
+
+                // First convert to canvas
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                // Convert canvas to PDF
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('sales-report.pdf');
+
+            } catch (err) {
+                console.error('Error generating PDF:', err);
+                alert('Error generating PDF. Please try again.');
+            }
+        }
     </script>
 </body>
 

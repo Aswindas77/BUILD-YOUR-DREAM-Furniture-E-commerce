@@ -646,9 +646,15 @@
 															<% } %>
 												</div>
 
-												<button class="add-to-cart" onclick="addToCart('<%= product._id %>')">
-													<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
-												</button>
+												<% if(product.stock>0){ %>
+													<button class="add-to-cart" onclick="addToCart('<%= product._id %>')">
+														<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
+													</button>
+													<% }else{ %>
+														<button class="add-to-cart" onclick="">
+															<i class="fa fa-shopping-cart me-2"></i>product unAvailable
+														</button>
+														<% } %>
 											</div>
 
 											<div class="product-actions">
@@ -664,10 +670,26 @@
 										<% }); %>
 								</div>
 							</div>
+
 						</div>
 					</div>
 				</div>
-
+        <!-- pagianation links -->
+		 <div class="pagination" style="margin-top: 57px; margin-left: 44%;">
+			<% if (currentPage > 1) { %>
+				<a href="?page=<%= currentPage - 1 %>&search=<%= searchQuery %>" style="text-decoration: none; padding: 5px 10px;width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
+			  <% } %>
+		
+			  <% for (let i = 1; i <= totalPages; i++) { %>
+				<a href="?page=<%= i %>&search=<%= searchQuery %>" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; background-color: '<%= currentPage === i ? '#ddd' : '#fff' %>';">
+				  <%= i %>
+				</a>
+			  <% } %>
+		
+			  <% if (currentPage < totalPages) { %>
+				<a href="?page=<%= currentPage + 1 %>&search=<%= searchQuery %>" style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
+			  <% } %>
+		 </div>
 
 				<!-- Start related-product Area -->
 				<section class="related-product-area section_gap">
@@ -772,11 +794,9 @@
 						})
 							.then(response => response.json())
 							.then(data => {
-								if (data.success) {
-									showToast("Product added to cart.", "success");
-								} else {
-									showToast("Already exists in cart", "error");
-								}
+								if (data.message) {
+									showToast(data.message);
+								} 
 							})
 							.catch(error => {
 								showToast("Something went wrong.", "error");
@@ -791,9 +811,9 @@
 							position: "center",
 							close: true,
 							style: {
-								background: "orange",
+								background: "orange", 
 								color: "white",
-								fontWeight: "bold",
+								fontWeight: "bold", 
 								borderRadius: "8px",
 							},
 						}).showToast();

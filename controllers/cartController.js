@@ -60,6 +60,11 @@ const addcart = async (req, res) => {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
+        // if(quantity >0){
+            
+        //     
+        // }
+
         const userId = req.session.User._id;
 
         let cart = await Cart.findOne({ userId });
@@ -74,11 +79,19 @@ const addcart = async (req, res) => {
         if (productExists) {
 
 
-            return res.status(400).json({ msg: 'alreadyexist' });
+            return res.status(400).json({ success:false, message:"product is already exist" });
         }
 
         const product = await Product.findById(productId);
+
+        if(!product.stock>0){
+            return res.status(400).json({ success:false, message: 'the products is currently unavailable' });
+        }
+        
+
         if (!product) return res.status(404).json({ success: false, message: "Product not found" });
+
+        
 
         cart.products.push({
             productId,

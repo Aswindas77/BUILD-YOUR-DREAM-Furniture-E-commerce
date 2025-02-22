@@ -22,23 +22,51 @@ const loadWallet = async (req, res) => {
             });
         }
 
-        
+
         const walletHistory = wallet.transactions.sort((a, b) => b.date - a.date);
 
         res.render('profile/profileWallet', {
             walletBalance: wallet.balance,
             walletHistory: walletHistory
         });
-        
+
     } catch (error) {
 
         console.error(error.message)
     }
 }
- 
 
+// add money
+
+const addMoneyWallet = async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const userId = req.session.User._id;
+        console.log('userId', userId)
+        await Wallet.updateOne(
+            { userId },
+            {
+                $setOnInsert: {
+                    userId,
+                    transactions: []
+                },
+                $inc: { balance: amount }
+            },
+            { upsert: true }
+        );
+        log
+        res.json({ success: true, message: 'Money added to wallet successfully' });
+    } catch (error) {
+        console.error('Error adding money to wallet:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
 module.exports = {
     loadWallet,
+    addMoneyWallet
 }
 
 

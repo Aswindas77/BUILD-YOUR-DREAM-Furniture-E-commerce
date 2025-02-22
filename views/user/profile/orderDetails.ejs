@@ -1310,29 +1310,48 @@
 
     console.log("Return Data Sent:", returnData); 
 
-    if (confirm('Are you sure you want to request a return?')) {
+    Swal.fire({
+    title: "Are you sure?",
+    text: "Do you want to request a return?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, request it!"
+}).then((result) => {
+    if (result.isConfirmed) {
         fetch('/user/request-return', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(returnData)  
+            body: JSON.stringify(returnData)
         })
         .then(response => response.json())
         .then(data => {
-            console.log("Server Response:", data); 
+            console.log("Server Response:", data);
             if (data.success) {
-                alert('Return request submitted successfully!');
-                window.location.reload();
+                Swal.fire(
+                    "Success!",
+                    "Return request submitted successfully!",
+                    "success"
+                ).then(() => {
+                    window.location.reload();
+                });
             } else {
-                alert('Failed to submit return request: ' + data.message);
+                Swal.fire(
+                    "Error!",
+                    "Failed to submit return request: " + data.message,
+                    "error"
+                );
             }
         })
         .catch(error => {
-            console.error('Fetch Error:', error);
-            alert('Failed to submit return request');
+            Swal.fire("Error!", "Something went wrong!", "error");
         });
     }
+});
+
 }
         
         window.onclick = function (event) {
@@ -1341,6 +1360,7 @@
             }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

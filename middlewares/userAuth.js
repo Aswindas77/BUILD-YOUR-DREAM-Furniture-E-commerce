@@ -37,7 +37,7 @@ const isBan = async(req,res,next)=>{
 
             const user =await User.findOne({email})
 
-            console.log("aswinnnn====",user)
+            
 
             if(user.isBlocked===true){
                 req.session.destroy()

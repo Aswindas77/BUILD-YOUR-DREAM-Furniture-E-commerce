@@ -29,7 +29,9 @@ const loadCoupon = async (req, res) => {
 const addCoupon = async (req, res) => {
     try {
         console.log("Received coupon data:", req.body);
-
+   
+        
+       
         const {
             code,
             description,
@@ -38,6 +40,10 @@ const addCoupon = async (req, res) => {
             startDate,
             expiryDate
         } = req.body;
+
+        if(discountPercentage<50){
+            console.log("hhhh")
+        }
 
         const formattedCode = code.toUpperCase();
 

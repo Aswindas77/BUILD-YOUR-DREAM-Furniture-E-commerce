@@ -339,7 +339,7 @@ const updateReturnStatus = async (req, res) => {
                 date: new Date()
             });
 
-            await wallet.save(); 
+            await wallet.save();
 
             await Orders.findByIdAndUpdate(
                 returnRequest.orderId._id,
@@ -367,7 +367,9 @@ const updateReturnStatus = async (req, res) => {
 
 
 
+
 module.exports = {
+
     loadOrderPage,
     updateOrderStatus,
     getOrderDetails,
