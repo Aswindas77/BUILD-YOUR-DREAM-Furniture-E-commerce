@@ -803,7 +803,7 @@ const buyNow = async (req, res) => {
         const userId = req.session.User._id;
 
 
-        console.log("joo",selectedAddressId )
+        console.log("joo",selectedAddressId)
 
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
