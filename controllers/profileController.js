@@ -28,15 +28,21 @@ const userProfile = async (req, res) => {
         if (!req.session.User) {
             return res.redirect("login");
         }
-
+        const { search = "", page = 1 } = req.query;
         const userId = req.session.User._id;
         const user = req.session.User;
+        const limit =2;
+        const skip =(page-1)*limit;
 
+        const totalOrders = await Order.countDocuments();
+                const totalPages =Math.ceil(totalOrders/limit);
 
         const orders = await Order.find({ userId })
             .populate('items.productId')
             .lean()
             .sort({ createdAt: -1 })
+            .skip(skip)
+        .limit(limit);
 
 
         orders.forEach(order => {
@@ -45,7 +51,12 @@ const userProfile = async (req, res) => {
             }
         });
 
-        res.render("profile/profileView", { user, orders });
+        res.render("profile/profileView", {
+             user,
+              orders,
+              currentPage:parseInt(page),
+            totalPages,
+             });
 
     } catch (error) {
         console.error("Error in userProfile:", error);
@@ -400,7 +411,7 @@ const updatePassword = async (req, res) => {
         if (newPassword !== confirmPassword) {
             return res.status(400).json({ success: false, message: 'New passwords do not match' });
         }
-
+n
         
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
         if (!passwordRegex.test(newPassword)) {
@@ -414,7 +425,7 @@ const updatePassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-
+        
        
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
@@ -426,7 +437,7 @@ const updatePassword = async (req, res) => {
 
         
         user.password = hashedPassword;
-        await user.save();
+        await user.save();  
 
         res.status(200).json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
@@ -442,23 +453,36 @@ const updatePassword = async (req, res) => {
 
 const getOrderDetails = async (req, res) => {
     try {
+        if (!req.session.User) {
+            return res.redirect("/user/login");
+        }
         const orderId = req.params?.orderId;
-        const userId = req.session.User?._id;
-
+        const userId = req.session.User?._id; 
 
         
-        const order = await Order.findOne({ _id: orderId, userId })
+        const order = await Order.findById(orderId)
             .populate('items.productId')
-            .populate('billingAddress')
-            .lean();
+            .populate('addressId' )
+        
+
+           
+            
 
         if (!order) {
             return res.status(404).json({
                 success: false,
                 message: 'Order not found'
             });
-        }
+        } 
 
+        const userAddress = await Address.findOne({ userId });
+        let selectedAddress = null;
+        
+        if (userAddress && Array.isArray(userAddress.address) && userAddress.address.length > 0) {
+           
+            selectedAddress = userAddress.address[0];
+        }
+        
         
         if (!order.totalAmount) {
             order.totalAmount = order.items.reduce((total, item) => {
@@ -486,7 +510,7 @@ const getOrderDetails = async (req, res) => {
                 month: 'long',
                 year: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
             }),
             items: order.items.map(item => ({
                 productId: {
@@ -496,14 +520,16 @@ const getOrderDetails = async (req, res) => {
                 quantity: item.quantity || 0,
                 price: item.price || 0
             })),
-            billingAddress: order.billingAddress || {},
+            
             paymentMethod: order.paymentMethod || 'Not Specified',
             paymentStatus: order.paymentStatus || 'Pending',
             totalAmount: order.totalAmount || 0,
             discount: order.discount || 0,
             progress: progressPercentage,
             timeline: orderTimeline,
-            returnRequest
+            returnRequest,
+           
+            
         };
 
         console.log('Formatted Order:', formattedOrder); 
@@ -512,7 +538,9 @@ const getOrderDetails = async (req, res) => {
         res.render('profile/orderDetails', {
             order: formattedOrder,
             returnOrder:returnRequest,
-            user: req.session.User
+            user: req.session.User,
+            selectedAddress
+            
         });
 
     } catch (error) {

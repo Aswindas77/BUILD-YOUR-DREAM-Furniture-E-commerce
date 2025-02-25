@@ -26,7 +26,7 @@ const loadCart = async (req, res) => {
         const cart = await Cart.findOne({ userId })
             .populate({
                 path: "products.productId",
-                select: "name salesPrice images stock",
+                select: "name salesPrice images stock", 
             });
 
         console.log("Cart Data After Populate:", JSON.stringify(cart, null, 2));
@@ -228,7 +228,7 @@ const loadCheckout = async (req, res) => {
         const { _id } = req.session?.User;
         const userId = new mongoose.Types.ObjectId(_id);
 
-        // Fetch active coupons
+        
         const validCoupons = await Coupon.find({
             isActive: true,
             validUntil: { $gt: new Date() },

@@ -1065,9 +1065,25 @@
                     <p>Status: <%= order.paymentStatus %>
                     </p>
                 </div>
+                <span>
+                    <div class="info-box">
+                        <h4>shipping Address</h4>
+                        <% if (selectedAddress) { %>
+                            <p>House Name : <%= selectedAddress.houseNumber %></p>
+                            <p>Landmark : <%= selectedAddress.landmark ? selectedAddress.landmark : 'N/A' %></p>
+                            <p>Pincode : <%= selectedAddress.pincode %></p>
+                            <p>City : <%= selectedAddress.city %></p>
+                            <p>Country : <%= selectedAddress.country %></p>
+                           
+                            
+                        <% } else { %>
+                            <p style="color: red;">Address not found</p>
+                        <% } %>
+                    </div>
+                </span>
             </div>
-        </div>
-
+        </div> 
+ 
         <div class="price-summary">
             <div class="price-row">
                 <span>Subtotal</span>

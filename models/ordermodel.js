@@ -3,14 +3,22 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',  // Assuming you have a User model
+    ref: 'User',  
 
   },
+  couponCode:{
+    type: String,
+  },
+  addressId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:'Address',
+    required:true
+  }, 
   items: [{
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product', // Referring to the Product model
-
+      ref: 'Product', 
+ 
     },
     quantity: {
       type: Number,
@@ -26,7 +34,7 @@ const orderSchema = new mongoose.Schema({
     name: { type: String },
     country: { type: String },
     street: { type: String },
-    city: { type: String },
+    city: { type: String }, 
     state: { type: String },
     postcode: { type: String },
     phone: { type: String },
@@ -48,8 +56,9 @@ const orderSchema = new mongoose.Schema({
     type: Number,
 
 
-    min: [0, 'Total amount cannot be negative'], // Ensuring total amount is positive
+    min: [0, 'Total amount cannot be negative'], 
   },
+
   paymentStatus: {
     type: String,
     enum: ['Pending', 'Paid', 'Failed', 'Processing'],

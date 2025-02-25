@@ -38,11 +38,11 @@
 
 
 	<link rel="stylesheet" href="/public/userAssets/css/custom.css">
-	```
+	
 
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-
+ 
 
 	<style>
 		* {
@@ -574,7 +574,7 @@
 								</button>
 
 							</div>
-
+ 
 
 
 							<!-- Product Grid -->
@@ -662,11 +662,10 @@
 													onclick="addToWhishList('<%= product._id %>')">
 													<i class="fa fa-heart-o"></i>
 												</button>
-												<button class="action-btn compare" title="Compare">
-													<i class="fa fa-refresh"></i>
-												</button>
+												
 											</div>
-										</div>
+										
+								     </div>
 										<% }); %>
 								</div>
 							</div>
@@ -920,9 +919,9 @@
 								if (document.getElementById('sortSelect')) document.getElementById('sortSelect').value = '';
 								if (document.getElementById('categorySelect')) document.getElementById('categorySelect').value = '';
 
-								// Apply the reset filters
+								
 								applyButton.click();
-								// showToast('Filters reset successfully');
+								
 							});
 						}
 					});
@@ -978,6 +977,13 @@
 										<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
 									</button>
 								</div>
+								<div class="product-actions">
+												<button class="action-btn wishlist"
+													onclick="addToWhishList('${product._id}')">
+													<i class="fa fa-heart-o"></i>
+												</button>
+												
+											</div>
 							</div>
 						`).join('');
 					}
@@ -1003,7 +1009,7 @@
 
 									showToast("product whislisted")
 								} else {
-									alert("❌ " + data.message);
+									alert( data.message);
 								}
 
 							});

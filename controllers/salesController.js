@@ -170,7 +170,7 @@ const filterSalesReport = async (req, res) => {
             return acc;
         }, {});
 
-        
+         
         const salesData = Object.entries(salesByDate).map(([date, data], index, array) => {
             const prevData = array[index - 1]?.[1];
             return {
@@ -190,7 +190,7 @@ const filterSalesReport = async (req, res) => {
             totalProducts,
             totalCustomers: uniqueCustomers,
             revenueData,
-            productData,
+            productData, 
             filterType: type,
             selectedYear: year,
             selectedMonth: month,

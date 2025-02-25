@@ -645,6 +645,8 @@
                     const couponCode = document.getElementById('couponCode').value;
                     const cartId = '<%= cart?._id %>';
                     const grandTotal = ' <%= grandTotal %>';
+                   
+                    
 
                     try {
                         const response = await fetch('/user/applyCoupon', {

@@ -125,7 +125,7 @@ userRouter.delete('/cartDelete', isBan, cartController.deleteCart)
 userRouter.get('/checkout', isBan, cartController.loadCheckout)
 
 
-userRouter.post("/checkout", userController.buyNow)
+userRouter.post("/checkout",isBan, userController.buyNow)
 
 userRouter.post('/paypal/success', userController.paypalSuccess)
 

@@ -31,6 +31,7 @@ const loadOrderPage = async (req, res) => {
                 model: "Product",
                 select: "name price"
             })
+            .populate("addressId", "houseNumber landmark city pincode country")
             .sort({ createdAt: -1 })
             .limit(limit)
             .skip(skip);
@@ -65,7 +66,9 @@ const updateOrderStatus = async (req, res) => {
                 updatedAt: new Date()
             },
             { new: true }
-        ).populate("userId", "name email");
+        )
+        .populate("userId", "name email")
+        .populate("addressId","houseNumber city landmark country pincode")
 
         if (!order) {
             return res.status(404).json({
@@ -103,6 +106,14 @@ const getOrderDetails = async (req, res) => {
                 select: 'name price images description'
             })
             .populate('userId', 'username email')
+            .populate('addressId')
+
+            
+
+            //  selected address
+            const selectedAddress = order.addressId.address;
+            
+
 
 
         if (!order) {
@@ -111,7 +122,7 @@ const getOrderDetails = async (req, res) => {
             });
         }
 
-        res.render('profile/orderDetais', { order });
+        res.render('profile/orderDetais', { order,selectedAddress });
     } catch (error) {
         console.log("Error fetching order details:", error.message);
         res.status(500).render('userError', {

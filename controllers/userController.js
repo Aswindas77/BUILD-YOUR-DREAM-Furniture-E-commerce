@@ -94,39 +94,39 @@ const verifyUser = async (req, res) => {
         const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
         const secretKey = '6LfVW8MqAAAAAI2w-b4uB11B24m0BtDABGV9Q-8H';
 
-        try {
-            const verificationResponse = await axios.post(verifyUrl, null, {
-                params: {
-                    secret: secretKey
-                    ,
-                    response: captchaResponse
-                }
-            });
+        // try {
+        //     const verificationResponse = await axios.post(verifyUrl, null, {
+        //         params: {
+        //             secret: secretKey
+        //             ,
+        //             response: captchaResponse
+        //         }
+        //     });
 
-            console.log("verifiationresponseeee===", verificationResponse.data)
+        //     console.log("verifiationresponseeee===", verificationResponse.data)
 
-            if (!captchaResponse) {
-                return res.status(400).json({
-                    success: false,
-                    emailError: 'reCAPTCHA response is missing'
-                });
-            }
+        //     if (!captchaResponse) {
+        //         return res.status(400).json({
+        //             success: false,
+        //             emailError: 'reCAPTCHA response is missing'
+        //         });
+        //     }
 
-            if (!verificationResponse.data.success) {
-                return res.status(400).json({
-                    success: false,
-                    emailError: 'reCAPTCHA verification failed'
-                });
-            }
-        } catch (captchaError) {
-            console.error('reCAPTCHA verification error:', captchaError);
-            return res.status(500).json({
-                success: false,
-                emailError: 'reCAPTCHA verification failed'
-            });
-        }
+        //     if (!verificationResponse.data.success) {
+        //         return res.status(400).json({
+        //             success: false,
+        //             emailError: 'reCAPTCHA verification failed'
+        //         });
+        //     }
+        // } catch (captchaError) {
+        //     console.error('reCAPTCHA verification error:', captchaError);
+        //     return res.status(500).json({
+        //         success: false,
+        //         emailError: 'reCAPTCHA verification failed'
+        //     });
+        // }
 
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ email: email }); 
 
         if (!user) {
             return res.status(400).json({ emailError: "user not found!" });
@@ -375,7 +375,7 @@ async function sendotp(otp, email) {
 
 // otp generator 
 
-//====================================================================================================================================================
+// ====================================================================================================================================================
 
 const generateOtp = () => {
 
@@ -385,9 +385,9 @@ const generateOtp = () => {
 
 };
 
-
+  
 // load otp verify section 
-
+ 
 //====================================================================================================================================================
 
 const verifyOtp = async (req, res) => {
@@ -569,7 +569,7 @@ const loadShop = async (req, res) => {
         const { search = "", category, minPrice, maxPrice, sort, page = 1 } = req.query;
         const limit =6;
         const skip =(page-1)*limit;
-
+ 
         let query = {
             isDeleted: false,
             isListed: false,
@@ -795,17 +795,18 @@ const loadBanProduct = async (req, res) => {
 
 
 
-
+ 
 
 const buyNow = async (req, res) => {
     try {
-        const { selectedAddressId, paymentMethod, cartId, } = req.body;
+        const { selectedAddressId, paymentMethod, cartId,couponCode } = req.body;
         const userId = req.session.User._id;
 
-
-        console.log("joo",selectedAddressId)
+      console.log("dddddd",selectedAddressId)
+       
 
         const user = await User.findById(userId);
+
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
 
@@ -831,8 +832,10 @@ const buyNow = async (req, res) => {
                 const newOrder = new ordermodel({
                     userId,
                     items: orderItems,
-                    billingAddress: selectedAddressId,
+                    addressId: selectedAddressId,
+                    couponCode:couponCode, 
                     paymentMethod,
+                    
                     totalAmount,
                     paymentStatus: "Completed",
                     orderStatus: "Pending",
@@ -859,7 +862,7 @@ const buyNow = async (req, res) => {
             console.log(totalAmount, 'inside the paypal; paypal');
             console.log(paymentMethod, 'method inside the payoap')
             const { orderId, paypalRedirectUrl } = await createPayPalOrder(totalAmount, userId);
-            console.log(paypalRedirectUrl, 'paypal order inside paypal approvalLinkapprovalLinkapprovalLink');
+            console.log(paypalRedirectUrl, 'paypal order inside paypal');
             return res.status(200).json({
                 success: true,
                 message: "Redirect to PayPal",
@@ -873,7 +876,8 @@ const buyNow = async (req, res) => {
             const newOrder = new ordermodel({
                 userId,
                 items: orderItems,
-                billingAddress: selectedAddressId,
+                addressId: selectedAddressId,
+                couponCode:couponCode, 
                 paymentMethod,
                 totalAmount,
                 paymentStatus: "Pending",
@@ -882,7 +886,10 @@ const buyNow = async (req, res) => {
 
             await newOrder.save();
             await Cart.findByIdAndDelete(cartId);
-
+            await Coupon.findOneAndUpdate(
+                
+                { $push: { usedBy: userId } }
+            );
             return res.status(200).json({
                 success: true,
                 message: "Order placed successfully. Pay on delivery.",
@@ -894,7 +901,8 @@ const buyNow = async (req, res) => {
             const newOrder = new ordermodel({
                 userId,
                 items: orderItems,
-                billingAddress: selectedAddressId,
+                addressId: selectedAddressId,
+                couponCode:couponCode, 
                 paymentMethod,
                 totalAmount,
                 paymentStatus: "Pending",

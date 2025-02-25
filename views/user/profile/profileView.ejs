@@ -624,8 +624,10 @@
                                             <%= order.status %>
                                         </span>
                                         <div class="order-buttons">
-                                            <a href="/user/orderdetails/<%= order._id %>" class="view-details-btn">View
-                                                Details</a>
+                                            <button class="view-details-btn"
+                                            onclick="showOrderDetails('<%= order._id %>')">
+                                                View Details
+                                            </button>
                                             <% if (order.status !=='Delivered' && order.status !=='Cancelled' ) { %>
                                                 <button class="cancel-order-btn"
                                                     onclick="cancelOrder('<%= order._id %>')">
@@ -638,6 +640,23 @@
                             </div>
                             <% }); %>
                     </div>
+
+                 <!-- pagianation links -->
+		 <div class="pagination" style="margin-top: 57px; margin-left: 44%;">
+			<% if (currentPage > 1) { %>
+				<a href="?page=<%= currentPage - 1 %>" style="text-decoration: none; padding: 5px 10px;width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
+			  <% } %>
+		
+			  <% for (let i = 1; i <= totalPages; i++) { %>
+				<a href="?page=<%= i %>" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; background-color: '<%= currentPage === i ? '#ddd' : '#fff' %>';">
+				  <%= i %>
+				</a>
+			  <% } %>
+		
+			  <% if (currentPage < totalPages) { %>
+				<a href="?page=<%= currentPage + 1 %>" style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
+			  <% } %>
+		 </div>
                     <% } else { %>
                         <div class="empty-orders">
                             <i class="fas fa-shopping-bag"></i>
@@ -651,7 +670,7 @@
         </main>
     </div>
 
-    <div class="menu-toggle">
+    <div class="menu-toggle"> 
         <i class="fas fa-bars"></i>
     </div>
 
@@ -665,6 +684,8 @@
         });
 
         function showOrderDetails(orderId) {
+            console.log("noo",orderId);
+            
             window.location.href = `/user/orderdetails/${orderId}`;
         }
 
@@ -676,7 +697,7 @@
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
                 cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, cancel it!",
+                confirmButtonText: "Yes, cancel it!", 
                 cancelButtonText: "No, keep it"
             }).then((result) => {
                 if (result.isConfirmed) {

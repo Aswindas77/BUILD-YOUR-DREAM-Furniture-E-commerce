@@ -296,7 +296,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Date</th>
+                        <th>Date</th> 
                         <th>Total Orders</th>
                         <th>Total Sales</th>
                         <th>Revenue</th>
@@ -322,7 +322,7 @@
                                                     <% } %>
                                     </small>
                             </td>
-                            <td>
+                            <td> 
                                 <%= data.totalProducts %>
                                     <small class="text-muted">
                                         <% if(data.salesGrowth> 0) { %>
@@ -350,7 +350,7 @@
                                 <div class="progress" style="height: 8px;">
                                     <div class="progress-bar <%= data.revenueGrowth >= 0 ? 'bg-success' : 'bg-danger' %>"
                                         role="progressbar"
-                                        style="width: <%= Math.min(Math.abs(data.revenueGrowth), 100) %>%">
+                                        style="width: <%= Math.min(Math.abs(data.revenueGrowth), 100) %> %">
                                     </div>
                                 </div>
                             </td>
