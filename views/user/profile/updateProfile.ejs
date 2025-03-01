@@ -280,6 +280,7 @@
         }
 
         .form-group {
+            position: relative;
             margin-bottom: 1.5rem;
         }
 
@@ -399,24 +400,18 @@
             font-size: 0.875rem;
             margin-top: 0.5rem;
             display: none;
+            /* Hidden by default */
+            transition: all 0.3s ease;
         }
 
-        .modal-content .form-group {
-            margin-bottom: 1.5rem;
+        .error-message.show {
+            display: block;
+            /* Will be shown when active */
         }
 
-        .modal-content input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .modal-content input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
+        .input-error {
+            border-color: #dc2626 !important;
+            background-color: #fff5f5;
         }
     </style>
 </head>
@@ -476,31 +471,35 @@
                 <h2>Personal Information</h2>
                 <form class="form-grid">
                     <input type="hidden" id="userId" value="<%= user._id %>">
-                    <!-- Stacked First Name and Last Name -->
+
+                    <!-- Username field -->
                     <div class="stacked">
                         <div class="form-group">
-                            <label>username</label>
-                            <input type="text" value="<%=user.username   %>" />
+                            <label>Username</label>
+                            <input type="text" id="username" value="<%=user.username%>" />
+                            <div class="error-message" id="usernameError"></div>
                         </div>
-
                     </div>
 
-                    <!-- Other fields -->
+                    <!-- Email field -->
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" value="<%=user.email  %>" />
+                        <input type="email" id="email" value="<%=user.email%>" />
+                        <div class="error-message" id="emailError"></div>
                     </div>
+
+                    <!-- Phone field -->
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="tel" value="<%= typeof user !== 'undefined' && user.phone ? user.phone : '' %>"
+                        <input type="tel" id="phone"
+                            value="<%= typeof user !== 'undefined' && user.phone ? user.phone : '' %>"
                             placeholder="Enter phone number" />
-
+                        <div class="error-message" id="phoneError"></div>
                     </div>
                 </form>
 
                 <button class="btn">Save Changes</button>
                 <button id="i" type="button" class="btn">Change Password</button>
-
             </div>
         </main>
     </div>
@@ -559,51 +558,170 @@
             sidebar.classList.toggle('active');
         });
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const profilePic = document.getElementById('profile-pic');
-            const profileUpload = document.getElementById('profile-upload');
+        document.addEventListener("DOMContentLoaded", function () {
+            const profilePic = document.getElementById("profile-pic");
+            const profileUpload = document.getElementById("profile-upload");
 
-            // Open file input when profile picture is clicked
-            profilePic.addEventListener('click', () => {
+            profilePic.addEventListener("click", () => {
                 profileUpload.click();
             });
 
-            // Handle file selection
-            profileUpload.addEventListener('change', function (event) {
+            profileUpload.addEventListener("change", function (event) {
                 const file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        // Remove the initials
-                        profilePic.innerHTML = '';
+                        profilePic.innerHTML = "";
 
-                        // Create and set the image
-                        const img = document.createElement('img');
+                        const img = document.createElement("img");
                         img.src = e.target.result;
                         profilePic.appendChild(img);
 
-                        // Append the edit icon back
-                        const editIcon = document.createElement('div');
-                        editIcon.className = 'profile-pic-edit';
+                        const editIcon = document.createElement("div");
+                        editIcon.className = "profile-pic-edit";
                         editIcon.innerHTML = '<i class="fas fa-camera"></i>';
                         profilePic.appendChild(editIcon);
                     };
                     reader.readAsDataURL(file);
                 }
             });
-        });
 
-        // Update your button click handlers
-        document.addEventListener('DOMContentLoaded', function () {
-            // Save changes button
-            document.querySelector('.btn').addEventListener('click', () => {
-                showModal('saveChangesModal');
+            document.querySelector(".btn").addEventListener("click", (event) => {
+                if (!validateForm()) {
+                    event.preventDefault();
+                } else {
+                    const modal = document.getElementById("saveChangesModal");
+                    if (modal) {
+                        modal.style.display = "block";
+                        modal.querySelectorAll("input").forEach(input => input.value = "");
+                        modal.querySelectorAll(".error-message").forEach(error => error.style.display = "none");
+                    } else {
+                        console.error("Modal with id saveChangesModal not found");
+                    }
+                }
             });
 
-            // Change password button
-            document.getElementById('i').addEventListener('click', function (e) {
-                e.preventDefault(); // Prevent any default action
-                showModal('changePasswordModal');
+            document.getElementById("i").addEventListener("click", function (e) {
+                e.preventDefault();
+                const modal = document.getElementById("changePasswordModal");
+                if (modal) {
+                    modal.style.display = "block";
+                    modal.querySelectorAll("input").forEach(input => input.value = "");
+                    modal.querySelectorAll(".error-message").forEach(error => error.style.display = "none");
+                } else {
+                    console.error("Modal with id changePasswordModal not found");
+                }
+            });
+        });
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function validateEmail(email) {
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailRegex.test(email.trim());
+        }
+
+        function validatePhone(phone) {
+            const phoneRegex = /^[6-9]\d{9}$/;
+            return phoneRegex.test(phone.trim());
+        }
+
+        function showError(input, message) {
+            try {
+                if (!input) {
+                    console.error('Input element is null');
+                    return;
+                }
+
+                const errorId = input.id + 'Error';
+                console.log('Looking for error element with ID:', errorId);
+
+                const errorElement = document.getElementById(errorId);
+                if (!errorElement) {
+                    console.error(`Error element with id ${errorId} not found`);
+                    return;
+                }
+
+                errorElement.textContent = message;
+                errorElement.style.display = "block";
+                errorElement.classList.add('show');
+                input.classList.add("input-error");
+            } catch (error) {
+                console.error('Error in showError function:', error);
+            }
+        }
+
+        function clearError(input) {
+            try {
+                if (!input) {
+                    console.error('Input element is null');
+                    return;
+                }
+
+                const errorId = input.id + 'Error';
+                const errorElement = document.getElementById(errorId);
+                if (!errorElement) {
+                    console.error(`Error element with id ${errorId} not found`);
+                    return;
+                }
+
+                errorElement.textContent = "";
+                errorElement.style.display = "none";
+                errorElement.classList.remove('show');
+                input.classList.remove("input-error");
+            } catch (error) {
+                console.error('Error in clearError function:', error);
+            }
+        }
+
+        function validateForm() {
+            const emailInput = document.getElementById("email");
+            const phoneInput = document.getElementById("phone");
+            let isValid = true;
+
+            if (!emailInput || !phoneInput) {
+                console.error('Required input elements not found');
+                return false;
+            }
+
+            // Clear previous errors
+            clearError(emailInput);
+            clearError(phoneInput);
+
+            // Email validation
+            if (!emailInput.value.trim()) {
+                showError(emailInput, "Email address is required.");
+                isValid = false;
+            } else if (!validateEmail(emailInput.value)) {
+                showError(emailInput, "Please enter a valid email address.");
+                isValid = false;
+            }
+
+            // Phone validation
+            if (!phoneInput.value.trim()) {
+                showError(phoneInput, "Phone number is required.");
+                isValid = false;
+            } else if (!validatePhone(phoneInput.value)) {
+                showError(phoneInput, "Please enter a valid 10-digit phone number starting with 6-9.");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Add this to check if elements exist when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            const requiredElements = ['email', 'phone', 'emailError', 'phoneError'];
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (!element) {
+                    console.error(`Required element with id "${id}" not found`);
+                }
             });
         });
 
@@ -629,14 +747,18 @@
 
         // Verify password and save changes
         function verifyAndSaveChanges() {
+            if (!validateForm()) {
+                return;
+            }
+
             const password = document.getElementById('confirmSavePassword').value;
             const errorElement = document.getElementById('savePasswordError');
 
             // Get updated profile data
             const updatedData = {
-                username: document.querySelector('input[type="text"]').value,
-                email: document.querySelector('input[type="email"]').value,
-                phone: document.querySelector('input[type="tel"]').value,
+                username: document.querySelector('input[type="text"]').value.trim(),
+                email: document.querySelector('input[type="email"]').value.trim(),
+                phone: document.querySelector('input[type="tel"]').value.trim(),
                 password: password
             };
 
@@ -650,9 +772,18 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Profile updated successfully');
-                        closeModal('saveChangesModal');
-                        location.reload();
+                        Swal.fire({
+                            title: 'Success!',
+                            text: "profile updated successfully",
+                            icon: 'success',
+                            confirmButtonColor: '#FF6F00'
+                        }).then(()=>{
+                            closeModal('saveChangesModal');
+                        }).then(()=>{
+                           location.reload();
+                        })
+                       
+                        
                     } else {
                         errorElement.textContent = data.message || 'Incorrect password';
                         errorElement.style.display = 'block';
@@ -708,6 +839,7 @@
                             closeModal('changePasswordModal');
                         });
                     } else {
+                        console.log(data.message)
                         showError('currentPasswordError', data.message || 'Failed to change password');
                     }
                 })
@@ -715,12 +847,6 @@
                     showError('currentPasswordError', 'Error changing password');
                     console.error('Error:', error);
                 });
-        }
-
-        function showError(elementId, message) {
-            const errorElement = document.getElementById(elementId);
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

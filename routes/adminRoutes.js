@@ -66,7 +66,7 @@ adminRouter.patch("/admin/list/:categoryId/:action", categoryController.toggleLi
 
 
 // load sales report
-adminRouter.get('/salesReport', adminAuth.isLogin, salesController.filterSalesReport);
+// adminRouter.get('/salesReport', adminAuth.isLogin, salesController.filterSalesReport);
 
 // load admin product management
 adminRouter.get('/productManagement', adminAuth.isLogin, productController.loadProducts)

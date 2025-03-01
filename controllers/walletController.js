@@ -54,7 +54,7 @@ const addMoneyWallet = async (req, res) => {
             },
             { upsert: true }
         );
-        log
+        
         res.json({ success: true, message: 'Money added to wallet successfully' });
     } catch (error) {
         console.error('Error adding money to wallet:', error);

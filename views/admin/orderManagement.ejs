@@ -9,7 +9,63 @@
     
     
 </head>
+<style>
+    /* Add these styles */
+    .status-select {
+        transition: background-color 0.3s ease;
+        color: #000;
+        font-weight: 500;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
 
+    .status-select:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .status-select option {
+        background-color: white;
+        color: black;
+    }
+
+    /* Status colors */
+    .status-Pending {
+        background-color: #ffd700 !important;
+    }
+
+    .status-Shipped {
+        background-color: #87ceeb !important;
+    }
+
+    .status-Delivered {
+        background-color: #90ee90 !important;
+    }
+
+    .status-Cancelled {
+        background-color: #ff6b6b !important;
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .status-select:disabled {
+        animation: pulse 1s infinite;
+    }
+</style>
 <body>
     <div class="container mt-4">
         <h2 class="mb-4"><i class="fas fa-shopping-bag"></i> Order Management</h2>
@@ -79,7 +135,7 @@
                                 <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>>Cancelled
                                 </option>
                             </select>
-                        </td>
+                        </td> 
                         <td>
                             <% if (order.status==='Delivered' ) { %>
                                 <span class="text-success">Completed</span>
@@ -141,152 +197,80 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function () {
-            $('.status-select').change(function () {
-                const selectElement = $(this);
-                const orderId = selectElement.data('order-id');
-                const newStatus = selectElement.val();
-                const previousValue = selectElement.data('previous-value');
+ document.addEventListener("DOMContentLoaded", function () {
+    const colors = {
+        'Pending': '#ffd700',
+        'Shipped': '#87ceeb',
+        'Delivered': '#90ee90',
+        'Cancelled': '#ff6b6b'
+    };
 
-                // Update select background color immediately
-                const colors = {
-                    'Pending': '#ffd700',
-                    'Shipped': '#87ceeb',
-                    'Delivered': '#90ee90',
-                    'Cancelled': '#ff6b6b'
-                };
+    document.querySelectorAll('.status-select').forEach(select => {
+        // Store previous value
+        select.dataset.previousValue = select.value;
 
-                // Add loading effect and change color immediately
-                selectElement.prop('disabled', true);
-                selectElement.css('background-color', colors[newStatus]);
+        select.addEventListener('change', async function () {
+            const orderId = this.dataset.orderId;
+            const newStatus = this.value;
+            const previousValue = this.dataset.previousValue;
 
-                $.ajax({
-                    url: '/admin/update-order-status',
+            // Disable select and change background color
+            this.disabled = true;
+            this.style.backgroundColor = colors[newStatus];
+
+            try {
+                const response = await fetch('/admin/update-order-status', {
                     method: 'POST',
-                    data: { orderId, status: newStatus },
-                    success: function (response) {
-                        if (response.success) {
-                            // Update the status immediately
-                            selectElement.css('background-color', colors[newStatus]);
-                            selectElement.val(newStatus);
-                            selectElement.data('previous-value', newStatus);
-
-                            // Show success toast
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Status Updated',
-                                text: `Order status changed to ${newStatus}`,
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 1000,
-                                timerProgressBar: true
-                            })
-                                .then(() => {
-                                    window.location.reload()
-                                })
-
-                            // Update any other elements that show the status
-                            $(`.order-status-${orderId}`).text(newStatus);
-
-                            // Update row styling if needed
-                            const row = selectElement.closest('tr');
-                            row.attr('data-status', newStatus);
-                        } else {
-                            // Revert changes on error
-                            selectElement.css('background-color', colors[previousValue]);
-                            selectElement.val(previousValue);
-
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message || 'Failed to update status'
-                            });
-                        }
-                    },
-                    error: function () {
-                        // Revert changes on error
-                        selectElement.css('background-color', colors[previousValue]);
-                        selectElement.val(previousValue);
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to update status'
-                        });
-                    },
-                    complete: function () {
-                        // Remove loading state
-                        selectElement.prop('disabled', false);
-                    }
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId, status: newStatus })
                 });
-            });
 
-            // Initialize previous values on page load
-            $('.status-select').each(function () {
-                const currentStatus = $(this).val();
-                $(this).data('previous-value', currentStatus);
-            });
+                const data = await response.json();
+
+                if (data.success) {
+                    this.dataset.previousValue = newStatus;
+
+                    // **Fix: Only update status text if the element exists**
+                    const statusElement = document.querySelector(`.order-status-${orderId}`);
+                    if (statusElement) {
+                        statusElement.textContent = newStatus;
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Status Updated',
+                        text: `Order status changed to ${newStatus}`,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => window.location.reload());
+
+                } else {
+                    throw new Error(data.message || 'Failed to update status');
+                }
+            } catch (error) {
+                console.error("Error updating status:", error);
+
+                // **Revert UI Changes**
+                this.style.backgroundColor = colors[previousValue];
+                this.value = previousValue;
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message
+                });
+            } finally {
+                this.disabled = false;
+            }
         });
-    </script>
+    });
+});
 
-    <style>
-        /* Add these styles */
-        .status-select {
-            transition: background-color 0.3s ease;
-            color: #000;
-            font-weight: 500;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
+   </script>
 
-        .status-select:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .status-select option {
-            background-color: white;
-            color: black;
-        }
-
-        /* Status colors */
-        .status-Pending {
-            background-color: #ffd700 !important;
-        }
-
-        .status-Shipped {
-            background-color: #87ceeb !important;
-        }
-
-        .status-Delivered {
-            background-color: #90ee90 !important;
-        }
-
-        .status-Cancelled {
-            background-color: #ff6b6b !important;
-        }
-
-        /* Loading animation */
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .status-select:disabled {
-            animation: pulse 1s infinite;
-        }
-    </style>
+   
     
 </body>
 

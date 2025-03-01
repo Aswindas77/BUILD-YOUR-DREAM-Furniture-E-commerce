@@ -407,11 +407,16 @@ const updatePassword = async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const userId = req.session.User._id;
 
+        console.log("currentPass",currentPassword);
+        console.log("newpass",newPassword);
+        console.log("currentPass",confirmPassword);
+
+   
         
         if (newPassword !== confirmPassword) {
             return res.status(400).json({ success: false, message: 'New passwords do not match' });
         }
-n
+
         
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
         if (!passwordRegex.test(newPassword)) {
@@ -464,7 +469,7 @@ const getOrderDetails = async (req, res) => {
             .populate('items.productId')
             .populate('addressId' )
         
-
+ 
            
             
 

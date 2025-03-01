@@ -27,7 +27,7 @@ const loadProducts = async (req, res) => {
     
     const products = await Products.find({ isDeleted: false })
       .populate('category', 'name description')
-      .sort({ updatedAt: -1 })
+      .sort({ updatedAt:-1 })
       .skip(skip)
       .limit(limit);
 
@@ -159,6 +159,10 @@ const editProduct = async (req, res) => {
     const product = await Products.findById(productId)
     const categories = await Categories.find({ isDeleted: false })
 
+    if(!product.stock>0){
+
+    }
+
     if (!product) return res.send("product not found")
 
     res.render("editproduct", { product, categories })
@@ -167,7 +171,7 @@ const editProduct = async (req, res) => {
     console.log(error.message);
     res.redirect("/admin/productManagement");
   }
-
+ 
 }
 
 
@@ -181,13 +185,21 @@ const updateProduct = async (req, res) => {
 
     const { id, name, description, salesPrice, category, productOffer, stock, status } = req.body;
 
-    
+    console.log("hi",stock)
+
+    if (stock === undefined || stock === null || stock < 0) {
+      console.log("Stock error");
+      return res.status(400).json({
+        success: false,
+        message: "Stock error",
+      });
+    }
     const images = [req.body?.image0, req.body?.image1, req.body?.image2];
 
     
     const dirPath = `./public/uploads/products/${id}`;
     fs.mkdirSync(dirPath, { recursive: true });
-
+  
     const imagep = [];
     images.forEach((img, index) => {
       if (img && img !== 'undefined') {
@@ -218,12 +230,17 @@ const updateProduct = async (req, res) => {
 
     const updatedProduct = await Products.findByIdAndUpdate(
       id,
-      { name, description, salesPrice, category, productOffer, stock, status },
-      { new: true } 
+      { name, description, salesPrice, category, productOffer, stock, status,updatedAt:new Date() },
+      { new: true,runValidators: true } 
     );
 
     console.log('Product updated successfully:', updatedProduct);
-    res.redirect("/admin/productManagement");
+
+    return res.json({
+      success: true,
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
 
   } catch (error) {
     console.error('Error updating product:', error);

@@ -66,7 +66,8 @@ const addCoupon = async (req, res) => {
             minPurchase: Number(minPurchase),
             startDate: new Date(startDate),
             expiryDate: new Date(expiryDate),
-            isActive: true
+            isActive: true,
+            updatedAt:new Date()
         });
 
         await newCoupon.save();
@@ -115,7 +116,7 @@ const editCoupon = async (req, res) => {
 };
 
 
-// update coupon 
+// update coupon  
 
 //====================================================================================================================================================
 
@@ -123,10 +124,13 @@ const updateCoupon = async (req, res) => {
     try {
         const couponId = req.params.id;
         const updateData = req.body;
+        console.log("nii",updateData)
+
+        updateData.updatedAt =new Date();
 
         const coupon = await Coupon.findByIdAndUpdate(
             couponId,
-            updateData,
+            { $set: updateData },
             { new: true, runValidators: true }
         );
 
@@ -220,7 +224,7 @@ const applyCoupon = async (req, res) => {
 
         if (!coupon) {
             return res.json({
-                success: false,
+                success: false, 
                 message: 'Invalid or expired coupon code'
             });
         }

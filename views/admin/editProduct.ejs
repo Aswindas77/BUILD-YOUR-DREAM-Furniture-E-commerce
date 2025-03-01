@@ -8,6 +8,8 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -38,23 +40,22 @@
         }
     </style>
     <style>
-        /* Container for the cropper */
         .cropper-container {
-            width: 300px; /* Fixed width for the cropper */
-            height: 300px; /* Fixed height for the cropper */
+            width: 300px;
+            height: 300px;
             margin-top: 10px;
-            border: 2px solid #ddd; /* Optional, just for visibility */
-            border-radius: 8px; /* Rounded corners */
-            overflow: hidden; /* Hide any overflow from the cropper */
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
         }
-    
-        /* Image preview before cropping */
+
+
         .cropper-preview {
-            width: 100%; /* Make the image fill the container */
+            width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensures the image covers the area without stretching */
+            object-fit: cover;
         }
-    
+
         .error {
             color: red;
             font-size: 0.9em;
@@ -115,7 +116,7 @@
                 <div class="mb-3">
                     <label for="stock" class="form-label">Stock</label>
                     <input type="number" class="form-control" id="stock" name="stock" value="<%= product.stock%>"
-                        min="0" required>
+                        required>
                 </div>
 
                 <!-- Status -->
@@ -130,27 +131,33 @@
                 <!-- Image Upload -->
                 <div class="mb-3 d-flex flex-column align-items-center">
                     <label for="image1" class="text-center mb-2">Image 1</label>
-                    <input onchange="cropper(1)" id="image1" type="file" accept="image/*" class="form-control form-control-sm w-50 mb-2 text-center">
+                    <input onchange="cropper(1)" id="image1" type="file" accept="image/*"
+                        class="form-control form-control-sm w-50 mb-2 text-center">
                     <div class="cropper-container text-center">
-                        
-                        <img style="object-fit: cover;" src="<%= product.images[0] %>" alt="Image 1 Preview" id="prev1" class="mb-3 img-fluid">
-                    
-                    </div>
-                    <label for="image2" class="text-center mb-2">Image 2</label>
-                    <input onchange="cropper(2)" id="image2" type="file" accept="image/*" class="form-control form-control-sm w-50 mb-2 text-center">
-                    <div class="cropper-container text-center">
-                        <img style="object-fit: cover;" src="<%= product.images[1] %>" alt="Image 2 Preview" id="prev2" class="mb-3 img-fluid">
+
+                        <img style="object-fit: cover;" src="<%= product.images[0] %>" alt="Image 1 Preview" id="prev1"
+                            class="mb-3 img-fluid">
 
                     </div>
-                
-                    <label for="image3" class="text-center mb-2">Image 3</label>
-                    <input onchange="cropper(3)" id="image3" type="file" accept="image/*" class="form-control form-control-sm w-50 mb-2 text-center">
+                    <label for="image2" class="text-center mb-2">Image 2</label>
+                    <input onchange="cropper(2)" id="image2" type="file" accept="image/*"
+                        class="form-control form-control-sm w-50 mb-2 text-center">
                     <div class="cropper-container text-center">
-                        
-                        <img style="object-fit: cover;" src="<%= product.images[2] %>" alt="Image 3 Preview" id="prev3" class="mb-3 img-fluid">
+                        <img style="object-fit: cover;" src="<%= product.images[1] %>" alt="Image 2 Preview" id="prev2"
+                            class="mb-3 img-fluid">
+
+                    </div>
+
+                    <label for="image3" class="text-center mb-2">Image 3</label>
+                    <input onchange="cropper(3)" id="image3" type="file" accept="image/*"
+                        class="form-control form-control-sm w-50 mb-2 text-center">
+                    <div class="cropper-container text-center">
+
+                        <img style="object-fit: cover;" src="<%= product.images[2] %>" alt="Image 3 Preview" id="prev3"
+                            class="mb-3 img-fluid">
                     </div>
                 </div>
-                
+
                 <!-- Submit Button -->
                 <button type="submit" id="btn-submit" class="btn btn-primary w-100">update</button>
             </form>
@@ -162,15 +169,105 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
 
-        if (typeof errorMessage !== 'undefined' && errorMessage) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: errorMessage,
-                confirmButtonColor: '#007bff'
-            });
-        }
+        document.getElementById("add-product-form").addEventListener("submit", function (event) {
+            let isValid = true;
 
+            // Get input values
+            const name = document.getElementById("name");
+            const description = document.getElementById("description");
+            const category = document.getElementById("category");
+            const salesPrice = document.getElementById("salesPrice");
+            const productOffer = document.getElementById("productOffer");
+            const stock = document.getElementById("stock");
+            const status = document.getElementById("status");
+
+            // Remove old error messages
+            document.querySelectorAll(".error-message").forEach(e => e.remove());
+
+            // Function to show error messages
+            function showError(input, message) {
+                input.classList.add("border", "border-danger"); // Add red border
+                const errorDiv = document.createElement("div");
+                errorDiv.className = "error-message text-danger mt-1";
+                errorDiv.innerText = message;
+                input.parentNode.appendChild(errorDiv);
+                isValid = false;
+            }
+
+            function clearError(input) {
+                input.classList.remove("border", "border-danger");
+            }
+
+            // Validate Product Name
+            if (name.value.trim().length < 3) {
+                showError(name, " Product name must be at least 3 characters.");
+            } else {
+                clearError(name);
+            }
+
+            // Validate Description
+            if (description.value.trim().length < 10) {
+                showError(description, " Description must be at least 10 characters.");
+            } else {
+                clearError(description);
+            }
+
+            // Validate Category
+            if (!category.value) {
+                showError(category, " Please select a category.");
+            } else {
+                clearError(category);
+            }
+
+            // Validate Sales Price
+            if (isNaN(salesPrice.value) || salesPrice.value <= 0) {
+                showError(salesPrice, " Sales price must be greater than 0.");
+            } else {
+                clearError(salesPrice);
+            }
+
+            // Validate Product Offer (0-100%)
+            if (isNaN(productOffer.value) || productOffer.value < 0 || productOffer.value > 100) {
+                showError(productOffer, " Product offer must be between 0% and 100%.");
+            } else {
+                clearError(productOffer);
+            }
+
+            // Validate Stock (Must be 0 or greater)
+            if (isNaN(stock.value) || stock.value < 0) {
+                showError(stock, " Stock cannot be negative.");
+            } else {
+                clearError(stock);
+            }
+
+            // Validate Status
+            if (!["active", "inactive"].includes(status.value)) {
+                showError(status, " Please select a valid status.");
+            } else {
+                clearError(status);
+            }
+
+            // Validate Images
+            for (let i = 1; i <= 3; i++) {
+                const imageInput = document.getElementById(`image${i}`);
+                if (imageInput.files.length > 0) {
+                    const file = imageInput.files[0];
+                    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+                    if (!allowedTypes.includes(file.type)) {
+                        showError(imageInput, " Only JPG, JPEG, or PNG images allowed.");
+                    }
+                    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                        showError(imageInput, " Image must be less than 2MB.");
+                    }
+                }
+            }
+
+            // Prevent form submission if invalid
+            if (!isValid) {
+                event.preventDefault();
+            }
+
+        });
 
         //  this is cropper image function
 
@@ -200,7 +297,7 @@
         }
 
         function productAdder(e) {
-
+            console.log(e)
 
             e.preventDefault()
             let images = []
@@ -226,14 +323,46 @@
                 body: JSON.stringify(formObject),
                 headers: { 'Content-Type': 'application/json' },
             })
-                .then((r) => r.text())
-                .then((html) => {
-                    window.location.href = '/admin/productManagement'
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {  
+                        console.log("Update successful");
+                        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Product updated successfully',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            window.location.href = "/admin/productManagement";
+        });
+
+                    } else {
+                        showToast(data.message || "Failed to update product");
+                    }
                 })
-                .catch((error) => {
-                    console.error('Error during fetch:', error)
-                })
+                .catch(error => {
+                    console.error('Error during fetch:', error);
+                    showToast("An error occurred. Please try again.");
+                });
         }
+
+
+        function showToast(message, type) { 
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                close: true,
+                style: {
+                    background: "orange",
+                    color: "white",
+                    fontWeight: "bold",
+                    borderRadius: "8px",
+                },
+            }).showToast();
+        }
+
 
     </script>
 </body>

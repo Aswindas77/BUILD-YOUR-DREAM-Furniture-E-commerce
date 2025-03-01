@@ -18,6 +18,7 @@ const { createPayPalOrder } = require("../services/paypalService");
 const { capturePayPalOrder } = require("../services/paypalService");
 const saltRounds = 10;
 const Coupon= require('../models/couponModel');
+const Wallet =require("../models/walletModel");
 
 
 
@@ -599,7 +600,7 @@ const loadShop = async (req, res) => {
         }
        
         const totalProducts = await Products.countDocuments(query);
-        const totalPages =Math.ceil(totalProducts/limit);
+        const totalPages =Math.ceil(totalProducts/limit); 
 
         const products =await Products.find(query)
         .populate({
@@ -613,6 +614,16 @@ const loadShop = async (req, res) => {
       const filteredProducts = products.filter(product => product.category);
       const categories = await Category.find({ isDeleted: false, isListed: false });
 
+
+      let wishlistProducts = [];
+      if(user){
+        const wishlist = await WhishList.findOne({userId:user._id});
+        wishlistProducts=wishlist ? wishlist.products.map((product)=>product.productId.toString()):[];
+        console.log("booomaaa",wishlist)
+        console.log("booomuuuu",wishlistProducts)
+      }
+
+      
         
         
           
@@ -621,6 +632,7 @@ const loadShop = async (req, res) => {
         res.render("shop", {
             categories,
             user,
+            wishlistProducts,
             products:filteredProducts,
             filters: { search, category, minPrice, maxPrice, sort },
             currentPage:parseInt(page),
@@ -794,15 +806,15 @@ const loadBanProduct = async (req, res) => {
 //====================================================================================================================================================
 
 
-
  
-
+  
+ 
 const buyNow = async (req, res) => {
     try {
-        const { selectedAddressId, paymentMethod, cartId,couponCode } = req.body;
-        const userId = req.session.User._id;
+        const { selectedAddressId, paymentMethod, cartId,couponCode,grandTotal } = req.body;
+        const userId = req.session?.User?._id;
 
-      console.log("dddddd",selectedAddressId)
+      
        
 
         const user = await User.findById(userId);
@@ -810,12 +822,36 @@ const buyNow = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
 
-        const cart = await Cart.findById(cartId).populate("products.productId");
+        const cart = await Cart.findById(cartId)
+        .populate({
+            path: 'products.productId',
+                select: 'name salesPrice quantity stock'
+        });
+
+      cart.products =cart.products.filter(p=>p.productId && p.productId.stock>0)
+     
+
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
-        let totalAmount = cart.products.reduce((total, item) => total + item.quantity * item.salesPrice, 0);
-        if (cart.discount) totalAmount -= cart.discount;
-        console.log(totalAmount, 'totalAmount')
+        const coupon =await Coupon.findOne({code:couponCode})
+
+        const wallet = await Wallet.findOne({ userId }).select("balance");
+
+        
+
+       let totalAmount =grandTotal
+        if(couponCode){
+            const discountAmount = (grandTotal * coupon?.discountPercentage) / 100;
+         totalAmount = grandTotal - discountAmount;
+        }
+          
+      for(let item of cart.products){
+        await Products.findByIdAndUpdate(
+            item.productId._id,{
+            $inc:{stock:-item.quantity}
+      })
+      }
+          
 
         const orderItems = cart.products.map(item => ({
             productId: item.productId._id,
@@ -823,25 +859,34 @@ const buyNow = async (req, res) => {
             price: item.salesPrice,
         }));
 
-
+       
         if (paymentMethod.toLowerCase() === "wallet") {
-            if (user.walletBalance >= totalAmount) {
-                user.walletBalance -= totalAmount;
+
+            console.log("amount",totalAmount)
+            
+            if (wallet.balance >= totalAmount) {
+                 
+                 wallet.balance -= totalAmount;
+
+                 
                 await user.save();
+                await wallet.save();
+                
 
                 const newOrder = new ordermodel({
                     userId,
                     items: orderItems,
                     addressId: selectedAddressId,
                     couponCode:couponCode, 
-                    paymentMethod,
+                    paymentMethod, 
                     
                     totalAmount,
-                    paymentStatus: "Completed",
+                    paymentStatus: "Paid",
                     orderStatus: "Pending",
                 });
 
                 await newOrder.save();
+                
                 await Cart.findByIdAndDelete(cartId);
 
                 return res.status(200).json({
@@ -885,9 +930,9 @@ const buyNow = async (req, res) => {
             });
 
             await newOrder.save();
-            await Cart.findByIdAndDelete(cartId);
+            await Cart.findOneAndDelete(cartId);
             await Coupon.findOneAndUpdate(
-                
+                { code: couponCode },
                 { $push: { usedBy: userId } }
             );
             return res.status(200).json({
@@ -910,10 +955,11 @@ const buyNow = async (req, res) => {
             });
 
             await newOrder.save();
+            await Products.findOneAndUpdate()
 
             await Coupon.findOneAndUpdate(
-                
-                { $push: { usedBy: userId } }
+                { code: couponCode },
+                { $push: {usedBy: userId}}
             );
             await Cart.findByIdAndDelete(cartId);
 
@@ -925,10 +971,6 @@ const buyNow = async (req, res) => {
 
 
         }
-
-
-
-
 
     } catch (error) {
         console.error("Error in buyNow:", error);
@@ -971,6 +1013,7 @@ const loadOrderPlaced = async (req, res) => {
 
 const filterProducts = async (req, res) => {
     try {
+        const user = req.session?.User;
         const { search, category, sort, minPrice, maxPrice } = req.query;
 
         
@@ -1027,12 +1070,26 @@ const filterProducts = async (req, res) => {
         // Get filtered products
         const products = await Products.find(query)
             .sort(sortOption)
-            .populate('category');
+            .populate('category',);
+
+            const filteredProducts = products.filter(product => product.category);
+
+
+            let wishlistProducts = [];
+            if(user){
+              const wishlist = await WhishList.findOne({userId:user._id});
+              console.log("lllll");
+              wishlistProducts=wishlist ? wishlist.products.map((product)=>product.productId.toString()):[];
+              
+            }
+
+            console.log("ksksksk", wishlistProducts) 
 
         res.json({
             success: true,
-            products: products
-        });
+            wishlistProducts,
+            products: filteredProducts
+        }); 
 
     } catch (error) {
         console.error('Filter error:', error);
@@ -1111,7 +1168,14 @@ const addWhishList = async (req, res) => {
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
-
+        
+        const cart = await Cart.findOne({userId,"products.productId":productId})
+        if(cart){
+            return res.status(400).json({
+                success:false,
+                message:"Product is already in your cart. Cannot add to wishlist."
+            })
+        }
         // Check if wishlist exists for user
         let wishlist = await WhishList.findOne({ userId });
 

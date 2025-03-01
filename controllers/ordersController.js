@@ -27,7 +27,7 @@ const loadOrderPage = async (req, res) => {
         const userOrders = await Orders.find({})
             .populate("userId", "name email")
             .populate({
-                path: "items.productId",
+                path: "items.productId", 
                 model: "Product",
                 select: "name price"
             })
@@ -57,19 +57,9 @@ const updateOrderStatus = async (req, res) => {
     try {
         const { orderId, status } = req.body;
 
-
-        const order = await Orders.findByIdAndUpdate(
-            orderId,
-            {
-                status: status,
-
-                updatedAt: new Date()
-            },
-            { new: true }
-        )
-        .populate("userId", "name email")
-        .populate("addressId","houseNumber city landmark country pincode")
-
+        
+        const order = await Orders.findById(orderId);
+        
         if (!order) {
             return res.status(404).json({
                 success: false,
@@ -77,10 +67,23 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-        res.json({
+        
+        if (order.status === "Cancelled") {
+            return res.status(400).json({
+                success: false,
+                message: 'Status change not allowed. Order is already cancelled.'
+            });
+        }
+
+       
+        order.status = status;
+        order.updatedAt = new Date();
+        await order.save();
+
+        return res.json({
             success: true,
             message: 'Order status updated successfully',
-            order: order
+            order
         });
     } catch (error) {
         console.error("Error updating order status:", error.stack);
@@ -289,6 +292,9 @@ const loadReturnOrder = async (req, res) => {
                     path: 'items.productId',
                     select: 'name images price'
                 }
+            })
+            .sort({
+                updatedAt:-1
             })
             .exec();
         console.log("Return Orders Loaded Successfully ", returns);

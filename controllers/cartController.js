@@ -20,8 +20,15 @@ const loadCart = async (req, res) => {
         }
 
         const user = req.session?.User;
-        const products = await Product.find({ isDeleted: false, isListed: false });
+        const products = await Product.find({ isDeleted: false, isListed: false ,
+            stock:{$gt:0}
+        });
+
         const categories = await Category.find({ isDeleted: false, isListed: false });
+    
+
+       
+        
 
         const cart = await Cart.findOne({ userId })
             .populate({
@@ -29,13 +36,19 @@ const loadCart = async (req, res) => {
                 select: "name salesPrice images stock", 
             });
 
+            
+
+            
+
         console.log("Cart Data After Populate:", JSON.stringify(cart, null, 2));
 
-        if (!cart || !cart.products || cart.products.length === 0) {
+        if (!cart || !cart.products || cart.products.length === 0 ) {
             return res.render("cart", { user, products, categories, cart: [] });
         }
 
-
+        if(cart.products && cart.products.length >0){
+            cart.products = cart.products.filter(p => p.productId && p.productId.stock > 0)
+        }
 
         res.render("cart", { user, products, categories, cart });
 
@@ -60,7 +73,7 @@ const addcart = async (req, res) => {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
-        // if(quantity >0){
+        
             
         //     
         // }
@@ -224,11 +237,12 @@ const loadCheckout = async (req, res) => {
         const Id = req.query.id;
         const grandTotal = req.query.total;
         const cartId = new mongoose.Types.ObjectId(Id);
-        const user = req.session?.User;
-        const { _id } = req.session?.User;
-        const userId = new mongoose.Types.ObjectId(_id);
+        const user = req.session?.User?._id;
+        const userId = new mongoose.Types.ObjectId(user);
 
-        
+        if (!user) {
+            return res.redirect('/user/login');
+        }
         const validCoupons = await Coupon.find({
             isActive: true,
             validUntil: { $gt: new Date() },
@@ -252,9 +266,13 @@ const loadCheckout = async (req, res) => {
         const cart = await Cart.findById(cartId)
             .populate({
                 path: 'products.productId',
-                select: 'name salesPrice quantity'
+                select: 'name salesPrice quantity stock'
             })
             .exec();
+
+             cart.products = cart.products.filter(p => p.productId && p.productId.stock > 0)
+            
+            
 
         if (userAddresses) {
             userAddresses.address = userAddresses.address.filter(addr => !addr.isDeleted);

@@ -1001,7 +1001,7 @@
                 <%= order.status %>
             </span>
         </div>
-
+ 
         <div class="tracking-container">
             <div class="tracking-line">
                 <div class="tracking-line-progress"></div>
@@ -1115,9 +1115,14 @@
                             <% if (order.status === 'Delivered') { %>
                                 <% if (returnOrder && returnOrder.returnStatus === 'Rejected') { %>
                                     <button type="button" class="return-trigger-btn btn-danger">
-                                        <i class="fas fa-undo-alt"></i>
+                                        <i class="fas fa-exclamation-triangle"></i>
                                         Your return was rejected
                                     </button>
+                                    <% }else if(returnOrder && returnOrder.returnStatus === 'Approved'){ %>
+                                        <button type="button" class="return-trigger-btn btn-success" style="background: #48c779;">
+                                            <i class="fas fa-check-circle"></i>
+                                            return order Approved
+                                        </button>
                                 <% } else { %>
                                     <button type="button" class="return-trigger-btn" onclick="openReturnModal()">
                                         <i class="fas fa-undo-alt"></i>
