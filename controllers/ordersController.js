@@ -27,7 +27,7 @@ const loadOrderPage = async (req, res) => {
         const userOrders = await Orders.find({})
             .populate("userId", "name email")
             .populate({
-                path: "items.productId", 
+                path: "items.productId",
                 model: "Product",
                 select: "name price"
             })
@@ -57,9 +57,9 @@ const updateOrderStatus = async (req, res) => {
     try {
         const { orderId, status } = req.body;
 
-        
+
         const order = await Orders.findById(orderId);
-        
+
         if (!order) {
             return res.status(404).json({
                 success: false,
@@ -67,7 +67,7 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-        
+
         if (order.status === "Cancelled") {
             return res.status(400).json({
                 success: false,
@@ -75,8 +75,20 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-       
+        if (order.status === "Returned") {
+            return res.status(400).json({
+                success: false,
+                message: 'Status change not allowed. Order is already returned.'
+            });
+        }
+
+       if(order.status==="Delivered"){
+        order.paymentStatus ="Paid"
+       }else{
+        order.paymentStatus ="Pending"
+       }
         order.status = status;
+        
         order.updatedAt = new Date();
         await order.save();
 
@@ -111,11 +123,11 @@ const getOrderDetails = async (req, res) => {
             .populate('userId', 'username email')
             .populate('addressId')
 
-            
 
-            //  selected address
-            const selectedAddress = order.addressId.address;
-            
+
+        //  selected address
+        const selectedAddress = order.addressId.address;
+
 
 
 
@@ -125,7 +137,7 @@ const getOrderDetails = async (req, res) => {
             });
         }
 
-        res.render('profile/orderDetais', { order,selectedAddress });
+        res.render('profile/orderDetais', { order, selectedAddress });
     } catch (error) {
         console.log("Error fetching order details:", error.message);
         res.status(500).render('userError', {
@@ -294,7 +306,7 @@ const loadReturnOrder = async (req, res) => {
                 }
             })
             .sort({
-                updatedAt:-1
+                updatedAt: -1
             })
             .exec();
         console.log("Return Orders Loaded Successfully ", returns);

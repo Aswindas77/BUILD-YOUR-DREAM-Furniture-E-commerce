@@ -6,12 +6,11 @@ const categoryController = require('../controllers/categoryController');
 const productController = require("../controllers/productController");
 const orderController = require("../controllers/ordersController");
 const couponController = require("../controllers/couponController");
-const salesController = require("../controllers/salesController");
 const adminRouter = express.Router();
 
 
 
- 
+
 
 
 
@@ -22,7 +21,7 @@ adminRouter.get("/login", adminAuth.isLogout, adminController.loadLogin);
 adminRouter.post("/login", adminController.loadDash);
 
 // admin dashboard
-adminRouter.get("/dashboard", adminAuth.isLogin, adminAuth.verifyAdmin, adminController.dashboad);
+adminRouter.get("/dashboard", adminAuth.isLogin, adminAuth.verifyAdmin, adminController.loadDashboard);
 
 // load user management
 adminRouter.get('/user-managment', adminController.loadusermanagment)
@@ -60,13 +59,14 @@ adminRouter.patch("/deletecategory/:categoryid", adminAuth.isLogin, categoryCont
 adminRouter.patch("/admin/list/:categoryId/:action", categoryController.toggleListCategory);
 
 
+// adminRouter.get("/export-sales-report", adminAuth, adminController.generateSalesReportPDF);
 
 
 
 
 
-// load sales report
-// adminRouter.get('/salesReport', adminAuth.isLogin, salesController.filterSalesReport);
+
+
 
 // load admin product management
 adminRouter.get('/productManagement', adminAuth.isLogin, productController.loadProducts)
@@ -140,6 +140,8 @@ adminRouter.put('/updateReturnStatus/:returnId', orderController.updateReturnSta
 
 // logout route
 adminRouter.get("/logout", adminAuth.isLogin, adminController.logout);
+
+
 
 
 

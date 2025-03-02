@@ -3,27 +3,27 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',  
+    ref: 'User',
 
   },
-  couponCode:{
+  couponCode: {
     type: String,
   },
-  addressId:{
+  addressId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'Address',
-    required:true
-  }, 
+    ref: 'Address',
+    required: true
+  },
   items: [{
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product', 
- 
+      ref: 'Product',
+
     },
     quantity: {
       type: Number,
 
-      min: [1, 'Quantity must be at least 1'], 
+      min: [1, 'Quantity must be at least 1'],
     },
     price: {
       type: Number,
@@ -34,14 +34,14 @@ const orderSchema = new mongoose.Schema({
     name: { type: String },
     country: { type: String },
     street: { type: String },
-    city: { type: String }, 
+    city: { type: String },
     state: { type: String },
     postcode: { type: String },
     phone: { type: String },
   },
   status: {
     type: String,
-    enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+    enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
     default: 'Pending',
   },
   createdAt: {
@@ -56,12 +56,12 @@ const orderSchema = new mongoose.Schema({
     type: Number,
 
 
-    min: [0, 'Total amount cannot be negative'], 
+    min: [0, 'Total amount cannot be negative'],
   },
 
   paymentStatus: {
     type: String,
-    enum: ['Pending', 'Paid', 'Failed', 'Processing'],
+    enum: ['Pending', 'Paid', 'Failed', 'Processing', 'Refunded'],
     default: 'Pending',
   },
   isPaid: {
@@ -77,10 +77,10 @@ const orderSchema = new mongoose.Schema({
     origin: { type: String, default: "India" },
     estimatedArrival: { type: Date, default: new Date('2025-02-15') },
     actualArrival: { type: Date, default: null },
-    status: { type: String, enum: ['Pending', 'Shipped', 'Cancelled','Processing', 'Delivered'], default: 'Pending' },
+    status: { type: String, enum: ['Pending', 'Shipped', 'Cancelled', 'Processing', 'Delivered'], default: 'Pending' },
   }
 }, {
-  timestamps: true, 
+  timestamps: true,
 });
 
 

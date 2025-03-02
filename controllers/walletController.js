@@ -42,19 +42,24 @@ const addMoneyWallet = async (req, res) => {
     try {
         const { amount } = req.body;
         const userId = req.session.User._id;
-        console.log('userId', userId)
-        await Wallet.updateOne(
+
+        // Create or update wallet with transaction history
+        const wallet = await Wallet.findOneAndUpdate(
             { userId },
             {
-                $setOnInsert: {
-                    userId,
-                    transactions: []
-                },
-                $inc: { balance: amount }
+                $inc: { balance: amount },
+                $push: {
+                    transactions: {
+                        type: 'credit',
+                        amount: amount, 
+                        description: 'Money Added to Wallet',
+                        date: new Date()
+                    }
+                }
             },
-            { upsert: true }
+            { upsert: true, new: true }
         );
-        
+
         res.json({ success: true, message: 'Money added to wallet successfully' });
     } catch (error) {
         console.error('Error adding money to wallet:', error);
@@ -64,10 +69,57 @@ const addMoneyWallet = async (req, res) => {
         });
     }
 };
+
+
+const deductFromWallet = async (userId, amount, description = 'Purchase') => {
+    try {
+        const wallet = await Wallet.findOne({ userId });
+
+        if (!wallet || wallet.balance < amount) {
+            throw new Error('Insufficient wallet balance');
+        }
+
+        // Update wallet balance and add transaction record
+        const updatedWallet = await Wallet.findOneAndUpdate(
+            { userId },
+            {
+                $inc: { balance: -amount },
+                $push: {
+                    transactions: {
+                        type: 'debit',
+                        amount: amount,
+                        description: description,
+                        date: new Date()
+                    }
+                }
+            },
+            { new: true }
+        );
+
+        return updatedWallet;
+    } catch (error) {
+        console.error('Error deducting from wallet:', error);
+        throw error;
+    }
+};
+
+// Add function to check wallet balance
+const checkWalletBalance = async (userId) => {
+    try {
+        const wallet = await Wallet.findOne({ userId });
+        return wallet ? wallet.balance : 0;
+    } catch (error) {
+        console.error('Error checking wallet balance:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     loadWallet,
-    addMoneyWallet
-}
+    addMoneyWallet,
+    deductFromWallet,
+    checkWalletBalance
+};
 
 
 
