@@ -808,15 +808,14 @@ const loadBanProduct = async (req, res) => {
 
 
 
-
+//  buynow  controller
 
 const buyNow = async (req, res) => {
     try {
+
+
         const { selectedAddressId, paymentMethod, cartId, couponCode, grandTotal } = req.body;
         const userId = req.session?.User?._id;
-
-
-
 
         const user = await User.findById(userId);
 
@@ -870,7 +869,7 @@ const buyNow = async (req, res) => {
                     'Order Payment'
                 );
 
-                // Create new order
+                
                 const newOrder = new ordermodel({
                     userId,
                     items: orderItems,
@@ -885,7 +884,7 @@ const buyNow = async (req, res) => {
                 await newOrder.save();
                 await Cart.findByIdAndDelete(cartId);
 
-                // If coupon was used, update coupon usage
+                
                 if (couponCode) {
                     await Coupon.findOneAndUpdate(
                         { code: couponCode },
@@ -999,6 +998,7 @@ const paypalSuccess = async (req, res) => {
 }
 
 
+// load order placed
 
 const loadOrderPlaced = async (req, res) => {
 
@@ -1014,7 +1014,7 @@ const loadOrderPlaced = async (req, res) => {
     }
 }
 
-
+// filter product
 
 const filterProducts = async (req, res) => {
     try {
@@ -1147,8 +1147,8 @@ const loadWhishList = async (req, res) => {
     }
 };
 
-// add to whishlist 
 
+// add to whishlist 
 
 const addWhishList = async (req, res) => {
     try {
@@ -1159,7 +1159,7 @@ const addWhishList = async (req, res) => {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
-        // Find user by email
+        
         const userData = await User.findOne({ email: user.email });
         if (!userData) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -1168,7 +1168,7 @@ const addWhishList = async (req, res) => {
         const userId = userData._id;
         console.log("User ID:", userId);
 
-        // Validate Product ID
+        
         const product = await Products.findById(productId);
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
@@ -1181,11 +1181,12 @@ const addWhishList = async (req, res) => {
                 message: "Product is already in your cart. Cannot add to wishlist."
             })
         }
-        // Check if wishlist exists for user
+        
+
         let wishlist = await WhishList.findOne({ userId });
 
         if (wishlist) {
-            // Check if product is already in the wishlist
+            
             if (wishlist.products.some(p => p.productId.toString() === productId)) {
                 return res.status(400).json({
                     success: false,
@@ -1193,7 +1194,7 @@ const addWhishList = async (req, res) => {
                 });
             }
 
-            // Add new product to existing wishlist
+            
             wishlist.products.push({ productId });
 
         } else {
@@ -1221,6 +1222,9 @@ const addWhishList = async (req, res) => {
         });
     }
 };
+
+
+// delete wishList
 
 const deleteWhishlist = async (req, res) => {
     try {
@@ -1252,6 +1256,7 @@ const deleteWhishlist = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 }
+
 
 
 
@@ -1298,8 +1303,7 @@ module.exports = {
     loadOrderPlaced,
     filterProducts,
     deleteWhishlist,
-
-
+    
 
 
 };

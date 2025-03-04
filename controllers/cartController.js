@@ -72,11 +72,8 @@ const addcart = async (req, res) => {
         if (!req.session.User || !req.session.User._id) {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
-
-        
             
-        //     
-        // }
+        
 
         const userId = req.session.User._id;
 

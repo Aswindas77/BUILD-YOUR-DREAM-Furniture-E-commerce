@@ -535,21 +535,21 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Orders</h3>
-                    <div class="value">
-                        <%= orders.length %>
+                    <div class="value"> 
+                        <%= totalOrders %>
                     </div>
                 </div>
                 <div class="stat-card">
                     <h3>Active Orders</h3>
-                    <div class="value">3</div>
+                    <div class="value"><%= activeOrders.length %></div>
                 </div>
                 <div class="stat-card">
                     <h3>Wallet Balance</h3>
-                    <div class="value">$249.99</div>
+                    <div class="value">₹<%=Number(walletBalance).toFixed(2) %></div>
                 </div>
                 <div class="stat-card">
                     <h3>Saved Addresses</h3>
-                    <div class="value">2</div>
+                    <div class="value"><%= userAddress %></div>
                 </div>
             </div>
 

@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const express = require('express');
 const path = require('path');
@@ -26,14 +25,14 @@ app.use(expressLayouts);
 app.use(flash());
 
 
-// layout dfor admin
+
 
 app.use('/admin', (req, res, next) => {
     app.set('layout', 'layouts/adminLayout');
     next();
 })
 
-// layout for user
+
 app.use('/user', (req, res, next) => {
     app.set('layout', false);
     next();
@@ -41,7 +40,7 @@ app.use('/user', (req, res, next) => {
 
 
 
-// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
@@ -50,7 +49,7 @@ app.use(express.json({ limit: '50mb' }));
 
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-// app.use(morgan('dev'))
+app.use(morgan('dev'))
 
 app.use(nocache());
 app.use(session({
@@ -67,21 +66,28 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Route Configurations
 
-// Admin Routes
+
+
 app.use("/admin", (req, res, next) => {
     app.set('views', path.join(__dirname, 'views/admin'));
     next();
 });
 app.use("/admin", adminRouter);
 
-// User Routes
+
 app.use("/user", (req, res, next) => {
     app.set('views', path.join(__dirname, 'views/user'));
     next();
 });
 app.use("/user", userRoute);
+
+
+
+
+
+
+
 
 
 

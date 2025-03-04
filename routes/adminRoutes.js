@@ -142,7 +142,7 @@ adminRouter.put('/updateReturnStatus/:returnId', orderController.updateReturnSta
 adminRouter.get("/logout", adminAuth.isLogin, adminController.logout);
 
 
-
+adminRouter.get('/orders/:period', adminController.getOrdersByPeriod);
 
 
 

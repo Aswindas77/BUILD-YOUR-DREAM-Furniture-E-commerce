@@ -15,6 +15,7 @@ const Return = require('../models/returnModel')
 
 
 
+
 // =================  admin verification =================================
 
 
@@ -65,9 +66,6 @@ const loadDash = async (req, res) => {
 
 //====================================================================================================================================================
 
-// load dashboard
-
-//====================================================================================================================================================
 
 
 
@@ -189,91 +187,70 @@ const logout = async (req, res) => {
 //====================================================================================================================================================
 
 
-async function calculateTotalRevenue() {
-  const result = await Order.aggregate([
-    {
-      $match: {
-        status: { $nin: ['Cancelled', 'Returned'] },
-        isPaid: true
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        total: { $sum: '$totalAmount' }
-      }
-    }
-  ]);
-  return result[0]?.total || 0;
-}
+
 
 
 
 const getSalesData = async (startDate, endDate) => {
-  const orders = await Order.find({
-    createdAt: {
-      $gte: new Date(startDate),
-      $lte: new Date(endDate)
-    }
-  })
-    .populate('userId')
-    .populate('items.productId');
+  try {
+    const orders = await Order.find({
+      createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
+      status: 'Delivered'  
+    }).populate('items.productId');
 
-  if (!orders.length) return null;
+    let totalOrders = orders.length;
+    let totalRevenue = 0;
+    let totalProductDiscount = 0;
+    let totalProductCount = 0;
 
-  let totalOrders = await Order.aggregate([
-    {
-      $match: {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
-      }
-    },
-    { $unwind: "$items" },
-    { $group: { _id: null, total: { $sum: 1 } } }
-  ]).then(result => result.length ? result[0].total : 0);
+    orders.forEach(order => {
+      totalRevenue += order.totalAmount || 0;
 
-  let totalProductCount = 0;
-  let totalDeliveredProducts = 0;
-  let totalRevenue = 0;
-  let totalProductDiscount = 0;
+      order.items.forEach(item => {
+        const product = item.productId;
+        if (!product || !item.quantity) return;
 
-  orders.forEach(order => {
-    order.items.forEach(item => {
-      if (item.quantity && item.shippingDetails && item.shippingDetails.status === 'Delivered') {
         totalProductCount += item.quantity;
-        totalDeliveredProducts += item.quantity;
 
-        const productPrice = parseFloat(item.productId.price.replace(/,/g, ''));
-        const offerPercentage = item.productId.offer ? parseFloat(item.productId.offer) / 100 : 0;
+        const productPrice = typeof product.price === 'string'
+          ? parseFloat(product.price.replace(/,/g, ''))
+          : product.price;
 
-        totalRevenue += Math.floor((productPrice - (productPrice * offerPercentage)) * item.quantity);
-        totalProductDiscount += Math.floor(offerPercentage * productPrice * item.quantity);
-      }
+        const offerPercentage = product.offer ? product.offer / 100 : 0;
+        const discountAmount = productPrice * offerPercentage;
+        totalProductDiscount += discountAmount * item.quantity;
+      });
     });
-  });
 
-  return {
-    totalOrders: Math.floor(totalOrders),
-    totalProductCount: Math.floor(totalProductCount),
-    totalDeliveredProducts: Math.floor(totalDeliveredProducts),
-    totalRevenue: Math.floor(totalRevenue),
-    totalProductDiscount: Math.floor(totalProductDiscount)
-  };
+    return {
+      totalOrders,
+      totalRevenue: Math.floor(totalRevenue),
+      totalProductCount,
+      totalProductDiscount: Math.floor(totalProductDiscount),
+      couponDiscount: 0 
+    };
+  } catch (error) {
+    console.error('Error in getSalesData:', error);
+    return {
+      totalOrders: 0,
+      totalRevenue: 0,
+      totalProductCount: 0,
+      totalProductDiscount: 0,
+      couponDiscount: 0
+    };
+  }
 };
 
-const getDailySales = async (page = 1, limit = 10, startDate = null, endDate = null) => {
-  const skip = (page - 1) * limit;
+
+
+const getDailySales = async (startDate = null, endDate = null) => {
+  const queryStartDate = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const queryEndDate = endDate ? new Date(endDate) : new Date();
+
+  queryStartDate.setHours(0, 0, 0, 0);
+  queryEndDate.setHours(23, 59, 59, 999);
+
   const dailySales = [];
-
-  let queryStartDate = startDate ? new Date(startDate) : await Order.findOne().sort({ createdAt: 1 }).then(order => order?.createdAt);
-  let queryEndDate = endDate ? new Date(endDate) : new Date();
-
-  if (!queryStartDate) return { data: [], totalPages: 0 };
-
-  queryStartDate = new Date(queryStartDate.setHours(0, 0, 0, 0));
-  queryEndDate = new Date(queryEndDate.setHours(23, 59, 59, 999));
 
   for (let d = new Date(queryStartDate); d <= queryEndDate; d.setDate(d.getDate() + 1)) {
     const dayStart = new Date(d);
@@ -281,21 +258,15 @@ const getDailySales = async (page = 1, limit = 10, startDate = null, endDate = n
     dayEnd.setHours(23, 59, 59, 999);
 
     const salesData = await getSalesData(dayStart, dayEnd);
-    if (salesData) {
-      dailySales.push({
-        date: dayStart.toISOString().split('T')[0],
-        ...salesData
-      });
-    }
+    dailySales.push({
+      date: dayStart.toISOString().split('T')[0],
+      ...salesData
+    });
   }
 
-  dailySales.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  return {
-    data: dailySales.slice(skip, skip + limit),
-    totalPages: Math.ceil(dailySales.length / limit)
-  };
+  return dailySales.sort((a, b) => new Date(b.date) - new Date(a.date));
 };
+
 
 const getWeeklySales = async (page = 1, limit = 10, startDate = null, endDate = null) => {
   const skip = (page - 1) * limit;
@@ -472,6 +443,11 @@ const getYearlySales = async (page = 1, limit = 10, startDate = null, endDate = 
 };
 
 
+
+
+
+// dashboard
+
 const loadDashboard = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -490,25 +466,25 @@ const loadDashboard = async (req, res) => {
     }
 
     const [dailySalesData, weeklySalesData, monthlySalesData, yearlySalesData] = await Promise.all([
-      getDailySales(page, limit, startDate, endDate),
+      getDailySales(startDate, endDate),
       getWeeklySales(page, limit, startDate, endDate),
       getMonthlySales(page, limit, startDate, endDate),
       getYearlySales(page, limit, startDate, endDate)
     ]);
 
     console.log('Sales Data Status:', {
-      hasDaily: dailySalesData.data.length > 0,
+      hasDaily: dailySalesData.length > 0,
       hasYearly: yearlySalesData.data.length > 0,
       yearlyData: yearlySalesData
     });
 
-    if (!dailySalesData.data || dailySalesData.data.length === 0) {
+    if (!dailySalesData.length) {
       const emptyData = {
         data: [],
         totalPages: 0
       };
 
-      return res.render('admin/adminDashboard', {
+      return res.render('adminDashboard', {
         totalUsers: await User.countDocuments(),
         totalOrders: 0,
         totalProducts: 0,
@@ -516,24 +492,6 @@ const loadDashboard = async (req, res) => {
         totalRevenue: 0,
         totalReturns: 0,
         orders: [],
-        currentPage: {
-          daily: page,
-          weekly: page,
-          monthly: page,
-          yearly: page
-        },
-        totalPages: {
-          daily: 0,
-          weekly: 0,
-          monthly: 0,
-          yearly: 0
-        },
-        dailySales: [],
-        weeklySales: [],
-        monthlySales: [],
-        yearlySales: [],
-        startDate: startDate ? startDate.toISOString().split('T')[0] : '',
-        endDate: endDate ? endDate.toISOString().split('T')[0] : ''
       });
     }
 
@@ -552,7 +510,6 @@ const loadDashboard = async (req, res) => {
       {
         $match: orderQuery
       },
-      { $unwind: "$items" },
       { $group: { _id: null, total: { $sum: 1 } } }
     ]).then(result => result.length ? result[0].total : 0);
 
@@ -576,14 +533,14 @@ const loadDashboard = async (req, res) => {
           'status': 'Delivered'
         }
       },
-      { $unwind: '$items' },
       {
         $group: {
           _id: null,
-          total: { $sum: '$items.quantity' }
+          total: { $sum: 1 }
         }
       }
     ]).then(result => result.length ? result[0].total : 0);
+
 
     const orders = await Order.find(orderQuery).populate('items.productId');
     let totalRevenue = 0;
@@ -591,7 +548,9 @@ const loadDashboard = async (req, res) => {
 
     orders.forEach(order => {
       if (order.status === 'Delivered') {
+
         totalRevenue += order.totalAmount;
+
       }
     });
 
@@ -610,12 +569,12 @@ const loadDashboard = async (req, res) => {
         yearly: page
       },
       totalPages: {
-        daily: dailySalesData.totalPages,
+        daily: dailySalesData.length,
         weekly: weeklySalesData.totalPages,
         monthly: monthlySalesData.totalPages,
         yearly: yearlySalesData.totalPages
       },
-      dailySales: dailySalesData.data,
+      dailySales: dailySalesData,
       weeklySales: weeklySalesData.data,
       monthlySales: monthlySalesData.data,
       yearlySales: yearlySalesData.data,
@@ -634,62 +593,11 @@ const loadDashboard = async (req, res) => {
 
 
 
-async function exportToExcel(res, salesData) {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Sales Report');
 
-  // Add headers
-  worksheet.columns = [
-    { header: 'Date', key: 'date', width: 15 },
-    { header: 'Total Orders', key: 'totalOrders', width: 15 },
-    { header: 'Total Revenue', key: 'totalRevenue', width: 15 },
-    { header: 'Coupon Discount', key: 'couponDiscount', width: 15 },
-    { header: 'Product Discount', key: 'productDiscount', width: 15 }
-  ];
 
-  // Add data
-  salesData.forEach(data => {
-    worksheet.addRow(data);
-  });
 
-  // Set response headers
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', 'attachment; filename=sales-report.xlsx');
 
-  // Write to response
-  await workbook.xlsx.write(res);
-}
 
-async function exportToPDF(res, salesData) {
-  const doc = new PDFDocument();
-
-  // Set response headers
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'attachment; filename=sales-report.pdf');
-
-  // Pipe the PDF to the response
-  doc.pipe(res);
-
-  // Add content to PDF
-  doc.fontSize(20).text('Sales Report', { align: 'center' });
-  doc.moveDown();
-
-  // Add table headers
-  const headers = ['Date', 'Orders', 'Revenue', 'Coupon Discount', 'Product Discount'];
-  let y = 150;
-
-  // Add data rows
-  salesData.forEach(data => {
-    doc.fontSize(12).text(
-      `${data.date}    ${data.totalOrders}    ₹${data.totalRevenue}    ₹${data.couponDiscount}    ₹${data.productDiscount}`,
-      50,
-      y
-    );
-    y += 20;
-  });
-
-  doc.end();
-}
 
 
 
@@ -867,6 +775,66 @@ const getSalesReport = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+const getOrdersByPeriod = async (req, res) => {
+  try {
+    const period = req.params.period;
+    const now = new Date();
+    let startDate;
+
+    switch (period) {
+      case 'daily':
+        startDate = new Date(now);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'weekly':
+        startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case 'monthly':
+        startDate = new Date(now);
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case 'yearly':
+        startDate = new Date(now);
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid period' });
+    }
+
+    // Populate product details and format response
+    const orders = await Order.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: now
+      }
+    })
+      .populate('userId', 'name')
+      .populate('items.productId', 'name price')
+      .sort({ createdAt: -1 });
+
+    // Format orders to match frontend display requirements
+    const formattedOrders = orders.map(order => ({
+      _id: order._id,
+      userId: order.userId._id,
+      items: order.items,
+      totalAmount: order.totalAmount,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      status: order.status,
+      createdAt: order.createdAt
+    }));
+
+    console.log('Start date:', startDate);
+    console.log('End date:', now);
+    console.log('Number of orders found:', formattedOrders.length);
+
+    res.json(formattedOrders);
+  } catch (error) {
+    console.error('Error getting orders by period:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 module.exports = {
   loadLogin,
@@ -879,5 +847,6 @@ module.exports = {
 
   loadOrderManagement,
   updateOrderStatus,
-  viewOrder
+  viewOrder,
+  getOrdersByPeriod
 };

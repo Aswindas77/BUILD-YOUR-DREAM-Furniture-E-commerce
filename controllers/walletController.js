@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const Wallet = require("../models/walletModel");
 
 
-// load wallet page
+// load wallet
+
 const loadWallet = async (req, res) => {
     try {
         const userId = req.session.User._id;
@@ -43,7 +44,6 @@ const addMoneyWallet = async (req, res) => {
         const { amount } = req.body;
         const userId = req.session.User._id;
 
-        // Create or update wallet with transaction history
         const wallet = await Wallet.findOneAndUpdate(
             { userId },
             {
@@ -61,6 +61,7 @@ const addMoneyWallet = async (req, res) => {
         );
 
         res.json({ success: true, message: 'Money added to wallet successfully' });
+
     } catch (error) {
         console.error('Error adding money to wallet:', error);
         res.status(500).json({
@@ -70,6 +71,7 @@ const addMoneyWallet = async (req, res) => {
     }
 };
 
+// deductFormWallet
 
 const deductFromWallet = async (userId, amount, description = 'Purchase') => {
     try {
@@ -79,7 +81,7 @@ const deductFromWallet = async (userId, amount, description = 'Purchase') => {
             throw new Error('Insufficient wallet balance');
         }
 
-        // Update wallet balance and add transaction record
+       
         const updatedWallet = await Wallet.findOneAndUpdate(
             { userId },
             {
@@ -103,7 +105,10 @@ const deductFromWallet = async (userId, amount, description = 'Purchase') => {
     }
 };
 
+
+
 // Add function to check wallet balance
+
 const checkWalletBalance = async (userId) => {
     try {
         const wallet = await Wallet.findOne({ userId });

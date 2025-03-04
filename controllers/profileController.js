@@ -24,6 +24,7 @@ const Return =require("../models/returnModel");
 // ====================================================================================================================================================
 
 const userProfile = async (req, res) => {
+
     try {
         if (!req.session.User) {
             return res.redirect("login");
@@ -44,6 +45,18 @@ const userProfile = async (req, res) => {
             .skip(skip)
         .limit(limit);
 
+        const WalletBalance =await Wallet.findOne({userId:userId})
+
+        const userAddress = await Address.findOne({ userId: userId }).lean(); 
+
+        const activeOrders = await Order.find({
+            userId: userId,
+            status: { $nin: ["Delivered", "Cancelled"] } 
+        }).lean();
+        
+        
+
+        
 
         orders.forEach(order => {
             if (!order.totalAmount) {
@@ -54,8 +67,12 @@ const userProfile = async (req, res) => {
         res.render("profile/profileView", {
              user,
               orders,
+              totalOrders,
+              activeOrders,
               currentPage:parseInt(page),
             totalPages,
+            walletBalance:WalletBalance ? WalletBalance.balance || 0 : 0,
+            userAddress:userAddress ? userAddress?.address?.length || 0 :0,
              });
 
     } catch (error) {
@@ -368,7 +385,7 @@ const deleteAddress = async (req, res) => {
             return res.status(404).json({ error: "Address not found." });
         }
 
-        // 3. Send success response
+        
         res.status(200).json({ message: "Address deleted successfully." });
     } catch (error) {
         console.error("Server error:", error);
