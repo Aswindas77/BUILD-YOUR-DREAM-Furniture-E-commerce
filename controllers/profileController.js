@@ -244,7 +244,7 @@ const addAddress = async (req, res) => {
             address.address.push(newAddress);
         }
 
-        console.log("Address to be saved:", address);
+        
 
 
         await address.save();
@@ -302,14 +302,18 @@ const loadEditAddress = async (req, res) => {
 
 //====================================================================================================================================================
 
-const updateAddress = async (req, res) => {
+const updateAddress = async (req, res) => { 
     try {
         const { addressId, houseNumber, city, landmark, country, pincode, phone } = req.body;
         const { _id } = req.session.User._id
         const userId = _id
 
-        const userAddress = await Address.findOne({ "address._id": addressId });
+        console.log("addressId",addressId)
 
+        const userAddress = await Address.findOne({ "address._id": addressId });
+        
+         console.log("user address",userAddress);
+         
         const errors = [];
         if (!/^[6-9]\d{9}$/.test(phone)) {
             return res.status(404).json('Invalid phone number format');
@@ -319,6 +323,8 @@ const updateAddress = async (req, res) => {
             phone: phone,
             _id: { $ne: addressId }
         });
+        console.log("existing phone",existingPhone)
+
         if (existingPhone) {
             return res.status(404).send('Phone number already exists in your addresses');
         }
@@ -343,9 +349,14 @@ const updateAddress = async (req, res) => {
 
         
         await userAddress.save();
+   
+       
+       
+        res.status(200).json({
+            success:true,
+            message:"Address updated successfully!",
 
-        console.log("Updated Address:", addressToUpdate);
-        res.redirect('/user/useraddress');
+        })
     } catch (error) {
         console.error('Error updating address:', error);
         res.status(500).json({

@@ -32,8 +32,15 @@
                         </li> -->
                         <!-- <li class="nav-item"><a class="nav-link" href="">about</a></li> -->
                          <li class="nav-item submenu dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                             aria-expanded="false">Profile</a>
+                            <% if(user) { %>
+                                <a href="#" class="nav-link dropdown-toggle d-flex align-items-center user-profile-trigger" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    <i class="" style="font-size: 22px; margin-right: 10px; margin-top: 2px;"></i>
+                                    <span class="username-text"><%=user.username %></span>
+                                    <i class="fas fa-chevron-down dropdown-chevron" style="margin-left: 8px; color: #6c757d;"></i>
+                                </a>
+                            <% } else { %>
+                                <a href="#" class="nav-link dropdown-toggle profile-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile</a>
+                            <% } %>
                             <ul class="dropdown-menu">
 
                                 <% if(user) {%>

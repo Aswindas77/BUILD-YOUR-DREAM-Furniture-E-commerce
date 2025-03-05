@@ -416,7 +416,7 @@ const verifyOtp = async (req, res) => {
                 }
 
                 const { username, email, password } = req.session.data;
-                console.log('this is the user data from session', req.session)
+                
 
 
                 const hashedpassword = await bcrypt.hash(password, saltRounds);
@@ -492,7 +492,7 @@ const resendOtp = async (req, res) => {
         })
         const email = req.session?.data?.email
 
-        console.log("asdfghjiuygfdsdfghj", email)
+        
 
         let newOtp;
         do {
@@ -546,7 +546,7 @@ const loadShopCategory = async (req, res) => {
         const user = req.session?.User
 
         const categories = await Category.findOne({ name: req.params.cat, isListed: false, isDeleted: false });
-        const a = await Category.find({ isListed: false, isDeleted: false });
+        
 
 
         const products = await Products.find({ isListed: false, isDeleted: false, category: categories?._id })
@@ -554,7 +554,7 @@ const loadShopCategory = async (req, res) => {
 
 
 
-        res.render("shopCategory", { products, categories: a, user });
+        res.render("shopCategory", { products, categories, user });
     } catch (err) {
         console.log(err.message);
     }
@@ -620,15 +620,14 @@ const loadShop = async (req, res) => {
         if (user) {
             const wishlist = await WhishList.findOne({ userId: user._id });
             wishlistProducts = wishlist ? wishlist.products.map((product) => product.productId.toString()) : [];
-            console.log("booomaaa", wishlist)
-            console.log("booomuuuu", wishlistProducts)
+           
         }
 
 
 
 
 
-        console.log('Found Products:', products.length);
+        
 
         res.render("shop", {
             categories,
@@ -719,7 +718,7 @@ const loadContact = async (req, res) => {
         const categories = await Category.find({ isDeleted: false, isListed: false })
         res.render("contact", { user, products, categories });
     } catch (err) {
-        console.log(err.message);
+        console.error(err.message);
     }
 }
 
@@ -749,7 +748,7 @@ const logOut = async (req, res) => {
 
 const googleLogin = async (req, res) => {
     try {
-        console.log(req.user);
+       
 
         const user = await User.findOne({ email: req.user.email });
 
@@ -1083,12 +1082,12 @@ const filterProducts = async (req, res) => {
         let wishlistProducts = [];
         if (user) {
             const wishlist = await WhishList.findOne({ userId: user._id });
-            console.log("lllll");
+            
             wishlistProducts = wishlist ? wishlist.products.map((product) => product.productId.toString()) : [];
 
         }
 
-        console.log("ksksksk", wishlistProducts)
+        
 
         res.json({
             success: true,
@@ -1119,7 +1118,7 @@ const loadWhishList = async (req, res) => {
         const categories = await Category.find({ isDeleted: false, isListed: false });
 
         const cart = await Cart.findOne({ userId: user._id }).populate("products.productId")
-        console.log("shoo", cart)
+        
 
         const cartProductIds = cart ? cart.products.map(p => p.productId._id.toString()) : [];
 
@@ -1138,7 +1137,7 @@ const loadWhishList = async (req, res) => {
             );
         }
 
-        console.log("Filtered wishlist (excluding cart items):", wishlist);
+        
 
         res.render("whishList", { user, categories, wishlist });
     } catch (error) {
@@ -1166,7 +1165,7 @@ const addWhishList = async (req, res) => {
         }
 
         const userId = userData._id;
-        console.log("User ID:", userId);
+        
 
         
         const product = await Products.findById(productId);
@@ -1206,7 +1205,7 @@ const addWhishList = async (req, res) => {
         }
 
         await wishlist.save();
-        console.log("Saved wishlist:", wishlist);
+       
 
         res.status(201).json({
             success: true,
@@ -1214,7 +1213,7 @@ const addWhishList = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error adding to wishlist:", error);
+       
         res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -1233,7 +1232,7 @@ const deleteWhishlist = async (req, res) => {
         console.log(productId)
 
         const whishlist = await WhishList.findOne({ userId });
-        console.log(whishlist)
+        
 
         if (!whishlist || !whishlist.products || whishlist.products.length === 0) {
             return res.status(400).json({ success: false, message: "Whishlist is empty" });

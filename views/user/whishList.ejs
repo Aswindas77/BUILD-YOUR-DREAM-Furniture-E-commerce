@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="/public/userAssets/css/main.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="/public/userAssets/css/custom.css">
-	```
+
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 
@@ -35,197 +35,200 @@
     <%- include("../partials/userPartial/userHeader") %>
         <!-- End Header Area -->
 
-        <%- include('../partials/userPartial/breadcrumb', { pageTitle: 'Whishlist page' , currentPage: 'whishlist' , parentPage:
-			null, parentPath: null }) %>
+        <%- include('../partials/userPartial/breadcrumb', { pageTitle: 'Whishlist page' , currentPage: 'whishlist' ,
+            parentPage: null, parentPath: null }) %>
 
-        <!--================Wishlist Area =================-->
-        <section class="cart_area" style="margin-top: 5%;">
-            <div class="container">
-                <div class="cart_inner">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">Images</th>
-                                    <th scope="col">Product</th>
-                                    <th scope="col">Price</th>
-                                    <th scope="col">Stock Status</th>
-                                    <th scope="col">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if (wishlist && wishlist.products && wishlist.products.length> 0) { %>
-                                    <% wishlist.products.forEach(item=> { %>
-                                        <% if (item && item.productId) { %>
-                                            <tr id="wishlist-item-<%= item.productId._id %>" class="wishlist-item-row">
-                                                <td>
-                                                    <div class="media">
-                                                        <div class="col-md-6 text-center">
-                                                            <div class="wishlist-image-container">
-                                                                <% if (item.productId.images &&
-                                                                    item.productId.images.length> 0) { %>
-                                                                    <img class="wishlist-thumbnail img-fluid"
-                                                                        src="<%= item.productId.images[0] %>"
-                                                                        alt="Product Image"
-                                                                        style="max-width: 120px; height: auto; border-radius: 8px;">
-                                                                    <% } else { %>
-                                                                        <p class="no-image">No image available</p>
-                                                                        <% } %>
+            <!--================Wishlist Area =================-->
+            <section class="cart_area" style="margin-top: 5%;">
+                <div class="container">
+                    <div class="cart_inner">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">Images</th>
+                                        <th scope="col">Product</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Stock Status</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (wishlist && wishlist.products && wishlist.products.length> 0) { %>
+                                        <% wishlist.products.forEach(item=> { %>
+                                            <% if (item && item.productId) { %>
+                                                <tr id="wishlist-item-<%= item.productId._id %>"
+                                                    class="wishlist-item-row">
+                                                    <td>
+                                                        <div class="media">
+                                                            <div class="col-md-6 text-center">
+                                                                <div class="wishlist-image-container">
+                                                                    <% if (item.productId.images &&
+                                                                        item.productId.images.length> 0) { %>
+                                                                        <img class="wishlist-thumbnail img-fluid"
+                                                                            src="<%= item.productId.images[0] %>"
+                                                                            alt="Product Image"
+                                                                            style="max-width: 120px; height: auto; border-radius: 8px;">
+                                                                        <% } else { %>
+                                                                            <p class="no-image">No image available</p>
+                                                                            <% } %>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="media-body">
-                                                        <p>
-                                                            <%= item.productId.name || 'Product Name Not Available' %>
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <h5>₹<%= item.productId.salesPrice || 0 %>
-                                                    </h5>
-                                                </td>
-                                                <td>
-                                                    <% if(item.productId.stock> 0) { %>
-                                                        <span class="text-success">In Stock</span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="media-body">
+                                                            <p>
+                                                                <%= item.productId.name || 'Product Name Not Available'
+                                                                    %>
+                                                            </p>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <h5>₹<%= item.productId.salesPrice || 0 %>
+                                                        </h5>
+                                                    </td>
+                                                    <td>
+                                                        <% if(item.productId.stock> 0) { %>
+                                                            <span class="text-success">In Stock</span>
+                                                            <% } else { %>
+                                                                <span class="text-danger">Out of Stock</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-primary btn-sm mb-2"
+                                                            onclick="addToCart('<%= item.productId._id %>')">
+                                                            Add to Cart
+                                                        </button>
+                                                        <button class="btn btn-danger btn-sm"
+                                                            onclick="removeFromWishlist('<%= item.productId._id %>')">
+                                                            <i class="lnr lnr-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                                    <% }); %>
                                                         <% } else { %>
-                                                            <span class="text-danger">Out of Stock</span>
-                                                            <% } %>
-                                                </td>
-                                                <td>
-                                                    <button class="btn btn-primary btn-sm mb-2"
-                                                        onclick="addToCart('<%= item.productId._id %>')">
-                                                        Add to Cart
-                                                    </button>
-                                                    <button class="btn btn-danger btn-sm"
-                                                        onclick="removeFromWishlist('<%= item.productId._id %>')">
-                                                        <i class="lnr lnr-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <% } %>
-                                                <% }); %>
-                                                    <% } else { %>
-                                                        <tr>
-                                                            <td colspan="5" style="color: red;" class="text-center">Your
-                                                                wishlist is empty</td>
-                                                        </tr>
-                                                        <% } %>
-                                                            <tr class="out_button_area">
-                                                                <td colspan="5">
-                                                                    <div
-                                                                        class="checkout_btn_inner d-flex justify-content-end">
-                                                                        <a class="btn btn-secondary gray_btn"
-                                                                            href="/user/shop">Continue Shopping</a>
-                                                                    </div>
-                                                                </td>
+                                                            <tr>
+                                                                <td colspan="5" style="color: red;" class="text-center">
+                                                                    Your
+                                                                    wishlist is empty</td>
                                                             </tr>
-                            </tbody>
-                        </table>
+                                                            <% } %>
+                                                                <tr class="out_button_area">
+                                                                    <td colspan="5">
+                                                                        <div
+                                                                            class="checkout_btn_inner d-flex justify-content-end">
+                                                                            <a class="btn btn-secondary gray_btn"
+                                                                                href="/user/shop">Continue Shopping</a>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
-        <!--================End Wishlist Area =================-->
+            </section>
+            <!--================End Wishlist Area =================-->
 
-        <!-- Start footer Area -->
-        <%- include("../partials/userPartial/userFooter") %>
-            <!-- End footer Area -->
- 
-            <!-- Scripts -->
-            <script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
-            <script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
-            <script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
-            <script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
-            <script src="/public/userAssets/js/jquery.sticky.js"></script>
-            <script src="/public/userAssets/js/nouislider.min.js"></script>
-            <script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
-            <script src="/public/userAssets/js/owl.carousel.min.js"></script>
-            <script src="/public/userAssets/js/main.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <!-- Start footer Area -->
+            <%- include("../partials/userPartial/userFooter") %>
+                <!-- End footer Area -->
 
-            <script>
-                function addToCart(productId) {
-                    console.log(productId)
-                    fetch("/user/cart", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            productId, 
-                            quantity: 1
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
+                <!-- Scripts -->
+                <script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+                <script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
+                <script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
+                <script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
+                <script src="/public/userAssets/js/jquery.sticky.js"></script>
+                <script src="/public/userAssets/js/nouislider.min.js"></script>
+                <script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
+                <script src="/public/userAssets/js/owl.carousel.min.js"></script>
+                <script src="/public/userAssets/js/main.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-                                showToast(data.message);
-                                document.getElementById(`wishlist-item-${productId}`).remove(); 
-                            } else {
-                                showToast(data.message);
-                            }
-                        })
-                        .then()
-                        .catch(error => {
-                            showToast("Something went wrong.", "error");
-                        });
-                }
-
-
-                function removeFromWishlist(productId) {
-                    
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "Do you want to remove this item from your wishlist?",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#d33",
-                        cancelButtonColor: "#3085d6",
-                        confirmButtonText: "Yes, remove it!"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch(`/user/removeWhishlist?id=${productId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                'Content-Type': 'application/json'
-                                       }
+                <script>
+                    function addToCart(productId) {
+                        console.log(productId)
+                        fetch("/user/cart", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                productId,
+                                quantity: 1
                             })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        showToast("product removed successfully", "success");
-                                        document.getElementById(`wishlist-item-${productId}`).remove(); 
-                                    } else {
-                                        showToast(data.message || "Failed to remove from wishlist", "error");
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+
+                                    showToast(data.message);
+                                    document.getElementById(`wishlist-item-${productId}`).remove();
+                                } else {
+                                    showToast(data.message);
+                                }
+                            })
+                            .then()
+                            .catch(error => {
+                                showToast("Something went wrong.", "error");
+                            });
+                    }
+
+
+                    function removeFromWishlist(productId) {
+
+                        Swal.fire({
+                            title: "Are you sure?",
+                            text: "Do you want to remove this item from your wishlist?",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#d33",
+                            cancelButtonColor: "#3085d6",
+                            confirmButtonText: "Yes, remove it!"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch(`/user/removeWhishlist?id=${productId}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json'
                                     }
                                 })
-                                .catch(error => {
-                                    showToast("Error removing from wishlist", "error");
-                                });
-                        }
-                    });
-                }
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            showToast("product removed successfully", "success");
+                                            document.getElementById(`wishlist-item-${productId}`).remove();
+                                        } else {
+                                            showToast(data.message || "Failed to remove from wishlist", "error");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        showToast("Error removing from wishlist", "error");
+                                    });
+                            }
+                        });
+                    }
 
-                function showToast(message, type) {
-						Toastify({
-							text: message,
-							duration: 3000,
-							gravity: "top",
-							position: "center",
-							close: true,
-							style: {
-								background: "orange", 
-								color: "white",
-								fontWeight: "bold", 
-								borderRadius: "8px",
-							},
-						}).showToast();
-					}
-            </script>
+                    function showToast(message, type) {
+                        Toastify({
+                            text: message,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "center",
+                            close: true,
+                            style: {
+                                background: "orange",
+                                color: "white",
+                                fontWeight: "bold",
+                                borderRadius: "8px",
+                            },
+                        }).showToast();
+                    }
+                </script>
 </body>
 
 </html>
