@@ -1,0 +1,54 @@
+.status-select {
+    transition: background-color 0.3s ease;
+    color: #000;
+    font-weight: 500;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.status-select:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.status-select option {
+    background-color: white;
+    color: black;
+}
+
+/* Status colors */
+.status-Pending {
+    background-color: #ffd700 !important;
+}
+
+.status-Shipped {
+    background-color: #87ceeb !important;
+}
+
+.status-Delivered {
+    background-color: #90ee90 !important;
+}
+
+.status-Cancelled {
+    background-color: #ff6b6b !important;
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.status-select:disabled {
+    animation: pulse 1s infinite;
+}

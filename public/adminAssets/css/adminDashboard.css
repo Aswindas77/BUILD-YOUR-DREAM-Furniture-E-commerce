@@ -1,68 +1,198 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f9;
-  }
+  background-color: #f0f0f0;
+  padding: 20px;
+}
 
-  /* Sidebar Styling */
-  .sidebar {
-    height: 100vh;
-    background-color: #343a40;
-    color: #fff;
-    padding: 20px;
-  }
+.dashboard-title { 
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
 
-  .sidebar h2 {
-    text-align: center;
-    margin-bottom: 30px;
-    font-weight: bold;
-  }
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
 
-  .sidebar a {
-    color: #adb5bd;
-    text-decoration: none;
-    padding: 10px;
-    display: block;
-    border-radius: 4px;
-    transition: 0.3s;
-  }
+.card {
+  padding: 20px;
+  border-radius: 8px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-  .sidebar a:hover, .sidebar a.active {
-    background-color: #495057;
-    color: #fff;
-  }
+.users-card {
+  background-color: #4a9cf5;
+}
 
-  /* Main Content */
-  .main-content {
-    padding: 20px;
-    height: 100vh;
-  }
+.orders-card {
+  background-color: #6ef38d;
+}
 
-  .card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+.products-card {
+  background-color: #ffce39;
+}
 
-  .chart-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+.delivered-card {
+  background-color: #ff3939;
+}
 
-  .card h5 {
-    color: #495057;
-  }
+.revenue-card {
+  background-color: #ffce39;
+}
 
-  .navbar {
-    margin-bottom: 20px;
-  }
-  .comp-logo img{
-      margin-bottom: 10%;
-      width: 200px;
-      height:auto;
-  }
+.returns-card {
+  background-color: #ff3939;
+}
 
+.card-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.sales-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sales-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sales-title {
+  font-size: 20px;
+  color: #333;
+}
+
+.period-buttons {
+  display: flex;
+  gap: 10px;
+  background-color: #f8f9fa;
+  padding: 5px;
+  border-radius: 6px;
+}
+
+.period-button {
+  padding: 8px 16px;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+  transition: all 0.3s ease;
+}
+
+.period-button:hover {
+  background-color: #e9ecef;
+}
+
+.period-button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.export-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s ease;
+}
+
+.excel-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.pdf-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.export-button:hover {
+  opacity: 0.9;
+}
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.sales-table th,
+.sales-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.sales-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.sales-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+  color: #666;
+}
+
+/* Add styles for PDF export */
+.pdf-wrapper {
+  padding: 20px;
+  background: white;
+}
+
+.pdf-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.pdf-table th,
+.pdf-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.pdf-table th {
+  background-color: #f4f4f4;
+}
 
 
 
@@ -183,7 +313,7 @@ header {
 }
 .btn {
   display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem; 
   margin: 0.2rem;
   border: none;
   border-radius: 5px;
