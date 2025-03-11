@@ -67,6 +67,18 @@
                         required>
                 </div>
 
+                <!-- Rating -->
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Rating</label>
+                    <select class="form-select" id="rating" name="rating">
+                        <option value="1" <%=product.rating===1 ? 'selected' : '' %>>1 Star</option>
+                        <option value="2" <%=product.rating===2 ? 'selected' : '' %>>2 Stars</option>
+                        <option value="3" <%=product.rating===3 ? 'selected' : '' %>>3 Stars</option>
+                        <option value="4" <%=product.rating===4 ? 'selected' : '' %>>4 Stars</option>
+                        <option value="5" <%=product.rating===5 ? 'selected' : '' %>>5 Stars</option>
+                    </select>
+                </div>
+
                 <!-- Status -->
                 <div class="mb-3">
                     <label for="status" class="form-label">Status</label>
@@ -128,6 +140,7 @@
             const productOffer = document.getElementById("productOffer");
             const stock = document.getElementById("stock");
             const status = document.getElementById("status");
+            const rating = document.getElementById("rating");
 
             // Remove old error messages
             document.querySelectorAll(".error-message").forEach(e => e.remove());
@@ -193,6 +206,13 @@
                 showError(status, " Please select a valid status.");
             } else {
                 clearError(status);
+            }
+
+            // Validate Rating
+            if (!rating.value || rating.value < 1 || rating.value > 5) {
+                showError(rating, "Please select a valid rating between 1 and 5.");
+            } else {
+                clearError(rating);
             }
 
             // Validate Images
@@ -273,16 +293,16 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {  
+                    if (data.success) {
                         console.log("Update successful");
                         Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Product updated successfully',
-            confirmButtonText: 'OK'
-        }).then(() => {
-            window.location.href = "/admin/productManagement";
-        });
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Product updated successfully',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = "/admin/productManagement";
+                        });
 
                     } else {
                         showToast(data.message || "Failed to update product");
@@ -295,7 +315,7 @@
         }
 
 
-        function showToast(message, type) { 
+        function showToast(message, type) {
             Toastify({
                 text: message,
                 duration: 3000,

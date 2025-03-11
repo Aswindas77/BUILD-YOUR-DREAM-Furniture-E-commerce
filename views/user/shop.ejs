@@ -2,22 +2,22 @@
 <html lang="zxx" class="no-js">
 
 <head>
-	<!-- Mobile Specific Meta -->
+
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<!-- Favicon-->
-	<link rel="shortcut icon" href="/public/userAssets/images/favicon.png">  
-	<!-- Author Meta -->
+
+	<link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
+
 	<meta name="author" content="CodePixar">
-	<!-- Meta Description -->
+
 	<meta name="description" content="">
-	<!-- Meta Keyword -->
+
 	<meta name="keywords" content="">
-	<!-- meta character set -->
+
 	<meta charset="UTF-8">
-	<!-- Site Title -->
+
 	<title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
 
-	<!-- CSS -->
+
 	<link rel="stylesheet" href="/public/userAssets/css/linearicons.css">
 	<link rel="stylesheet" href="/public/userAssets/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/public/userAssets/css/themify-icons.css">
@@ -41,9 +41,9 @@
 
 
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-	
-    <link rel="stylesheet" href="/public/userAssets/css/custom.css">
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+	<link rel="stylesheet" href="/public/userAssets/css/custom.css">
+	<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>  
 
 
 
@@ -65,9 +65,8 @@
 					<div class="row">
 
 
-						<!-- Main Content -->
+
 						<div class="col-xl-9 col-lg-8 col-md-7 mx-auto">
-							<!-- Advanced Filter Bar with Search and Filters -->
 
 							<div class="top-bar">
 								<div class="search-container">
@@ -85,11 +84,9 @@
 									<option value="nameAsc" <%=filters?.sort==='nameAsc' ? 'selected' : '' %>>Name (A-Z)
 									</option>
 									<option value="nameDesc" <%=filters?.sort==='nameDesc' ? 'selected' : '' %>>Name
-										(Z-A)
-									</option>
+										(Z-A)</option>
 									<option value="priceAsc" <%=filters?.sort==='priceAsc' ? 'selected' : '' %>>Price:
-										Low
-										to High</option>
+										Low to High</option>
 									<option value="priceDesc" <%=filters?.sort==='priceDesc' ? 'selected' : '' %>>Price:
 										High to Low</option>
 								</select>
@@ -155,12 +152,12 @@
 											<div class="product-info">
 												<div class="product-rating">
 													<div class="stars">
-														<% for(let i=1; i <=5; i++) { %>
-															<i
-																class="fa fa-star<%= i <= product.ratings ? '' : '-o' %>"></i>
-															<% } %>
+														<% let rating=Number(product.ratings) || 0; %>
+															<% for(let i=1; i <=5; i++) { %>
+																<i class="fa fa-star<%= i <=rating? '': 'o' %>"></i>
+																<% } %>
 													</div>
-													<span class="rating-count">(<%= product.reviewCount || 0 %>
+													<span class="rating-count">(<%= product.ratings || 0 %>
 															reviews)</span>
 												</div>
 
@@ -217,23 +214,23 @@
 						</div>
 					</div>
 				</div>
-				<!-- pagianation links -->
+
 				<div class="pagination" style="margin-top: 57px; margin-left: 44%;">
 					<% if (currentPage> 1) { %>
-						<a href="?page=<%= currentPage - 1 %>&search=<%= searchQuery %>"
-							style="text-decoration: none; padding: 5px 5px;width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
+						<a href="#" class="page-link" data-page="<%= currentPage - 1 %>"
+							style="text-decoration: none; padding: 5px 5px; width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
 						<% } %>
 
 							<% for (let i=1; i <=totalPages; i++) { %>
-								<a href="?page=<%= i %>&search=<%= searchQuery %>"
-									class="pagination-link <%= currentPage === i ? 'active' : '' %>">
+								<a href="#" class="page-link pagination-link <%= currentPage === i ? 'active' : '' %>"
+									data-page="<%= i %>">
 									<%= i %>
 								</a>
 								<% } %>
 
 
 									<% if (currentPage < totalPages) { %>
-										<a href="?page=<%= currentPage + 1 %>&search=<%= searchQuery %>"
+										<a href="#" class="page-link" data-page="<%= currentPage + 1 %>"
 											style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
 										<% } %>
 				</div>
@@ -270,317 +267,338 @@
 
 				<!-- Start footer Area -->
 				<%- include("../partials/userPartial/userFooter") %>
-				<!-- End footer Area -->
+					<!-- End footer Area -->
 
-				<!-- Modal Quick Product View -->
-				<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-hidden="true">
-					<div class="modal-dialog" role="document">
-						<div class="container relative">
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-							<div class="product-quick-view">
-								<div class="row align-items-center">
-									<div class="col-lg-6">
-										<div class="quick-view-carousel">
-											<!-- Carousel items -->
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="quick-view-content">
-											<!-- Quick view content -->
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
 
-				<!-- Scripts -->
-				<script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
-				<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
-					integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" 
-					crossorigin="anonymous"></script>
-				<script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
-				<script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
-				<script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
-				<script src="/public/userAssets/js/jquery.sticky.js"></script>
-				<script src="/public/userAssets/js/nouislider.min.js"></script>
-				<script src="/public/userAssets/js/countdown.js"></script>
-				<script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
-				<script src="/public/userAssets/js/owl.carousel.min.js"></script>
-				<!--gmaps Js-->
-				<script
-					src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
-				<script src="/public/userAssets/js/gmaps.min.js"></script>
-				<script src="/public/userAssets/js/main.js"></script>
-				<script>
 
-					function quickView(productId) {
-						window.location.href = `/user/product_view/${productId}`;
-					}
+					<!-- Scripts -->
+					<script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
+					<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+						integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+						crossorigin="anonymous"></script>
+					<script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
+					<script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
+					<script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
+					<script src="/public/userAssets/js/jquery.sticky.js"></script>
+					<script src="/public/userAssets/js/nouislider.min.js"></script>
+					<script src="/public/userAssets/js/countdown.js"></script>
+					<script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
+					<script src="/public/userAssets/js/owl.carousel.min.js"></script>
+					<!--gmaps Js-->
+					<script
+						src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
+					<script src="/public/userAssets/js/gmaps.min.js"></script>
+					<script src="/public/userAssets/js/main.js"></script>
+					<script>
 
-					function addToCart(productId) {
-						console.log(productId)
-						fetch("/user/cart", {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json"
-							},
-							body: JSON.stringify({
-								productId,
-								quantity: 1
+						function quickView(productId) {
+							window.location.href = `/user/product_view/${productId}`;
+						}
+
+						function addToCart(productId) {
+							console.log(productId)
+							fetch("/user/cart", {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json"
+								},
+								body: JSON.stringify({
+									productId,
+									quantity: 1
+								})
 							})
-						})
-							.then(response => response.json())
-							.then(data => {
-								if (data.message) {
-									showToast(data.message);
-								}
-							})
-							.catch(error => {
-								showToast("Something went wrong.", "error");
-							});
-					}
-
-					function showToast(message, type) {
-						Toastify({
-							text: message,
-							duration: 3000,
-							gravity: "top",
-							position: "center",
-							close: true,
-							style: {
-								background: "orange",
-								color: "white",
-								fontWeight: "bold",
-								borderRadius: "8px",
-							},
-						}).showToast();
-					}
-
-
-
-					document.getElementById('filterModal').addEventListener('click', function (e) {
-						if (e.target === this) {
-							this.classList.remove('active');
+								.then(response => response.json())
+								.then(data => {
+									if (data.message) {
+										showToast(data.message);
+									}
+								})
+								.catch(error => {
+									showToast("Something went wrong.", "error");
+								});
 						}
-					});
 
-
-
-					document.getElementById("searchBox").addEventListener("input", async function () {
-						let query = this.value.trim();
-						console.log("Search Query:", query);
-
-
-
-
-						if (query.length > 0) {
-							const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
-							const products = await response.json();
-
-
-							let productList = document.getElementById("productList");
-							productList.innerHTML = "";
-
-							products.forEach(product => {
-								let item = `<div class="product-item">
-							<h3>${product.name}</h3>
-							<p>${product.price}</p>
-						</div>`;
-								productList.innerHTML += item;
-							});
-						}
-					});
-
-				</script>
-
-				<script>
-
-					document.addEventListener('DOMContentLoaded', function () {
-
-						const applyButton = document.getElementById('applyFilters');
-						const resetButton = document.getElementById('resetFilters');
-
-						if (!applyButton) {
-							console.error('Apply button not found!');
-							return;
+						function showToast(message, type) {
+							Toastify({
+								text: message,
+								duration: 3000,
+								gravity: "top",
+								position: "center",
+								close: true,
+								style: {
+									background: "orange",
+									color: "white",
+									fontWeight: "bold",
+									borderRadius: "8px",
+								},
+							}).showToast();
 						}
 
 
-						applyButton.addEventListener('click', async function () {
-							try {
-								console.log('Apply button clicked');
 
 
-								const searchValue = document.getElementById('searchInput')?.value || '';
-								const sortValue = document.getElementById('sortSelect')?.value || '';
-								const categoryValue = document.getElementById('categorySelect')?.value || '';
-
-								console.log('Filter values:', { searchValue, sortValue, categoryValue });
-
-								const params = new URLSearchParams();
-								if (searchValue) params.set('search', searchValue);
-								if (sortValue) params.set('sort', sortValue);
-								if (categoryValue) params.set('category', categoryValue);
-
-								const productGrid = document.querySelector('.product-grid');
-								if (productGrid) {
-									productGrid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
-								}
-
-
-								const response = await fetch(`/user/shop/filter?${params.toString()}`);
-								if (!response.ok) {
-									throw new Error(`HTTP error! status: ${response.status}`);
-								}
-								const data = await response.json();
-
-								
-
-								if (data.success) {
-									displayProducts(data.products,data.wishlistProducts);
-									
-								} else {
-									throw new Error(data.message || 'Failed to filter products');
-								}
-
-							} catch (error) {
-								console.error('Filter error:', error);
-								showToast('Error applying filters', 'error');
+						document.getElementById('filterModal').addEventListener('click', function (e) {
+							if (e.target === this) {
+								this.classList.remove('active');
 							}
 						});
 
 
-						if (resetButton) {
-							resetButton.addEventListener('click', function () {
 
-								if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
-								if (document.getElementById('sortSelect')) document.getElementById('sortSelect').value = '';
-								if (document.getElementById('categorySelect')) document.getElementById('categorySelect').value = '';
+						document.getElementById("searchBox").addEventListener("input", async function () {
+							let query = this.value.trim();
+							console.log("Search Query:", query);
 
 
-								applyButton.click();
 
+
+							if (query.length > 0) {
+								const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+								const products = await response.json();
+
+
+								let productList = document.getElementById("productList");
+								productList.innerHTML = "";
+
+								products.forEach(product => {
+									let item = `<div class="product-item">
+							<h3>${product.name}</h3>
+							<p>${product.price}</p>
+						</div>`;
+									productList.innerHTML += item;
+								});
+							}
+						});
+
+					</script>
+
+					<script>
+
+						document.addEventListener('DOMContentLoaded', function () {
+							const searchInput = document.getElementById('searchInput');
+							const sortSelect = document.getElementById('sortSelect');
+							const categorySelect = document.getElementById('categorySelect');
+							const applyButton = document.getElementById('applyFilters');
+							const resetButton = document.getElementById('resetFilters');
+							const productGrid = document.querySelector('.product-grid');
+
+							let currentFilters = {
+								search: '<%= filters?.search || "" %>',
+								sort: '<%= filters?.sort || "" %>',
+								category: '<%= filters?.category || "" %>',
+								page: '<%= currentPage || 1 %>'
+							};
+
+							function updateProducts(filters) {
+								const queryString = new URLSearchParams(filters).toString();
+
+								// Show loading state
+								productGrid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
+
+								fetch(`/user/shop/filter?${queryString}`)
+									.then(response => response.json())
+									.then(data => {
+										if (data.success) {
+
+											window.history.pushState({}, '', `/user/shop?${queryString}`);
+
+											// Update product grid and pagination
+											displayProducts(data.products, data.wishlistProducts);
+											updatePagination(data.currentPage, data.totalPages, filters);
+										} else {
+											throw new Error(data.message || 'Failed to filter products');
+										}
+									})
+									.catch(error => {
+										console.error('Filter error:', error);
+										showToast('Error applying filters', 'error');
+									});
+							}
+
+							function updatePagination(currentPage, totalPages) {
+    const paginationContainer = document.querySelector('.pagination');
+    if (!paginationContainer) return;
+
+    let paginationHTML = '';
+
+    // Previous button
+    if (currentPage > 1) {
+        paginationHTML += `<a href="#" class="page-link" data-page="${currentPage - 1}">Previous</a>`;
+    }
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        paginationHTML += `<a href="#" class="page-link ${currentPage === i ? 'active' : ''}" data-page="${i}">${i}</a>`;
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+        paginationHTML += `<a href="#" class="page-link" data-page="${currentPage + 1}">Next</a>`;
+    }
+
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+
+							
+							
+							function fetchFilteredProducts(page = 1) {
+								const search = document.getElementById('search-input')?.value || "";
+								const category = document.getElementById('category-filter')?.value || "";
+								const minPrice = document.getElementById('min-price')?.value || "";
+								const maxPrice = document.getElementById('max-price')?.value || "";
+								const sort = document.getElementById('sort-filter')?.value || "";
+
+								fetch(`/api/products?search=${search}&category=${category}&minPrice=${minPrice}&maxPrice=${maxPrice}&sort=${sort}&page=${page}`)
+									.then(response => response.json())
+									.then(data => {
+										displayProducts(data.products, data.wishlistProducts, data.totalPages, data.currentPage);
+									})
+									.catch(error => console.error("Error fetching products:", error));
+							}
+
+							applyButton.addEventListener('click', function () {
+								currentFilters = {
+									search: searchInput.value,
+									sort: sortSelect.value,
+									category: categorySelect.value,
+									page: 1
+								};
+								updateProducts(currentFilters);
 							});
-						}
-					});
+
+							resetButton.addEventListener('click', function () {
+								searchInput.value = '';
+								sortSelect.value = '';
+								categorySelect.value = '';
+								currentFilters = {
+									search: '',
+									sort: '',
+									category: '',
+									page: 1
+								};
+								updateProducts(currentFilters);
+							});
+
+							document.querySelectorAll('.page-link').forEach(link => {
+								link.addEventListener('click', function (e) {
+									e.preventDefault();
+									const newPage = parseInt(this.dataset.page);
+									currentFilters.page = newPage;
+									updateProducts(currentFilters);
+								});
+							});
+						});
 
 
-					function displayProducts(products, wishlistProducts) {
-						const productGrid = document.querySelector('.product-grid');
-						if (!productGrid) {
-							console.error('Product grid container not found');
-							return;
-						}
+						function displayProducts(products, wishlistProducts, totalPages, currentPage) {
+							const productGrid = document.querySelector('.product-grid');
+							const paginationContainer = document.querySelector('.pagination');
 
-						if (!products || products.length === 0) {
-							productGrid.innerHTML = ` 
+							if (!productGrid) {
+								console.error('Product grid container not found');
+								return;
+							}
+
+							if (!products || products.length === 0) {
+								productGrid.innerHTML = ` 
 								<div class="text-center">
 									<h3>No products found</h3>
 									<p>Try adjusting your filters</p>
 								</div>
 							`;
-							return;
+								return;
+							}
+
+							productGrid.innerHTML = products.map(product => `
+        <div class="product-card">
+            <div class="product-badge">
+                ${product.productOffer > 0 ? `<span class="badge badge-danger">SAVE ${product.productOffer}%</span>` : ''}
+                ${product.isNew ? '<span class="badge badge-primary">NEW ARRIVAL</span>' : ''}
+                ${product.isBestSeller ? '<span class="badge badge-success">BESTSELLER</span>' : ''}
+            </div>
+
+            <div class="product-image-wrap">
+                ${product.images && product.images.length > 0 ? `
+                    <div class="product-image-slider">
+                        ${product.images.slice(0, 3).map(image => `<img src="${image}" alt="${product.name}" class="product-image">`).join('')}
+                    </div>
+                ` : `<img src="/default-product.jpg" alt="${product.name}" class="product-image">`}
+                
+                <div class="product-hover-overlay">
+                    <button class="quick-view-btn" onclick="quickView('${product._id}')">View Product</button>
+                </div>
+            </div>
+
+            <div class="product-info">
+                <h3 class="product-title"><a onclick="quickView('${product._id}')">${product.name}</a></h3>
+                <div class="product-price">₹${product.salesPrice.toFixed(2)}</div>
+                <button class="add-to-cart" onclick="addToCart('${product._id}')">
+                    <i class="fa fa-shopping-cart me-2"></i>ADD TO CART
+                </button>
+            </div>
+            <div class="product-actions">
+                <button class="action-btn wishlist ${wishlistProducts.includes(product._id.toString()) ? 'active' : ''}" 
+                    onclick="addToWhishList('${product._id}')" 
+                    id="wishlist-btn-${product._id}">
+                    ${wishlistProducts.includes(product._id.toString()) ? `<i class="fa fa-heart"></i>` : `<i class="fa fa-heart-o"></i>`}
+                </button>
+            </div>
+        </div>
+    `).join('');
+
+							updatePagination(totalPages, currentPage);
 						}
 
-						productGrid.innerHTML = products.map(product => `
-							<div class="product-card">
-								<div class="product-badge">
-									${product.productOffer > 0 ? `<span class="badge badge-danger">SAVE ${product.productOffer}%</span>` : ''}
-									${product.isNew ? '<span class="badge badge-primary">NEW ARRIVAL</span>' : ''}
-									${product.isBestSeller ? '<span class="badge badge-success">BESTSELLER</span>' : ''}
-								</div>
 
-								<div class="product-image-wrap">
-									${product.images && product.images.length > 0 ? `
-										<div class="product-image-slider">
-											${product.images.slice(0, 3).map(image => `
-												<img src="${image}" alt="${product.name}" class="product-image">
-											`).join('')}
-										</div>
-									` : `
-										<img src="/default-product.jpg" alt="${product.name}" class="product-image">
-									`}
-									
-									<div class="product-hover-overlay">
-										<button class="quick-view-btn" onclick="quickView('${product._id}')">View Product</button>
-									</div>
-								</div>
+					</script>
 
-								<div class="product-info">
-									<h3 class="product-title">
-										<a onclick="quickView('${product._id}')">${product.name}</a>
-									</h3>
-									<div class="product-price">₹${product.salesPrice.toFixed(2)}</div>
-									<button class="add-to-cart" onclick="addToCart('${product._id}')">
-										<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
-									</button>
-								</div>
-								<div class="product-actions">
-												<button class="action-btn wishlist ${wishlistProducts.includes(product._id.toString()) ? 'active' : ''}" 
-                          onclick="addToWhishList('${product._id}')" 
-                          id="wishlist-btn-${product._id}">
-
-                          ${wishlistProducts.includes(product._id.toString())
-								? `<i class="fa fa-heart"></i>`
-								: `<i class="fa fa-heart-o"></i>`}
-                 </button>
-												
-				</div>
-           </div>
-						`).join('');
-					}
-				</script>
-
-				<script>
+					<script>
 
 
-					function addToWhishList(productId) {
+						function addToWhishList(productId) {
 
-						let button = document.getElementById(`wishlist-btn-${productId}`);
-						let icon = button.querySelector("i");
+							let button = document.getElementById(`wishlist-btn-${productId}`);
+							let icon = button.querySelector("i");
 
 
-						fetch(`/user/whishList`, {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json"
-							},
-							body: JSON.stringify({ productId }) 
-						})
-							.then(response => response.json())
-							.then(data => {
-								if (data.success) {
-
-									showToast(data.message);
-
-									button.classList.toggle("active");
-
-									if (icon.classList.contains('fa-heart-o')) {
-										icon.classList.remove('fa-heart-o');
-										icon.classList.add('fa-heart');
-									} else {
-										icon.classList.remove('fa-heart');
-										icon.classList.add('fa-heart-o');
-									}
-								} else {
-									showToast(data.message);
-								}
-
+							fetch(`/user/whishList`, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json"
+								},
+								body: JSON.stringify({ productId })
 							})
-							.catch(error => {
-								console.error('Error adding to wishlist:', error);
-							});
+								.then(response => response.json())
+								.then(data => {
+									if (data.success) {
 
-					}
+										showToast(data.message);
+
+										button.classList.toggle("active");
+
+										if (icon.classList.contains('fa-heart-o')) {
+											icon.classList.remove('fa-heart-o');
+											icon.classList.add('fa-heart');
+										} else {
+											icon.classList.remove('fa-heart');
+											icon.classList.add('fa-heart-o');
+										}
+									} else {
+										showToast(data.message);
+									}
+
+								})
+								.catch(error => {
+									console.error('Error adding to wishlist:', error);
+								});
+
+						}
 
 
 
 
-				</script>
+					</script>
 </body>
 
 </html>

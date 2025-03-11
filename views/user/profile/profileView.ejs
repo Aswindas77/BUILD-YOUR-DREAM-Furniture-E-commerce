@@ -535,21 +535,26 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Orders</h3>
-                    <div class="value"> 
+                    <div class="value">
                         <%= totalOrders %>
                     </div>
                 </div>
                 <div class="stat-card">
                     <h3>Active Orders</h3>
-                    <div class="value"><%= activeOrders.length %></div>
+                    <div class="value">
+                        <%= activeOrders.length %>
+                    </div>
                 </div>
                 <div class="stat-card">
                     <h3>Wallet Balance</h3>
-                    <div class="value">₹<%=Number(walletBalance).toFixed(2) %></div>
+                    <div class="value">₹<%=Number(walletBalance).toFixed(2) %>
+                    </div>
                 </div>
                 <div class="stat-card">
                     <h3>Saved Addresses</h3>
-                    <div class="value"><%= userAddress %></div>
+                    <div class="value">
+                        <%= userAddress %>
+                    </div>
                 </div>
             </div>
 
@@ -625,7 +630,7 @@
                                         </span>
                                         <div class="order-buttons">
                                             <button class="view-details-btn"
-                                            onclick="showOrderDetails('<%= order._id %>')">
+                                                onclick="showOrderDetails('<%= order._id %>')">
                                                 View Details
                                             </button>
                                             <% if (order.status !=='Delivered' && order.status !=='Cancelled' ) { %>
@@ -641,22 +646,25 @@
                             <% }); %>
                     </div>
 
-                 <!-- pagianation links -->
-		 <div class="pagination" style="margin-top: 57px; margin-left: 44%;">
-			<% if (currentPage > 1) { %>
-				<a href="?page=<%= currentPage - 1 %>" style="text-decoration: none; padding: 5px 10px;width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
-			  <% } %>
-		
-			  <% for (let i = 1; i <= totalPages; i++) { %>
-				<a href="?page=<%= i %>" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; background-color: '<%= currentPage === i ? '#ddd' : '#fff' %>';">
-				  <%= i %>
-				</a>
-			  <% } %>
-		
-			  <% if (currentPage < totalPages) { %>
-				<a href="?page=<%= currentPage + 1 %>" style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
-			  <% } %>
-		 </div>
+                    <!-- pagianation links -->
+                    <div class="pagination" style="margin-top: 57px; margin-left: 44%;">
+                        <% if (currentPage> 1) { %>
+                            <a href="?page=<%= currentPage - 1 %>"
+                                style="text-decoration: none; padding: 5px 10px;width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
+                            <% } %>
+
+                                <% for (let i=1; i <=totalPages; i++) { %>
+                                    <a href="?page=<%= i %>"
+                                        style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; background-color: '<%= currentPage === i ? '#ddd' : '#fff' %>';">
+                                        <%= i %>
+                                    </a>
+                                    <% } %>
+
+                                        <% if (currentPage < totalPages) { %>
+                                            <a href="?page=<%= currentPage + 1 %>"
+                                                style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
+                                            <% } %>
+                    </div>
                     <% } else { %>
                         <div class="empty-orders">
                             <i class="fas fa-shopping-bag"></i>
@@ -670,7 +678,7 @@
         </main>
     </div>
 
-    <div class="menu-toggle"> 
+    <div class="menu-toggle">
         <i class="fas fa-bars"></i>
     </div>
 
@@ -684,64 +692,101 @@
         });
 
         function showOrderDetails(orderId) {
-            console.log("noo",orderId);
-            
+            console.log("noo", orderId);
+
             window.location.href = `/user/orderdetails/${orderId}`;
         }
 
+
         function cancelOrder(orderId) {
+    Swal.fire({
+        title: "Select a Cancellation Reason",
+        input: "select",
+        inputOptions: {
+            "Changed my mind": "Changed my mind",
+            "Found a better price": "Found a better price",
+            "Order delay": "Order delay",
+            "Wrong product ordered": "Wrong product ordered",
+            "Other": "Other"
+        },
+        inputPlaceholder: "Choose a reason",
+        showCancelButton: true,
+        confirmButtonText: "Next",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        preConfirm: (reason) => {
+            if (!reason) {
+                Swal.showValidationMessage("Please select a reason.");
+                return false;
+            }
+            return reason;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let reason = result.value;
+
+           
             Swal.fire({
                 title: "Are you sure?",
-                text: "Do you really want to cancel this order?",
+                text: `Do you really want to cancel this order? Reason: ${reason}`,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
                 cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, cancel it!", 
+                confirmButtonText: "Yes, cancel it!",
                 cancelButtonText: "No, keep it"
-            }).then((result) => {
-                if (result.isConfirmed) {
+
+            }).then((confirmResult) => {
+                if (confirmResult.isConfirmed) {
                     fetch(`/user/orderCancel/${orderId}`, {
-                        method: 'GET',
+                        method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
-                        }
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ reason: reason })
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: "Cancelled!",
-                                    text: "Your order has been cancelled.",
-                                    icon: "success",
-                                    timer: 2000, // Auto close in 2 seconds
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    window.location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Error",
-                                    text: data.message || "Error cancelling order",
-                                    icon: "error"
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error:", error);
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP Error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: "Cancelled!",
+                                text: "Your order has been cancelled.",
+                                icon: "success",
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
                             Swal.fire({
                                 title: "Error",
-                                text: "Something went wrong!",
+                                text: data.message || "Error cancelling order",
                                 icon: "error"
                             });
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire({
+                            title: "Error",
+                            text: "Something went wrong!",
+                            icon: "error"
                         });
+                    });
                 }
             });
         }
+    });
+}
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
-

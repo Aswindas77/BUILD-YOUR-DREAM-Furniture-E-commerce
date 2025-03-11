@@ -183,9 +183,9 @@ const updateProduct = async (req, res) => {
   console.log('Updating product...');
   try {
 
-    const { id, name, description, salesPrice, category, productOffer, stock, status } = req.body;
+    const { id, name, description, salesPrice, category, productOffer, stock, status,rating } = req.body;
 
-    console.log("hi",stock)
+    console.log("hi",rating)
 
     if (stock === undefined || stock === null || stock < 0) {
       console.log("Stock error");
@@ -230,7 +230,7 @@ const updateProduct = async (req, res) => {
 
     const updatedProduct = await Products.findByIdAndUpdate(
       id,
-      { name, description, salesPrice, category, productOffer, stock, status,updatedAt:new Date() },
+      { name, description, salesPrice, category, productOffer, stock,ratings:rating, status,updatedAt:new Date() },
       { new: true,runValidators: true } 
     );
 

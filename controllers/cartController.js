@@ -4,6 +4,7 @@ const Category = require("../models/categoryModel");
 const Address = require('../models/addressModel')
 const Cart = require('../models/cartModel')
 const Coupon = require('../models/couponModel');
+const User =require ('../models/userModel.js');
 
 
 
@@ -234,10 +235,12 @@ const loadCheckout = async (req, res) => {
         const Id = req.query.id;
         const grandTotal = req.query.total;
         const cartId = new mongoose.Types.ObjectId(Id);
-        const user = req.session?.User?._id;
-        const userId = new mongoose.Types.ObjectId(user);
+        const userId = req.session?.User?._id;
 
-        if (!user) {
+
+        const user = await User.findById(userId ) 
+
+        if (!userId) {
             return res.redirect('/user/login');
         }
         const validCoupons = await Coupon.find({
@@ -273,6 +276,9 @@ const loadCheckout = async (req, res) => {
 
         if (userAddresses) {
             userAddresses.address = userAddresses.address.filter(addr => !addr.isDeleted);
+
+            console.log("jjjjj",userAddresses.address)
+            
         }
 
         res.render("checkOut", {

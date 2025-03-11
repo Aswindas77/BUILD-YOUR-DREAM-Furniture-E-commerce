@@ -58,7 +58,17 @@ const orderSchema = new mongoose.Schema({
 
     min: [0, 'Total amount cannot be negative'],
   },
-
+  cancelReason: {
+    type: String,
+    enum: [
+      "Changed my mind",
+      "Found a better price",
+      "Order delay",
+      "Wrong product ordered",
+      "Other"
+    ],
+    default: null, 
+  },
   paymentStatus: {
     type: String,
     enum: ['Pending', 'Paid', 'Failed', 'Processing', 'Refunded'],
@@ -78,6 +88,12 @@ const orderSchema = new mongoose.Schema({
     estimatedArrival: { type: Date, default: new Date('2025-02-15') },
     actualArrival: { type: Date, default: null },
     status: { type: String, enum: ['Pending', 'Shipped', 'Cancelled', 'Processing', 'Delivered'], default: 'Pending' },
+  },
+  razorpayOrderId: {
+     type: String 
+    },
+  razorpayPaymentId: { 
+    type: String 
   }
 }, {
   timestamps: true,

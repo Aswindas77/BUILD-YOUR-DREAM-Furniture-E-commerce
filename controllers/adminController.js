@@ -195,7 +195,7 @@ const getSalesData = async (startDate, endDate) => {
   try {
     const orders = await Order.find({
       createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
-      status: 'Delivered'  
+      status: 'Delivered'
     }).populate('items.productId');
 
     let totalOrders = orders.length;
@@ -227,7 +227,7 @@ const getSalesData = async (startDate, endDate) => {
       totalRevenue: Math.floor(totalRevenue),
       totalProductCount,
       totalProductDiscount: Math.floor(totalProductDiscount),
-      couponDiscount: 0 
+      couponDiscount: 0
     };
   } catch (error) {
     console.error('Error in getSalesData:', error);
@@ -465,18 +465,93 @@ const loadDashboard = async (req, res) => {
       endDate.setHours(23, 59, 59, 999);
     }
 
+    // Get top selling products
+    const topProducts = await Order.aggregate([
+      {
+        $match: {
+          status: 'Delivered'
+        }
+      },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.productId',
+          soldCount: { $sum: '$items.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
+        }
+      },
+      { $sort: { soldCount: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'productDetails'
+        }
+      },
+      {
+        $project: {
+          name: { $arrayElemAt: ['$productDetails.name', 0] },
+          price: { $arrayElemAt: ['$productDetails.price', 0] },
+          images: { $arrayElemAt: ['$productDetails.images', 0] },
+          soldCount: 1,
+          totalRevenue: 1
+        }
+      }
+    ]);
+
+    // Get top categories
+    const topCategories = await Order.aggregate([
+      {
+        $match: {
+          status: 'Delivered'
+        }
+      },
+      { $unwind: '$items' },
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'items.productId',
+          foreignField: '_id',
+          as: 'product'
+        }
+      },
+      { $unwind: '$product' },
+      {
+        $group: {
+          _id: '$product.category',
+          totalSales: { $sum: '$items.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
+          productCount: { $addToSet: '$product._id' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'categoryDetails'
+        }
+      },
+      {
+        $project: {
+          name: { $arrayElemAt: ['$categoryDetails.name', 0] },
+          totalSales: 1,
+          totalRevenue: 1,
+          productCount: { $size: '$productCount' }
+        }
+      },
+      { $sort: { totalSales: -1 } },
+      { $limit: 10 }
+    ]);
+
     const [dailySalesData, weeklySalesData, monthlySalesData, yearlySalesData] = await Promise.all([
       getDailySales(startDate, endDate),
       getWeeklySales(page, limit, startDate, endDate),
       getMonthlySales(page, limit, startDate, endDate),
       getYearlySales(page, limit, startDate, endDate)
     ]);
-
-    console.log('Sales Data Status:', {
-      hasDaily: dailySalesData.length > 0,
-      hasYearly: yearlySalesData.data.length > 0,
-      yearlyData: yearlySalesData
-    });
 
     if (!dailySalesData.length) {
       const emptyData = {
@@ -492,6 +567,8 @@ const loadDashboard = async (req, res) => {
         totalRevenue: 0,
         totalReturns: 0,
         orders: [],
+        topProducts: [],
+        topCategories: []
       });
     }
 
@@ -541,16 +618,12 @@ const loadDashboard = async (req, res) => {
       }
     ]).then(result => result.length ? result[0].total : 0);
 
-
     const orders = await Order.find(orderQuery).populate('items.productId');
     let totalRevenue = 0;
-    let totalProductDiscount = 0;
 
     orders.forEach(order => {
       if (order.status === 'Delivered') {
-
         totalRevenue += order.totalAmount;
-
       }
     });
 
@@ -562,6 +635,8 @@ const loadDashboard = async (req, res) => {
       totalRevenue,
       totalReturns,
       orders,
+      topProducts,
+      topCategories,
       currentPage: {
         daily: page,
         weekly: page,
@@ -640,6 +715,9 @@ const loadOrderManagement = async (req, res) => {
   }
 };
 
+
+
+
 const updateOrderStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
@@ -661,6 +739,8 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+
+
 const viewOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.orderId)
@@ -678,7 +758,10 @@ const viewOrder = async (req, res) => {
   }
 };
 
-// Add this function to handle period changes via API
+
+
+
+
 const getSalesReport = async (req, res) => {
   try {
     const period = req.query.period || 'daily';
@@ -775,6 +858,10 @@ const getSalesReport = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
+
 const getOrdersByPeriod = async (req, res) => {
   try {
     const period = req.params.period;
@@ -802,7 +889,6 @@ const getOrdersByPeriod = async (req, res) => {
         return res.status(400).json({ error: 'Invalid period' });
     }
 
-    // Populate product details and format response
     const orders = await Order.find({
       createdAt: {
         $gte: startDate,
@@ -813,7 +899,6 @@ const getOrdersByPeriod = async (req, res) => {
       .populate('items.productId', 'name price')
       .sort({ createdAt: -1 });
 
-    // Format orders to match frontend display requirements
     const formattedOrders = orders.map(order => ({
       _id: order._id,
       userId: order.userId._id,
@@ -836,6 +921,293 @@ const getOrdersByPeriod = async (req, res) => {
   }
 };
 
+
+
+
+
+
+const getGraphData = async (req, res) => {
+  try {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      return date;
+    }).reverse();
+
+    const deliveredProducts = [];
+    const revenue = [];
+    const labels = [];
+
+    for (const date of last7Days) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const deliveredCount = await Order.countDocuments({
+        status: 'Delivered',
+        createdAt: {
+          $gte: startOfDay,
+          $lte: endOfDay
+        }
+      });
+
+      const dailyRevenue = await Order.aggregate([
+        {
+          $match: {
+            status: 'Delivered',
+            createdAt: {
+              $gte: startOfDay,
+              $lte: endOfDay
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$totalAmount" }
+          }
+        }
+      ]);
+
+      const formattedDate = date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short'
+      });
+
+      labels.push(formattedDate);
+      deliveredProducts.push(deliveredCount);
+      revenue.push(dailyRevenue[0]?.total || 0);
+    }
+
+    res.json({
+      labels,
+      deliveredProducts,
+      revenue
+    });
+  } catch (error) {
+    console.error('Error fetching graph data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
+
+
+const getSalesDataByPeriod = async (req, res) => {
+  try {
+    const period = req.params.period;
+    const now = new Date();
+    let startDate, groupBy, dateFormat;
+
+    switch (period) {
+      case 'daily':
+        startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - 7);
+        groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } };
+        dateFormat = { day: '2-digit', month: 'short' };
+        break;
+      case 'weekly':
+        startDate = new Date(now);
+        startDate.setMonth(startDate.getMonth() - 3);
+        groupBy = {
+          week: { $week: "$createdAt" },
+          year: { $year: "$createdAt" }
+        };
+        dateFormat = { week: 'numeric', year: 'numeric' };
+        break;
+      case 'monthly':
+        startDate = new Date(now);
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        groupBy = {
+          month: { $month: "$createdAt" },
+          year: { $year: "$createdAt" }
+        };
+        dateFormat = { month: 'short', year: 'numeric' };
+        break;
+      case 'yearly':
+        startDate = new Date(now);
+        startDate.setFullYear(startDate.getFullYear() - 5);
+        groupBy = { $year: "$createdAt" };
+        dateFormat = { year: 'numeric' };
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid period' });
+    }
+
+    const results = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: now }
+        }
+      },
+      {
+        $group: {
+          _id: groupBy,
+          totalOrders: { $sum: 1 },
+          totalRevenue: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "Delivered"] },
+                "$totalAmount",
+                0
+              ]
+            }
+          }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    const formattedData = results.map(item => {
+      let label;
+      if (period === 'daily') {
+        const date = new Date(item._id);
+        label = date.toLocaleDateString('en-IN', dateFormat);
+      } else if (period === 'weekly') {
+        label = `Week ${item._id.week}, ${item._id.year}`;
+      } else if (period === 'monthly') {
+        const date = new Date(item._id.year, item._id.month - 1);
+        label = date.toLocaleDateString('en-IN', dateFormat);
+      } else {
+        label = `${item._id}`;
+      }
+
+      return {
+        label,
+        orders: item.totalOrders,
+        revenue: item.totalRevenue
+      };
+    });
+
+    res.json({
+      labels: formattedData.map(item => item.label),
+      orders: formattedData.map(item => item.orders),
+      revenue: formattedData.map(item => item.revenue)
+    });
+
+  } catch (error) {
+    console.error('Error getting sales data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
+
+
+const getAnalytics = async (req, res) => {
+  try {
+    const period = req.params.period;
+    const now = new Date();
+    let startDate, groupBy, dateFormat;
+
+    switch (period) {
+      case 'daily':
+        startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - 7); 
+        groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } };
+        dateFormat = { day: '2-digit', month: 'short' };
+        break;
+
+      case 'weekly':
+        startDate = new Date(now);
+        startDate.setMonth(startDate.getMonth() - 3); 
+        groupBy = {
+          week: { $week: "$createdAt" },
+          year: { $year: "$createdAt" }
+        };
+        break;
+
+      case 'monthly':
+        startDate = new Date(now);
+        startDate.setFullYear(startDate.getFullYear() - 1); 
+        groupBy = {
+          month: { $month: "$createdAt" },
+          year: { $year: "$createdAt" }
+        };
+        dateFormat = { month: 'short', year: 'numeric' };
+        break;
+
+      case 'yearly':
+        startDate = new Date(now);
+        startDate.setFullYear(startDate.getFullYear() - 5); 
+        groupBy = { $year: "$createdAt" };
+        dateFormat = { year: 'numeric' };
+        break;
+
+      default:
+        return res.status(400).json({ error: 'Invalid period' });
+    }
+
+    
+    const results = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: now }
+        }
+      },
+      {
+        $group: {
+          _id: groupBy,
+          totalSales: { $sum: 1 },
+          totalRevenue: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "Delivered"] },
+                "$totalAmount",
+                0
+              ]
+            }
+          }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+   
+    const formattedData = results.map(item => {
+      let label;
+      if (period === 'daily') {
+        const date = new Date(item._id);
+        label = date.toLocaleDateString('en-IN', dateFormat);
+      } else if (period === 'weekly') {
+        label = `Week ${item._id.week}, ${item._id.year}`;
+      } else if (period === 'monthly') {
+        const date = new Date(item._id.year, item._id.month - 1);
+        label = date.toLocaleDateString('en-IN', dateFormat);
+      } else {
+        label = `${item._id}`;
+      }
+
+      return {
+        label,
+        sales: item.totalSales,
+        revenue: item.totalRevenue
+      };
+    });
+
+   
+    res.json({
+      labels: formattedData.map(item => item.label),
+      sales: formattedData.map(item => item.sales),
+      revenue: formattedData.map(item => item.revenue)
+    });
+
+  } catch (error) {
+    console.error('Analytics error:', error);
+    res.status(500).json({ error: 'Error fetching analytics data' });
+  }
+};
+
+
+
+
+
 module.exports = {
   loadLogin,
   loadDash,
@@ -848,5 +1220,8 @@ module.exports = {
   loadOrderManagement,
   updateOrderStatus,
   viewOrder,
-  getOrdersByPeriod
+  getOrdersByPeriod,
+  getGraphData,
+  getSalesDataByPeriod,
+  getAnalytics
 };

@@ -84,14 +84,14 @@
                         <div class="form-group">
                             <label for="pincode">Pincode</label>
                             <input type="text" id="pincode" name="pincode" value="<%= address.pincode %>"
-                                pattern="[0-9]{5,10}">
+                                >
                             <small class="error-message"></small>
                         </div>
 
                         <div class="form-group">
                             <label for="phone">Phone</label>
                             <input type="tel" id="phone" name="phone" value="<%= address.phone %>"
-                                pattern="^[6-9]\d{9}$">
+                                >
                             <small class="error-message"></small>
                         </div>
 
@@ -124,8 +124,8 @@
                 { id: "landmark", message: "Landmark is required" },
                 { id: "city", message: "City is required" },
                 { id: "country", message: "Country is required" },
-                { id: "pincode", message: "Pincode must be 5-10 digits", pattern: /^[0-9]{5,10}$/ },
-                { id: "phone", message: "Phone number is invalid", pattern: /^[6-9]\d{9}$/ }
+                { id: "pincode", message: "Pincode must be 5-10 digits", pattern: /^[1-9]{5,10}$/ },
+                { id: "phone", message: "Phone number is invalid", pattern:/^[1-9][0-9]{9}$/}
             ];
 
             fields.forEach(field => {

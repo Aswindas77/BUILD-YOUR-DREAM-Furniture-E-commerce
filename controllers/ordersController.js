@@ -11,6 +11,7 @@ const walletModel = require("../models/walletModel");
 
 
 
+
 // load order page
 
 //====================================================================================================================================================
@@ -49,6 +50,36 @@ const loadOrderPage = async (req, res) => {
 };
 
 
+
+// load order view
+const loadOrderView = async (req, res) => {
+    try {
+        const { orderId } = req.params
+
+
+        const order = await Orders.findById(orderId)
+            .populate('userId', 'name email')
+            .populate({
+                path: 'items.productId',
+                select: 'name images price'
+            })
+            .populate('addressId', 'houseNumber landmark city pincode country');
+
+
+
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        console.log(order)
+
+        res.render("orderView", { order })
+    } catch (error) {
+        console.error('Error in loadOrderView:', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
 // update order
 
 //====================================================================================================================================================
@@ -82,13 +113,13 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-       if(order.status==="Delivered"){
-        order.paymentStatus ="Paid"
-       }else{
-        order.paymentStatus ="Pending"
-       }
+        if (order.status === "Delivered") {
+            order.paymentStatus = "Paid"
+        } else {
+            order.paymentStatus = "Pending"
+        }
         order.status = status;
-        
+
         order.updatedAt = new Date();
         await order.save();
 
@@ -159,6 +190,10 @@ const getOrderDetails = async (req, res) => {
 const orderCancel = async (req, res) => {
     try {
         const orderId = req.params.orderId;
+        const { reason } = req.body;
+
+        console.log("reee", reason)
+
 
 
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -169,6 +204,7 @@ const orderCancel = async (req, res) => {
         }
 
         const order = await Orders.findById(orderId);
+
 
         if (!order) {
             return res.status(404).json({
@@ -208,6 +244,7 @@ const orderCancel = async (req, res) => {
 
 
         order.status = 'Cancelled';
+        order.cancelReason = reason;
         order.cancelledAt = new Date();
         order.cancellationReason = 'Cancelled by user';
 
@@ -220,6 +257,7 @@ const orderCancel = async (req, res) => {
             }
         }
 
+        console.log("cancelled order", order)
         await order.save();
 
 
@@ -399,6 +437,7 @@ const updateReturnStatus = async (req, res) => {
 module.exports = {
 
     loadOrderPage,
+    loadOrderView,
     updateOrderStatus,
     getOrderDetails,
     orderCancel,

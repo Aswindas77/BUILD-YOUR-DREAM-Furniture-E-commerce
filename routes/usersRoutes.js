@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require("express-session");
 const config = require("../config/config");
-const { isLogin, isBan, payment } = require("../middlewares/userAuth")
+const { isLogin, isBan,payment } = require("../middlewares/userAuth")
 const userController = require("../controllers/userController");
 const cartController = require("../controllers/cartController.js");
 const profileController = require("../controllers/profileController.js");
@@ -47,20 +47,20 @@ userRouter.post("/forgot", isLogin, userController.genOtpForgotPass);
 userRouter.get("/changePassword", isLogin, userController.changePassword)
 
 // register route
-userRouter.get("/register", isLogin, userController.loadSingUp);
+userRouter.get("/register",isLogin, userController.loadSingUp);
 
 
 // generate otp route
-userRouter.post("/register", isLogin, userController.registration);
+userRouter.post("/register",isLogin, userController.registration);
 
 // load otp
-userRouter.get('/otp', isLogin, userController.loadOtp);
+userRouter.get('/otp',isLogin, userController.loadOtp);
 
 // resend otp
-userRouter.get('/resendOtp', isLogin, userController.resendOtp)
+userRouter.get('/resendOtp',isLogin, userController.resendOtp)
 
 // verify otp
-userRouter.post("/otp", isLogin, userController.verifyOtp)
+userRouter.post("/otp",isLogin, userController.verifyOtp)
 
 
 
@@ -105,7 +105,9 @@ userRouter.delete("/deleteAddress", isBan, profileController.deleteAddress);
 // ==============================================================================================================================================================================================================================
 
 // wallet controller
-userRouter.get("/wallet", isBan, walletController.loadWallet)
+userRouter.get("/wallet",isBan,walletController.loadWallet) 
+
+userRouter.post('/add-money-wallet',isBan,walletController.addMoneyWallet)
 
 // cart
 
@@ -125,33 +127,31 @@ userRouter.delete('/cartDelete', isBan, cartController.deleteCart)
 userRouter.get('/checkout', isBan, cartController.loadCheckout)
 
 
-userRouter.post("/checkout",isBan, userController.buyNow)
+userRouter.post("/checkout", userController.buyNow)
 
-userRouter.post('/paypal/success', userController.paypalSuccess)
+userRouter.post('/paypal/success',userController.paypalSuccess)
 
 userRouter.get('/orderCancel', orderController.orderCancel)
 
 
 // load whishlist
-userRouter.get('/whishList', userController.loadWhishList)
+userRouter.get('/whishList',userController.loadWhishList)
 
-userRouter.post('/whishList', userController.addWhishList)
+userRouter.post('/whishList',userController.addWhishList)
 
 // load delete whishlist
-userRouter.delete('/removeWhishlist', userController.deleteWhishlist)
+userRouter.delete('/removeWhishlist',userController.deleteWhishlist)
 
 
 // show coupon user side
 
-userRouter.get('/showCoupon', couponController.getAvailableCoupons)
+userRouter.get('/showCoupon',couponController.getAvailableCoupons)
 
 // apply coupon
-userRouter.post('/applyCoupon', couponController.applyCoupon)
+userRouter.post('/applyCoupon',couponController.applyCoupon)
 
 // cancel coupon 
-userRouter.post('/remove-coupon', couponController.removeCoupon)
-
-
+userRouter.post('/remove-coupon',couponController.removeCoupon)
 // ==============================================================================================================================================================================================================================
 
 
@@ -178,12 +178,14 @@ userRouter.get("/contact", isBan, userController.loadContact);
 
 // logout route 
 userRouter.get("/logout", userController.logOut);
-
+ 
 // product view
 userRouter.get('/product_view/:product_id', isBan, userController.loadProductView)
 
 
-userRouter.post("/checkout", isBan, userController.buyNow)
+userRouter.post("/checkout", isBan,userController.buyNow)
+
+userRouter.post('/updatePaymentStatus',isBan,userController.updatePaymentStatus)
 
 userRouter.get("/orderPlace", userController.loadOrderPlaced)
 
@@ -194,12 +196,11 @@ userRouter.get("/shop/filter", userController.filterProducts);
 userRouter.get('/orderdetails/:orderId', profileController.getOrderDetails);
 
 // return order details
-userRouter.post('/request-return', isBan, orderController.requestReturn)
+userRouter.post('/request-return',isBan,orderController.requestReturn)
 
 // Cancel order route
 userRouter.get('/orderCancel/:orderId', isBan, orderController.orderCancel);
 
-userRouter.post('/add-money-wallet', isBan, walletController.addMoneyWallet)
 
 
 
@@ -235,4 +236,3 @@ userRouter.get('*', (req, res) => {
 
 
 module.exports = userRouter;
-

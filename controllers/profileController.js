@@ -495,9 +495,9 @@ const getOrderDetails = async (req, res) => {
         
         const order = await Order.findById(orderId)
             .populate('items.productId')
-            .populate('addressId' )
+           
         
- 
+      
            
             
 
@@ -508,13 +508,19 @@ const getOrderDetails = async (req, res) => {
             });
         } 
 
-        const userAddress = await Address.findOne({ userId });
-        let selectedAddress = null;
         
-        if (userAddress && Array.isArray(userAddress.address) && userAddress.address.length > 0) {
-           
-            selectedAddress = userAddress.address[0];
-        }
+           let selectedAddress =null;
+           if(order.addressId){
+            const userAddress = await Address.findOne(
+                {"address._id":order.addressId},
+                {"address.$":1}
+            );
+            if (userAddress && userAddress.address.length > 0) {
+                selectedAddress = userAddress.address[0]; 
+            }
+           }
+          
+        
         
         
         if (!order.totalAmount) {

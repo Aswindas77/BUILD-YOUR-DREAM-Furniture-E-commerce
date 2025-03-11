@@ -37,7 +37,7 @@
                     <th>Total</th>
                     <th>Order Status</th>
                     <th>payment Status</th>
-                    <!-- <th>Actions</th> -->
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="orderTableBody">
@@ -63,35 +63,37 @@
                             </span>
                         </td> -->
                         <td>
-                            <select  class="form-select form-select-sm status-select" data-order-id=<%=order._id %>
-                                style="width: 150px; background-color:<%= 
-                                order.status==='Pending' ? '#ffd700' :
-                                    order.status==='Shipped' ? '#87ceeb' :
-                                     order.status==='Delivered' ? '#90ee90' :
-                                    order.status==='Cancelled' ? '#ff6b6b' :
-                                     order.status==='Returned' ? '#ff9966'
+                            <select class="form-select form-select-sm status-select" data-order-id=<%=order._id %>
+                                style="width: 150px; background-color:<%= order.status==='Pending' ? '#ffd700' :
+                                    order.status==='Shipped' ? '#87ceeb' : order.status==='Delivered' ? '#90ee90' :
+                                    order.status==='Cancelled' ? '#ff6b6b' : order.status==='Returned' ? '#ff9966'
                                     : '#gray' %>">
-                                    <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending</option>
-                                    <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped </option>
-                                    <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>>Delivered </option>
-                                    <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                    <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>>Returned</option>
+                                    <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending
+                                    </option>
+                                    <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped
+                                    </option>
+                                    <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
+                                        >Delivered </option>
+                                    <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
+                                        >Cancelled</option>
+                                    <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>>Returned
+                                    </option>
                             </select>
                         </td>
                         <td>
-                            <% if (order.status==='Delivered' ||order.paymentStatus ==='Paid' ) { %>
+                            <% if (order.status==='Delivered' ||order.paymentStatus==='Paid' ) { %>
                                 <span class="text-success">Completed</span>
-                                <% } else if (order.paymentStatus === 'Refunded') { %>
+                                <% } else if (order.paymentStatus==='Refunded' ) { %>
                                     <span class="text-info">Refunded</span>
-                                <% } else if (order.status==='Cancelled' ) { %>
-                                    <span class="text-danger">Failed</span>
-                                    <% } else { %>
-                                        <span class="text-warning">Pending</span>
-                                        <% } %>
+                                    <% } else if (order.status==='Cancelled' ) { %>
+                                        <span class="text-danger">Failed</span>
+                                        <% } else { %>
+                                            <span class="text-warning">Pending</span>
+                                            <% } %>
                         </td>
-                        <!-- <td>
-                            <a href="/order/details/<%= order._id %>" class="btn btn-primary btn-sm">View</a>
-                        </td> -->
+                        <td>
+                            <a href="/admin/orderView/<%= order._id %>" class="btn btn-primary btn-sm">View</a>
+                        </td>
                     </tr>
                     <% }) %>
             </tbody>

@@ -71,7 +71,7 @@ const addMoneyWallet = async (req, res) => {
     }
 };
 
-// deductFormWallet
+
 
 const deductFromWallet = async (userId, amount, description = 'Purchase') => {
     try {
@@ -107,7 +107,7 @@ const deductFromWallet = async (userId, amount, description = 'Purchase') => {
 
 
 
-// Add function to check wallet balance
+
 
 const checkWalletBalance = async (userId) => {
     try {

@@ -30,7 +30,7 @@
       <% products.forEach((product, index) => { %>
         <tr>
           <td><%= index + 1 + (currentPage - 1) * 4 %></td> <!-- Adjust index for pagination -->
-          <td><a href="/admin/productView/<%= product._id %>"><%= product.name %></a></td>
+          <td><a style="text-decoration: none;" href="/admin/productView/<%= product._id %>"><%= product.name %></a></td>
           <td><%= product.category ? product.category.name : "No Category Assigned" %></td>
           <td>₹<%= product.salesPrice?.toFixed(2) %></td>
           <td><%= product.productOffer %></td>
@@ -152,7 +152,7 @@
                                 title: 'Success!',
                                 text: data.message,
                                 icon: 'success',
-                                confirmButtonText: 'OK'
+                                confirmButtonText: 'OK' 
                             }).then(() => {
                                 window.location.reload();
                             });

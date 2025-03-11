@@ -6,6 +6,7 @@ const categoryController = require('../controllers/categoryController');
 const productController = require("../controllers/productController");
 const orderController = require("../controllers/ordersController");
 const couponController = require("../controllers/couponController");
+const salesController = require("../controllers/salesController")
 const adminRouter = express.Router();
 
 
@@ -62,6 +63,10 @@ adminRouter.patch("/admin/list/:categoryId/:action", categoryController.toggleLi
 // adminRouter.get("/export-sales-report", adminAuth, adminController.generateSalesReportPDF);
 
 
+// sales report 
+
+adminRouter.get('/salesReport', adminAuth.isLogin, salesController.loadSalesReport)
+
 
 
 
@@ -101,6 +106,8 @@ adminRouter.patch("/admin/product/:productId/:action", productController.toggleL
 // admin order management
 
 adminRouter.get("/orderManagement", adminAuth.isLogin, orderController.loadOrderPage)
+
+adminRouter.get("/orderView/:orderId", adminAuth.isLogin, orderController.loadOrderView)
 
 // Order management routes
 
@@ -143,6 +150,15 @@ adminRouter.get("/logout", adminAuth.isLogin, adminController.logout);
 
 
 adminRouter.get('/orders/:period', adminController.getOrdersByPeriod);
+
+// Add graph data endpoint
+adminRouter.get('/graph-data', adminAuth.isLogin, adminController.getGraphData);
+
+// Add sales data endpoint
+adminRouter.get('/sales-data/:period', adminAuth.isLogin, adminController.getSalesDataByPeriod);
+
+// Dashboard analytics route
+adminRouter.get('/dashboard/analytics/:period', adminAuth.isLogin, adminController.getAnalytics);
 
 
 
