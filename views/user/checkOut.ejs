@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
     <link rel="stylesheet" href="/public/userAssets/css/custom.css">
 
+
     <style>
         .address-container {
             padding: 2rem;
@@ -264,7 +265,7 @@
 
 <body>
 
-    <!-- Start Header Area --> 
+    <!-- Start Header Area -->
     <%- include("../partials/userPartial/userHeader") %>
         <!-- End Header Area -->
 
@@ -477,7 +478,7 @@
                                                     value="" type="text">
                                             </div>
 
-                                           
+
                                         </div>
                                         <div class="info"></div>
                                     </form>
@@ -627,7 +628,7 @@
                     console.log("Sending request data:", requestData)
 
 
-                    if (requestData.paymentMethod === "Cash on Delivery"||requestData.paymentMethod === "Wallet") {
+                    if (requestData.paymentMethod === "Cash on Delivery" || requestData.paymentMethod === "Wallet") {
                         fetch("/user/checkout", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -639,7 +640,7 @@
                                     console.log(data.orderId);
 
                                     if (requestData.paymentMethod === "Wallet") {
-                                        
+
                                         window.location.href = "/user/orderPlace";
                                     } else if (requestData.paymentMethod === "Cash on Delivery") {
                                         window.location.href = "/user/orderPlace";
@@ -674,14 +675,215 @@
 
                     } else if (requestData.paymentMethod === "razorpay") {
 
-                        console.log("requestData.orderId",requestData)
-                        console.log("requestData.grandTotal",requestData.grandTotal)
+                        console.log("requestData.orderId", requestData)
+                        console.log("requestData.grandTotal", requestData.grandTotal)
 
-                        razorpay(requestData, requestData.grandTotal);
+                        initiateRazorpayPayment(requestData, requestData.grandTotal);
 
                     }
 
                 });
+
+
+                function initiateRazorpayPayment(requestData) {
+                    fetch('/user/createOrder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: requestData.grandTotal * 100,
+                            currency: "INR",
+                            receipt: "receipt_" + Date.now()
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                openRazorpay(data.order, requestData);
+                            } else {
+                                console.error("Error creating Razorpay order:", data.message);
+                                Swal.fire({
+                                    title: "Order Creation Failed!",
+                                    text: data.message || "Something went wrong while creating the order.",
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                        });
+                }
+
+                function openRazorpay(order, requestData) {
+                    var options = {
+                        "key": "rzp_test_av7bn0QCiETOX0",
+                        "amount": order.amount,
+                        "currency": order.currency,
+                        "name": "Build Your Dream",
+                        "description": "Test Transaction",
+                        "order_id": order.id,
+                        "handler": function (response) {
+                            console.log("Payment Successful:", response);
+                            verifyAndUpdatePayment(response, order.id, requestData);
+                        },
+                        "prefill": {
+                            "name": "John Doe",
+                            "email": "johndoe@example.com",
+                            "contact": "9999999999"
+                        },
+                        "theme": {
+                            "color": "#3399cc"
+                        }
+                    };
+
+                    var rzp = new Razorpay(options);
+
+                    rzp.on('payment.failed', function (response) {
+                        console.log("Payment Failed:", response.error);
+
+                        placePendingOrder(requestData, options.order_id, response);
+                    });
+
+                    rzp.open();
+                }
+
+                function verifyAndUpdatePayment(response, orderId, requestData) {
+                    fetch('/user/verifyPayment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            paymentId: response.razorpay_payment_id,
+                            signature: response.razorpay_signature,
+                            requestData
+
+                        })
+                    })
+                        .then(response => response.json())
+
+
+                        .then(data => {
+                            console.log("response", data);
+                            if (data.success) {
+                                Swal.fire({
+                                    title: "Payment Successful!",
+                                    text: "Your order has been placed successfully.",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.href = "/user/orderPlace";
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Payment Verification Failed!",
+                                    text: data.message || "Something went wrong",
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error verifying payment:", error);
+                            Swal.fire({
+                                title: "Error!",
+                                text: "Something went wrong while verifying payment",
+                                icon: "error"
+                            });
+                        });
+                }
+
+
+
+
+                function placePendingOrder(requestData, orderId, response) {
+                    fetch('/user/placePendingOrder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            requestData: requestData,
+                            paymentStatus: "Pending",
+                            orderId: orderId,
+                            paymentId: response.razorpay_payment_id,
+
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showRetrySwal(requestData, orderId, response)
+
+
+                            } else {
+                                Swal.fire({
+                                    title: "Order Placement Failed!",
+                                    text: "Something went wrong while saving the order.",
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error placing pending order:", error);
+                        });
+                }
+
+
+
+
+
+
+
+
+                function showRetrySwal(requestData, orderId, response) {
+                    Swal.fire({
+                        title: "Payment Failed!",
+                        text: "Do you want to retry the payment or pay later?",
+                        icon: "error",
+                        showCancelButton: true,
+                        confirmButtonText: "Retry Payment",
+                        cancelButtonText: "Pay Later"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            razorpay(requestData, orderId, response);
+                        } else {
+                            payLater(orderId);
+                        }
+                    });
+                }
+
+ 
+
+                function payLater(orderId) {
+                    Swal.fire({
+                        title: "Order Placed!",
+                        text: "You can complete the payment later from your orders page.",
+                        icon: "info",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        window.location.href = "/user/orderPlace";
+                    });
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -782,6 +984,13 @@
                     }
                 }
 
+
+
+
+
+
+
+
                 async function removeCoupon() {
                     const cartId = '<%= cart?._id %>';
                     const grandTotal = ' <%= grandTotal %>';
@@ -833,111 +1042,6 @@
         <li><a href="#">Total <span>₹${finalAmount}</span></a></li>
     `;
                 }
-
-
-
-
-
-
-                function razorpay(requestData, amount) {
-                    var options = {
-                        "key": "rzp_test_av7bn0QCiETOX0",
-                        "amount": amount * 100,
-                        "currency": "INR",
-                        "name": "Build Your Dream",
-                        "description": "Test Transaction",
-                        "handler": function (response) {
-                            console.log("Payment Successful:", response);
-                            verifyAndUpdatePayment(response);
-                        },
-                        "prefill": {
-                            "name": "John Doe",
-                            "email": "johndoe@example.com",
-                            "contact": "9999999999"
-                        },
-                        "theme": {
-                            "color": "#3399cc"
-                        }
-                    };
-
-                    var rzp = new Razorpay(options);
-
-                    rzp.on('payment.failed', function (response) {
-                        console.log("Payment Failed:", response.error);
-                        updatePaymentStatus(orderId, "Failed", null);
-                        showRetrySwal(orderId, amount);
-                    });
-
-                    rzp.open();
-                }
-
-                function verifyAndUpdatePayment(response, orderId) {
-                    fetch('/user/updatePaymentStatus', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: "Payment Successful!",
-                                    text: "Your order has been placed successfully.",
-                                    icon: "success"
-                                }).then(() => {
-                                    window.location.href = "/user/orderPlace";
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Payment Failed!",
-                                    text: data.message || "Something went wrong",
-                                    icon: "error"
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error updating payment status:", error);
-                            Swal.fire({
-                                title: "Error!",
-                                text: "Something went wrong while processing payment",
-                                icon: "error"
-                            });
-                        });
-                }
-
-                function showRetrySwal(orderId, amount) {
-                    Swal.fire({
-                        title: "Payment Failed!",
-                        text: "Do you want to retry the payment or pay later?",
-                        icon: "error",
-                        showCancelButton: true,
-                        confirmButtonText: "Retry Payment",
-                        cancelButtonText: "Pay Later"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            razorpay(orderId, amount);
-                        } else {
-                            payLater(orderId);
-                        }
-                    });
-                }
-
-
-                function payLater(orderId) {
-                    Swal.fire({
-                        title: "Order Placed!",
-                        text: "You can complete the payment later from your orders page.",
-                        icon: "info",
-                        confirmButtonText: "OK"
-                    }).then(() => {
-                        // window.location.href = "/user/orderPlace";
-                    });
-                }
-
 
             </script>
 

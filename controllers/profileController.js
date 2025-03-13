@@ -35,8 +35,8 @@ const userProfile = async (req, res) => {
         const limit =2;
         const skip =(page-1)*limit;
 
-        const totalOrders = await Order.countDocuments();
-                const totalPages =Math.ceil(totalOrders/limit);
+        const totalOrders = await Order.countDocuments({userId});
+        const totalPages =Math.ceil(totalOrders / limit);
 
         const orders = await Order.find({ userId })
             .populate('items.productId')
@@ -60,7 +60,7 @@ const userProfile = async (req, res) => {
 
         orders.forEach(order => {
             if (!order.totalAmount) {
-                order.totalAmount = 0;
+                order.totalAmount = order.totalAmount || 0;
             }
         });
 
@@ -607,4 +607,5 @@ module.exports = {
     getOrderDetails,
     
 }
+
 

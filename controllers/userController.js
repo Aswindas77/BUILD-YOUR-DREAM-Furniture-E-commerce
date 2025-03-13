@@ -21,6 +21,8 @@ const Coupon = require('../models/couponModel');
 const Wallet = require("../models/walletModel");
 const { deductFromWallet } = require("../controllers/walletController");
 const Razorpay = require('razorpay');
+const walletModel = require('../models/walletModel');
+const { userInfo } = require('os');
 
 
 
@@ -326,6 +328,32 @@ const registration = async (req, res) => {
 };
 
 
+// google auth
+
+const googleAuth = async (req, res) => {
+    try {
+        if (!req.user) {
+            req.session.gerrmessage = "Google authentication failed.";
+            return res.redirect("/user/signup");
+        }
+
+        const { displayName, emails } = req.user;
+        const email = emails[0].value;
+
+        req.session.data = {
+            username: displayName,
+            email: email
+        };
+
+
+        console.log("Google User Session Data:", req.session.data);
+
+        res.redirect("/dashboard");
+    } catch (err) {
+        console.error("Google Auth Error:", err.message);
+        res.redirect("/user/signup"); // Redirect on error
+    }
+};
 // otp page load
 
 //====================================================================================================================================================
@@ -570,93 +598,92 @@ const loadShopCategory = async (req, res) => {
 const loadShop = async (req, res) => {
     try {
         const user = req.session?.User;
-        const { search = "", category, minPrice, maxPrice, sort, page = 1 } = req.query;
-        const limit = 6;
+        const { search = "", category, sort, page = 1 } = req.query;
+        const limit = 12;
         const skip = (page - 1) * limit;
 
+        // Build query
         let query = {
             isDeleted: false,
-            isListed: false,
-            stock: { $gt: 0 }
+            isListed: false
         };
-
-
 
         if (search) {
             query.name = { $regex: new RegExp(search, 'i') };
         }
 
         if (category) {
-            query.category = new mongoose.Types.ObjectId(category);
+            const categoryDoc = await Category.findOne({ name: category });
+            if (categoryDoc) {
+                query.category = categoryDoc._id;
+            }
         }
 
-
-        if (minPrice || maxPrice) {
-            query.salesPrice = {};
-            if (minPrice) query.salesPrice.$gte = parseFloat(minPrice);
-            if (maxPrice) query.salesPrice.$lte = parseFloat(maxPrice);
-        }
-
-
-        let sortOption = {};
+        // Build sort object
+        let sortQuery = {};
         switch (sort) {
-            case 'nameAsc': sortOption = { name: 1 }; break;
-            case 'nameDesc': sortOption = { name: -1 }; break;
-            case 'priceAsc': sortOption = { salesPrice: 1 }; break;
-            case 'priceDesc': sortOption = { salesPrice: -1 }; break;
+            case 'nameAsc': sortQuery = { name: 1 }; break;
+            case 'nameDesc': sortQuery = { name: -1 }; break;
+            case 'priceAsc': sortQuery = { salesPrice: 1 }; break;
+            case 'priceDesc': sortQuery = { salesPrice: -1 }; break;
+            default: sortQuery = { createdAt: 1 }; // Default sort
         }
 
+        // Get total count for pagination
         const totalProducts = await Products.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
+        // Get products
         const products = await Products.find(query)
-            .populate({
-                path: "category",
-                match: { isListed: false, isDeleted: false },
-            })
-            .sort(sortOption)
+            .sort(sortQuery)
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .populate('category');
 
-
-        const categories = await Category.find({ isDeleted: false, isListed: false });
-
-
+        // Get wishlist products
         let wishlistProducts = [];
         if (user) {
             const wishlist = await WhishList.findOne({ userId: user._id });
-            wishlistProducts = wishlist ? wishlist.products.map((product) => product.productId.toString()) : [];
-
+            wishlistProducts = wishlist ? wishlist.products.map(p => p.productId.toString()) : [];
         }
 
-        if (req.xhr) {
+        // Get categories for filter dropdown
+        const categories = await Category.find({ isDeleted: false, isListed: false });
+
+        // Check if request wants JSON response
+        if (req.xhr || req.headers.accept.includes('application/json')) {
             return res.json({
+                success: true,
                 products,
                 wishlistProducts,
-                totalPages,
                 currentPage: parseInt(page),
+                totalPages,
+                filters: { search, category, sort }
             });
         }
 
-
-
-
-
-        res.render("shop", {
+        // Render HTML response
+        res.render('shop', {
+            products,
             categories,
             user,
             wishlistProducts,
-            products,
-            filters: { search, category, minPrice, maxPrice, sort },
             currentPage: parseInt(page),
-            searchQuery: search,
             totalPages,
+            filters: { search, category, sort }
         });
-    } catch (err) {
-        console.log('Error in loadShop:', err.message);
-        res.status(500).send("Server Error");
+
+    } catch (error) {
+        console.error('Shop error:', error);
+        if (req.xhr || req.headers.accept.includes('application/json')) {
+            return res.status(500).json({
+                success: false,
+                message: 'Error loading products'
+            });
+        }
+        res.status(500).render('error', { message: 'Error loading products' });
     }
-}
+};
 
 
 // shop products search
@@ -834,6 +861,8 @@ const buyNow = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
 
+
+
         const cart = await Cart.findById(cartId).populate("products.productId");
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
@@ -849,9 +878,34 @@ const buyNow = async (req, res) => {
 
 
         if (paymentMethod.toLowerCase() === "wallet") {
-            if (user.walletBalance >= totalAmount) {
-                user.walletBalance -= totalAmount;
-                await user.save();
+
+            const wallet = await walletModel.findOne({ userId })
+
+            for (let item of orderItems) {
+                const product = await Products.findById(item.productId);
+
+                if (!product) {
+                    return res.status(404).json({
+                        success: false,
+                        message: `Product with ID ${item.productId} not found`,
+                    });
+                }
+
+                if (product.stock < item.quantity) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+                    });
+                }
+
+                product.stock -= item.quantity;
+
+                await product.save();
+            }
+
+            if (wallet.balance >= totalAmount) {
+                wallet.balance -= totalAmount;
+                await wallet.save();
 
                 const newOrder = new ordermodel({
                     userId,
@@ -864,6 +918,7 @@ const buyNow = async (req, res) => {
                 });
 
                 await newOrder.save();
+
                 await Cart.findByIdAndDelete(cartId);
 
                 return res.status(200).json({
@@ -895,6 +950,39 @@ const buyNow = async (req, res) => {
 
 
         if (paymentMethod.toLowerCase() === "cash on delivery") {
+
+
+
+            if (totalAmount > 10000) {
+
+                return res.status(404).json({
+                    success: false,
+                    message: "sorry user COD available only 10000rs"
+                })
+            }
+
+            for (let item of orderItems) {
+                const product = await Products.findById(item.productId);
+
+                if (!product) {
+                    return res.status(404).json({
+                        success: false,
+                        message: `Product with ID ${item.productId} not found`,
+                    });
+                }
+
+                if (product.stock < item.quantity) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+                    });
+                }
+
+                product.stock -= item.quantity;
+
+                await product.save();
+            }
+
             const newOrder = new ordermodel({
                 userId,
                 items: orderItems,
@@ -905,7 +993,7 @@ const buyNow = async (req, res) => {
                 orderStatus: "Pending",
             });
 
-            await newOrder.save();
+            await newOrder.save()
             await Cart.findByIdAndDelete(cartId);
 
             return res.status(200).json({
@@ -916,6 +1004,31 @@ const buyNow = async (req, res) => {
         }
 
         if (paymentMethod.toLowerCase() === "razorpay") {
+
+
+
+            for (let item of orderItems) {
+                const product = await Products.findById(item.productId);
+
+                if (!product) {
+                    return res.status(404).json({
+                        success: false,
+                        message: `Product with ID ${item.productId} not found`,
+                    });
+                }
+
+                if (product.stock < item.quantity) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+                    });
+                }
+
+                product.stock -= item.quantity;
+
+                await product.save();
+            }
+
             const newOrder = new ordermodel({
                 userId,
                 items: orderItems,
@@ -929,9 +1042,9 @@ const buyNow = async (req, res) => {
             await newOrder.save();
             await Cart.findByIdAndDelete(cartId);
 
-            // Initialize Razorpay payment
+
             const razorpayOrder = await razorpay.orders.create({
-                amount: totalAmount * 100, // Convert to paise
+                amount: totalAmount * 100,
                 currency: "INR",
                 receipt: newOrder._id.toString()
             });
@@ -953,71 +1066,7 @@ const buyNow = async (req, res) => {
 };
 
 
-const updatePaymentStatus = async (req, res) => {
-    try {
-        const { orderId, paymentId, razorpaySignature, status } = req.body;
 
-        if (!orderId || !status) {
-            return res.status(400).json({
-                success: false,
-                message: "Missing required parameters"
-            });
-        }
-
-        // Find and update the order
-        const order = await ordermodel.findById(orderId);
-
-        if (!order) {
-            return res.status(404).json({
-                success: false,
-                message: "Order not found"
-            });
-        }
-
-        // For Razorpay payments, verify the signature
-        if (status === "Paid" && paymentId && razorpaySignature) {
-            try {
-                const secret = "wehlBhfqQlWoouA0ZGxYB373"; // Your Razorpay secret
-                const hmac = crypto.createHmac('sha256', secret);
-                hmac.update(orderId + "|" + paymentId);
-                const generatedSignature = hmac.digest('hex');
-
-                if (generatedSignature !== razorpaySignature) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Invalid payment signature"
-                    });
-                }
-            } catch (error) {
-                console.error("Signature verification error:", error);
-                return res.status(400).json({
-                    success: false,
-                    message: "Payment verification failed"
-                });
-            }
-        }
-
-        // Update order status
-        order.paymentStatus = status;
-        if (paymentId) {
-            order.paymentId = paymentId;
-        }
-
-        await order.save();
-
-        res.json({
-            success: true,
-            message: "Payment status updated successfully",
-            order
-        });
-    } catch (error) {
-        console.error("Error updating payment status:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
-};
 
 
 
@@ -1069,7 +1118,8 @@ const filterProducts = async (req, res) => {
 
         let query = {
             isDeleted: false,
-            isListed: false
+            isListed: false,
+            status: 'active'
         };
 
         if (search) {
@@ -1079,7 +1129,6 @@ const filterProducts = async (req, res) => {
             ];
         }
 
-        // Add category filter
         if (category && category !== 'all') {
             const categoryData = await Category.findOne({ name: category });
             if (categoryData) {
@@ -1087,14 +1136,12 @@ const filterProducts = async (req, res) => {
             }
         }
 
-        // Add price filter
         if (minPrice || maxPrice) {
             query.salesPrice = {};
             if (minPrice) query.salesPrice.$gte = parseFloat(minPrice);
             if (maxPrice) query.salesPrice.$lte = parseFloat(maxPrice);
         }
 
-        // Set up sort options
         let sortOption = {};
         switch (sort) {
             case 'priceAsc':
@@ -1109,34 +1156,33 @@ const filterProducts = async (req, res) => {
             case 'nameDesc':
                 sortOption = { name: -1 };
                 break;
+            case 'rating':
+                sortOption = { ratings: -1 };
+                break;
             default:
-                sortOption = { createdAt: -1 }; // Default sort by newest
+                sortOption = { createdAt: -1 };
         }
 
-        // Get total count for pagination
         const totalProducts = await Products.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Get filtered products with pagination
         const products = await Products.find(query)
             .sort(sortOption)
             .skip(skip)
             .limit(limit)
-            .populate('category');
+            .populate('category')
+            .select('name description salesPrice productOffer stock images status ratings isDeleted isListed createdAt updatedAt');
 
-        // Filter out products with unlisted categories
         const filteredProducts = products.filter(product =>
             product.category && !product.category.isListed && !product.category.isDeleted
         );
 
-        // Get wishlist products if user is logged in
         let wishlistProducts = [];
         if (user) {
             const wishlist = await WhishList.findOne({ userId: user._id });
             wishlistProducts = wishlist ? wishlist.products.map(p => p.productId.toString()) : [];
         }
 
-        // Send response based on request type
         if (req.xhr || req.headers.accept.includes('application/json')) {
             return res.json({
                 success: true,
@@ -1148,10 +1194,8 @@ const filterProducts = async (req, res) => {
             });
         }
 
-        // Get categories for filter dropdown
         const categories = await Category.find({ isDeleted: false, isListed: false });
 
-        // Render full page
         res.render("shop", {
             products: filteredProducts,
             categories,
@@ -1179,6 +1223,7 @@ const filterProducts = async (req, res) => {
 
 
 // load whishlist page
+
 const loadWhishList = async (req, res) => {
     try {
         const user = req.session?.User;
@@ -1339,14 +1384,149 @@ const razorpay = new Razorpay({
 });
 
 
+const createOrder = async (req, res) => {
+    try {
+        const { amount, currency, receipt } = req.body;
+
+        const order = await razorpay.orders.create({
+            amount,
+            currency,
+            receipt
+        });
+
+        res.json({ success: true, order });
+    } catch (error) {
+        console.error("Error creating order:", error);
+        res.status(500).json({ success: false, message: "Failed to create order." });
+    }
+};
 
 
 
 
+const verifyPayment = async (req, res) => {
+    try {
+        const { orderId, paymentId, requestData } = req.body;
+
+        const userId = req.session?.User?._id
+
+        console.log("Received Payment Data:", req.body);
+
+        const cartId = requestData.cartId
 
 
 
+        const cart = await Cart.findById(cartId).populate("products.productId");
+        if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
+        const orderItems = cart.products.map(item => ({
+            productId: item.productId._id,
+            quantity: item.quantity,
+            price: item.salesPrice,
+        }));
+
+
+        for (let item of orderItems) {
+            const product = await Products.findById(item.productId);
+
+            if (!product) {
+                return res.status(404).json({
+                    success: false,
+                    message: `Product with ID ${item.productId} not found`,
+                });
+            }
+
+            if (product.stock < item.quantity) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+                });
+            }
+
+            product.stock -= item.quantity;
+
+            await product.save();
+        }
+
+        const newOrder = new ordermodel({
+            userId: userId,
+            addressId: requestData.selectedAddressId,
+            items: orderItems,
+            cartId: requestData.cartId,
+            paymentMethod: requestData.paymentMethod,
+            couponCode: requestData.couponCode || null,
+            totalAmount: parseInt(requestData.grandTotal.trim()),
+            paymentStatus: "Paid",
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId
+        });
+
+
+        await newOrder.save();
+        await Cart.findByIdAndDelete(requestData.cartId);
+
+
+        console.log(" Order Saved Successfully:", newOrder);
+
+        res.json({ success: true, message: "Payment verified & order saved successfully", order: newOrder });
+    } catch (error) {
+        console.error(" Payment verification error:", error);
+        res.status(500).json({ success: false, message: "Payment verification failed" });
+    }
+
+}
+
+
+
+const placePendingOrder = async (req, res) => {
+    try {
+        const { requestData, orderId, paymentId } = req.body;
+
+        console.log("req.body;", req.body)
+        const userId = req.session?.User?._id
+
+        const newOrder = new ordermodel({
+            userId: userId,
+            addressId: requestData.selectedAddressId,
+            cartId: requestData.cartId,
+            paymentMethod: requestData.paymentMethod,
+            couponCode: requestData.couponCode || null,
+            totalAmount: parseInt(requestData.grandTotal.trim()),
+            paymentStatus: "Pending",
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId || ""
+        });
+
+        await newOrder.save();
+        await Cart.findByIdAndDelete(requestData.cartId);
+
+        console.log(" Order Placed with Payment Pending:", newOrder);
+
+        res.json({ success: true, message: "Order placed with pending payment", order: newOrder });
+    } catch (error) {
+        console.error(" Error placing pending order:", error);
+        res.status(500).json({ success: false, message: "Failed to place pending order." });
+    }
+};
+
+
+const downloadInvoice = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const filePath = path.join(__dirname, `../invoices/invoice-${orderId}.pdf`);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ message: "Invoice not found" });
+        }
+
+        res.contentType("application/pdf");
+        res.download(filePath, `invoice-${orderId}.pdf`);
+    } catch (error) {
+
+        console.error(error.message)
+
+    }
+}
 
 
 
@@ -1359,7 +1539,9 @@ module.exports = {
 
 
 
+
     googleLogin,
+    googleAuth,
     ForgotPassword,
     resendOtp,
     genOtpForgotPass,
@@ -1368,9 +1550,11 @@ module.exports = {
     changePassword,
 
 
+
     loadSingUp,
     registration,
     loadOtp,
+    placePendingOrder,
 
 
 
@@ -1384,18 +1568,21 @@ module.exports = {
     loadProductView,
     loadBanProduct,
 
+
     loadWhishList,
     addWhishList,
 
 
     buyNow,
-    updatePaymentStatus,
-
+    createOrder,
+    verifyPayment,
 
     paypalSuccess,
     loadOrderPlaced,
     filterProducts,
     deleteWhishlist,
+
+    downloadInvoice
 
 
 

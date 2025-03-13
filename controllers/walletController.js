@@ -7,9 +7,14 @@ const Wallet = require("../models/walletModel");
 
 const loadWallet = async (req, res) => {
     try {
-        const userId = req.session.User._id;
+        const userId = req.session?.User?._id;
+
+        if(!userId){
+            res.redirect('/user/login')
+        }
+
         const wallet = await Wallet.findOne({ userId: userId });
-        console.log(userId)
+       
         if (!wallet) {
             const newWallet = new Wallet({
                 userId: userId,
@@ -18,7 +23,7 @@ const loadWallet = async (req, res) => {
             });
             await newWallet.save();
             return res.render('profile/profileWallet', {
-                walletBalance: 0,
+                walletBalance: 0, 
                 walletHistory: []
             });
         }

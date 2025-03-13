@@ -3,6 +3,41 @@
 
 <head>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
+
+	<meta name="author" content="CodePixar">
+
+	<meta name="description" content="">
+
+	<meta name="keywords" content="">
+
+	<meta charset="UTF-8">
+
+	<title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
+
+
+	<link rel="stylesheet" href="/public/userAssets/css/linearicons.css">
+	<link rel="stylesheet" href="/public/userAssets/css/font-awesome.min.css">
+	<link rel="stylesheet" href="/public/userAssets/css/themify-icons.css">
+	<link rel="stylesheet" href="/public/userAssets/css/bootstrap.css">
+	<link rel="stylesheet" href="/public/userAssets/css/owl.carousel.css">
+	<link rel="stylesheet" href="/public/userAssets/css/nice-select.css">
+	<link rel="stylesheet" href="/public/userAssets/css/nouislider.min.css">
+	<link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.css" />
+	<link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.skinFlat.css" />
+	<link rel="stylesheet" href="/public/userAssets/css/magnific-popup.css">
+	<link rel="stylesheet" href="/public/userAssets/css/main.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+	<link href="css/font-awesome.css" rel="stylesheet">
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
+	<link rel="stylesheet" href="/public/userAssets/css/custom.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/public/userAssets/css/profileAsset/orderDetails.css">
 </head>
@@ -23,7 +58,7 @@
                 <%= order.status %>
             </span>
         </div>
- 
+
         <div class="tracking-container">
             <div class="tracking-line">
                 <div class="tracking-line-progress"></div>
@@ -91,21 +126,26 @@
                     <div class="info-box">
                         <h4>shipping Address</h4>
                         <% if (selectedAddress) { %>
-                            <p>House Name : <%= selectedAddress.houseNumber %></p>
-                            <p>Landmark : <%= selectedAddress.landmark ? selectedAddress.landmark : 'N/A' %></p>
-                            <p>Pincode : <%= selectedAddress.pincode %></p>
-                            <p>City : <%= selectedAddress.city %></p>
-                            <p>Country : <%= selectedAddress.country %></p>
-                           
-                            
-                        <% } else { %>
-                            <p style="color: red;">Address not found</p>
-                        <% } %>
+                            <p>House Name : <%= selectedAddress.houseNumber %>
+                            </p>
+                            <p>Landmark : <%= selectedAddress.landmark ? selectedAddress.landmark : 'N/A' %>
+                            </p>
+                            <p>Pincode : <%= selectedAddress.pincode %>
+                            </p>
+                            <p>City : <%= selectedAddress.city %>
+                            </p>
+                            <p>Country : <%= selectedAddress.country %>
+                            </p>
+
+
+                            <% } else { %>
+                                <p style="color: red;">Address not found</p>
+                                <% } %>
                     </div>
                 </span>
             </div>
-        </div> 
- 
+        </div>
+
         <div class="price-summary">
             <div class="price-row">
                 <span>Subtotal</span>
@@ -127,6 +167,9 @@
                     </div>
                     <div class="row mt-4 mb-5 d-flex justify-content-center">
                         <div class="col-12 text-center">
+                            <% if(order.paymentStatus==='Paid' && order.status==='Delivered') {%>
+                                <button onclick="downloadInvoice('<%= order._id %>')">Download Invoice</button>
+                                <% } %>
                             <button type="button" class="btn h" onclick="backToOrder()">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Orders
                             </button>
@@ -134,24 +177,26 @@
 
                         </div>
                         <div style="display: flex; justify-content: center; margin: 20px 0;">
-                            <% if (order.status === 'Delivered') { %>
-                                <% if (returnOrder && returnOrder.returnStatus === 'Rejected') { %>
+                            <% if (order.status==='Delivered' ) { %>
+                                <% if (returnOrder && returnOrder.returnStatus==='Rejected' ) { %>
                                     <button type="button" class="return-trigger-btn btn-danger">
                                         <i class="fas fa-exclamation-triangle"></i>
                                         Your return was rejected
                                     </button>
-                                    <% }else if(returnOrder && returnOrder.returnStatus === 'Approved'){ %>
-                                        <button type="button" class="return-trigger-btn btn-success" style="background: #48c779;">
+                                    <% }else if(returnOrder && returnOrder.returnStatus==='Approved' ){ %>
+                                        <button type="button" class="return-trigger-btn btn-success"
+                                            style="background: #48c779;">
                                             <i class="fas fa-check-circle"></i>
                                             return order Approved
                                         </button>
-                                <% } else { %>
-                                    <button type="button" class="return-trigger-btn" onclick="openReturnModal()">
-                                        <i class="fas fa-undo-alt"></i>
-                                        Return Order
-                                    </button>
-                                <% } %>
-                            <% } %>
+                                        <% } else { %>
+                                            <button type="button" class="return-trigger-btn"
+                                                onclick="openReturnModal()">
+                                                <i class="fas fa-undo-alt"></i>
+                                                Return Order
+                                            </button>
+                                            <% } %>
+                                                <% } %>
                         </div>
                     </div>
         </div>
@@ -197,7 +242,7 @@
                                 </span>
                             </label>
 
-                            
+
 
                             <label class="reason-option">
                                 <input type="radio" name="returnReason" value="quality">
@@ -338,70 +383,141 @@
         }
 
         function submitReturn(event) {
-    event.preventDefault(); 
+            event.preventDefault();
 
-    const form = event.target;
-    const formData = new FormData(form);
-    const orderId ='<%= order._id %>';
+            const form = event.target;
+            const formData = new FormData(form);
+            const orderId = '<%= order._id %>';
 
-    const returnData = {
-        orderId: orderId,  
-        returnReason: formData.get('returnReason'),
-        description: formData.get('description')
-    };
+            const returnData = {
+                orderId: orderId,
+                returnReason: formData.get('returnReason'),
+                description: formData.get('description')
+            };
 
 
-    console.log("Return Data Sent:", returnData); 
+            console.log("Return Data Sent:", returnData);
 
-    Swal.fire({
-    title: "Are you sure?",
-    text: "Do you want to request a return?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, request it!"
-}).then((result) => {
-    if (result.isConfirmed) {
-        fetch('/user/request-return', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(returnData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Server Response:", data);
-            if (data.success) {
-                Swal.fire(
-                    "Success!",
-                    "Return request submitted successfully!",
-                    "success"
-                ).then(() => {
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire(
-                    "Error!",
-                    "Failed to submit return request: " + data.message,
-                    "error"
-                );
-            }
-        })
-        .catch(error => {
-            Swal.fire("Error!", "Something went wrong!", "error");
-        });
-    }
-});
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Do you want to request a return?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, request it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/user/request-return', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(returnData)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("Server Response:", data);
+                            if (data.success) {
+                                Swal.fire(
+                                    "Success!",
+                                    "Return request submitted successfully!",
+                                    "success"
+                                ).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    "Error!",
+                                    "Failed to submit return request: " + data.message,
+                                    "error"
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire("Error!", "Something went wrong!", "error");
+                        });
+                }
+            });
 
-}
-        
+        }
+
         window.onclick = function (event) {
             if (event.target == document.getElementById('returnModal')) {
                 closeReturnModal();
             }
         }
+
+
+        function downloadInvoice(orderId) {
+    // Step 1: Show Confirmation Popup
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to download the invoice?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, download!',
+        cancelButtonText: 'Cancel',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Step 2: Show Loading Swal
+            Swal.fire({
+                title: 'Generating Invoice',
+                text: 'Please wait...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Step 3: Fetch the Invoice
+            fetch(`/user/orderInvoice/${orderId}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/pdf' }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(err => { throw new Error(err); });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Step 4: Close Loading Swal
+                Swal.close();
+
+                // Step 5: Create and Trigger File Download
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `invoice-${orderId}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Cleanup
+                setTimeout(() => window.URL.revokeObjectURL(url), 100);
+
+                // Step 6: Show Success Message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Invoice downloaded successfully',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error.message || 'Failed to generate invoice!'
+                });
+            });
+        }
+    });
+}
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

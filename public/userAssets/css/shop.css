@@ -439,27 +439,44 @@ body {
     background: #f9fafb;
 }
 
-.reset-btn {
+/* General Button Styling */
+.reset-btn, .apply-btn {
     padding: 0.75rem 1.5rem;
-    background: white;
-    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    font-weight: bold;
     border-radius: 6px;
-    color: #374151;
     cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
+/* Transparent Reset Button */
+.reset-btn {
+    background: transparent; /* Fully transparent */
+    border: 1px solid rgba(55, 65, 81, 0.5); /* Semi-transparent dark gray */
+    color: #374151; /* Dark gray text */
+}
+
+.reset-btn:hover {
+    background: rgba(55, 65, 81, 0.1); /* Light gray on hover */
+    transform: scale(1.05);
+}
+
+/* Transparent Apply Button */
 .apply-btn {
-    padding: 0.75rem 1.5rem;
-    background: #2563eb;
-    border: none;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
+    background: transparent;
+    border: 1px solid rgba(37, 99, 235, 0.7); /* Semi-transparent blue */
+    color: #2563eb; /* Blue text */
 }
 
 .apply-btn:hover {
-    background: #1d4ed8;
+    background: rgba(37, 99, 235, 0.2); /* Light blue hover effect */
+    transform: scale(1.05);
 }
+
 
 .sort-select {
     padding: 0.75rem 1rem;

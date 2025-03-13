@@ -8,7 +8,10 @@ const paypal = require("@paypal/checkout-server-sdk");
 const paypalClient = require("../config/paypal");
 const Return = require('../models/returnModel');
 const walletModel = require("../models/walletModel");
-
+const PDFDocument = require("pdfkit");
+const path = require("path");
+const fs = require("fs");
+const Razorpay =require('razorpay');
 
 
 
@@ -119,6 +122,8 @@ const updateOrderStatus = async (req, res) => {
             order.paymentStatus = "Pending"
         }
         order.status = status;
+
+        order.paymentStatus = "Paid";
 
         order.updatedAt = new Date();
         await order.save();
@@ -364,6 +369,13 @@ const loadReturnOrder = async (req, res) => {
     }
 };
 
+
+
+
+
+
+
+
 // update return status
 
 
@@ -434,6 +446,257 @@ const updateReturnStatus = async (req, res) => {
 
 
 
+
+
+
+
+
+
+const generateInvoice = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+
+        const order = await Orders.findById(orderId)
+            .populate("userId", "username email")
+            .populate("items.productId", "name price")
+            .populate("addressId");
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        const doc = new PDFDocument({
+            margin: 50,
+            size: 'A4',
+            bufferPages: true
+        });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename=invoice-Buid Your Dream Invoice.pdf`);
+
+        doc.pipe(res);
+
+        doc.rect(0, 0, doc.page.width, 120).fill('#f8f9fa');
+
+        const logoPath = path.join(__dirname, "../public/images/logo.png");
+        if (fs.existsSync(logoPath)) {
+            doc.image(logoPath, 50, 40, { width: 100 });
+        }
+
+        doc.fillColor("#222222")
+            .fontSize(22)
+            .font('Helvetica-Bold')
+            .text("BUILD YOUR DREAM", 200, 50, { align: "right" })
+            .fontSize(10)
+            .font('Helvetica')
+            .fillColor("#555555")
+            .text("electronics Business Street, banglore, india", 200, 75, { align: "right" })
+            .text("Phone: +1234567890 | Email: support@buildyourdream.com", 200, 90, { align: "right" })
+            .moveDown(2);
+
+        doc.rect(50, 130, doc.page.width - 100, 40).fillAndStroke('#f0f0f0', '#cccccc');
+        doc.fillColor("#000000")
+            .fontSize(18)
+            .font('Helvetica-Bold')
+            .text("INVOICE", 0, 142, { align: "center" })
+            .moveDown(1.5);
+
+        const customerY = doc.y + 10;
+        doc.rect(50, customerY, 240, 80).fill('#f9f9f9');
+
+        doc.fillColor("#444444")
+            .fontSize(12)
+            .font('Helvetica-Bold')
+            .text("Bill To:", 60, customerY + 10)
+            .moveDown(0.5)
+            .fontSize(10)
+            .font('Helvetica')
+            .text(`Name: ${order.userId.username}`, 60)
+            .text(`Email: ${order.userId.email}`, 60)
+            .moveDown();
+
+        doc.rect(310, customerY, 240, 80).fill('#f9f9f9');
+
+        doc.fontSize(12)
+            .font('Helvetica-Bold')
+            .text("Invoice Details:", 320, customerY + 10)
+            .moveDown(0.5)
+            .fontSize(10)
+            .font('Helvetica')
+            .text(`Invoice No: #${order._id}`, 320)
+            .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 320)
+            .text(`Payment Status: ${order.paymentStatus}`, 320)
+            .text(`Payment Method: ${order.paymentMethod}`, 320)
+            .moveDown(2);
+
+        const tableTop = doc.y + 20;
+        doc.rect(50, tableTop, doc.page.width - 100, 25).fill('#3498db');
+
+        doc.fillColor("#ffffff").fontSize(11).font('Helvetica-Bold');
+        doc.text("Item", 70, tableTop + 7, { width: 200 });
+        doc.text("Quantity", 270, tableTop + 7, { width: 70, align: "center" });
+        doc.text("Price", 340, tableTop + 7, { width: 90, align: "center" });
+        doc.text("Total", 430, tableTop + 7, { width: 90, align: "right" });
+
+        let y = tableTop + 25;
+
+        order.items.forEach((item, index) => {
+            const isEvenRow = index % 2 === 0;
+            doc.rect(50, y, doc.page.width - 100, 25).fill(isEvenRow ? '#f5f5f5' : '#ffffff');
+
+            doc.fillColor("#444444").fontSize(10).font('Helvetica');
+            doc.text(item.productId.name, 70, y + 7, { width: 200 });
+            doc.text(item.quantity.toString(), 270, y + 7, { width: 70, align: "center" });
+            doc.text(`${item.price.toFixed(2)}`, 340, y + 7, { width: 90, align: "center" });
+            doc.text(`${(item.quantity * item.price).toFixed(2)}`, 430, y + 7, { width: 90, align: "right" });
+
+            y += 25;
+        });
+
+        const totalsY = y + 20;
+        doc.rect(310, totalsY, 240, order.couponCode ? 90 : 60).fill('#f9f9f9').stroke('#e0e0e0');
+
+        let currentY = totalsY + 15;
+
+        doc.fillColor("#000000").fontSize(10).font('Helvetica-Bold');
+        doc.text("Subtotal:", 330, currentY);
+        doc.font('Helvetica').text(`${order.totalAmount.toFixed(2)}`, 430, currentY, { align: "right", width: 100 });
+
+        if (order.couponCode) {
+            currentY += 20;
+            doc.font('Helvetica-Bold').text("Discount:", 330, currentY);
+            doc.font('Helvetica').text(`-₹${(order.discount || 0).toFixed(2)}`, 430, currentY, { align: "right", width: 100 });
+        }
+
+        currentY += 20;
+
+        doc.rect(310, currentY - 5, 240, 30).fill('#3498db');
+        doc.fontSize(12)
+            .fillColor("#ffffff")
+            .font('Helvetica-Bold')
+            .text("Grand Total:", 330, currentY);
+        doc.text(`${(order.totalAmount - (order.discount || 0)).toFixed(2)}`, 430, currentY, { align: "right", width: 100 });
+
+        const footerY = doc.page.height - 100;
+
+        doc.moveTo(50, footerY)
+            .lineTo(doc.page.width - 50, footerY)
+            .stroke('#cccccc');
+
+        if (fs.existsSync(logoPath)) {
+            doc.opacity(0.05);
+            doc.image(logoPath, doc.page.width / 2 - 100, doc.page.height / 2 - 100, { width: 200 });
+            doc.opacity(1);
+        }
+
+        doc.moveDown(4)
+            .fillColor("#555555")
+            .fontSize(11)
+            .font('Helvetica-Bold')
+            .text("Thank you for shopping with us!", { align: "center" })
+            .moveDown()
+            .fontSize(8)
+            .font('Helvetica')
+            .text("This is a computer-generated invoice and does not require a signature.", { align: "center" })
+            .moveDown(0.5)
+            .text(`Generated on: ${new Date().toLocaleString()}`, { align: "center" });
+
+        const totalPages = doc.bufferedPageRange().count;
+        for (let i = 0; i < totalPages; i++) {
+            doc.switchToPage(i);
+            doc.fillColor("#aaaaaa")
+                .fontSize(8)
+                .text(
+                    `Page ${i + 1} of ${totalPages}`,
+                    50,
+                    doc.page.height - 30,
+                    { align: "center", width: doc.page.width - 100 }
+                );
+        }
+
+        doc.end();
+    } catch (error) {
+        console.error("Error generating invoice:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error generating invoice",
+            error: error.message,
+        });
+    }
+};
+
+
+
+
+
+
+
+const razorpay = new Razorpay({
+    key_id: "rzp_test_av7bn0QCiETOX0",
+    key_secret: "wehlBhfqQlWoouA0ZGxYB373",
+});
+
+const createRetryPayment = async (req,res)=>{
+    try {
+        const { receipt, currency,amount } = req.body;
+        const {orderId} =req.params
+
+        console.log("receipt",receipt)
+        console.log("currency",currency)
+        console.log("amount",amount)
+
+        const newOrder = await razorpay.orders.create({
+            amount,
+            currency,
+            receipt,
+            
+        });
+
+        res.json({
+            success: true,
+            razorpayOrderId: newOrder.id,
+            amount:amount,
+            order:newOrder
+        });
+
+    } catch (error) {
+        console.error("Error creating Razorpay order:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+}
+
+
+
+const retryPayment = async (req, res) => {
+    try {
+     const {orderId,razorpayPaymentId} =req.body
+ 
+     const order = await Orders.findById(orderId);
+     if (!order) {
+         return res.status(404).json({ success: false, message: "Order not found" });
+     }
+
+     console.log("order",order)
+ 
+     order.paymentStatus = "Paid";
+     order.paymentMethod=" razorpay"
+     order.isPaid = true;
+     order.razorpayPaymentId = razorpayPaymentId;
+     await order.save();
+ 
+     res.json({ success: true, message: "Payment status updated successfully" });
+ 
+    } catch (error) {
+     console.error("Error updating payment status:", error);
+     res.status(500).json({ success: false, message: "Server Error" });
+    }
+ 
+ } 
+
+
+
+
+
 module.exports = {
 
     loadOrderPage,
@@ -443,5 +706,8 @@ module.exports = {
     orderCancel,
     requestReturn,
     loadReturnOrder,
-    updateReturnStatus
+    updateReturnStatus,
+    generateInvoice,
+    createRetryPayment,
+    retryPayment,
 };

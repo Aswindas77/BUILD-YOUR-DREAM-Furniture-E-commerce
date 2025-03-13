@@ -2,10 +2,30 @@
 <html lang="en">
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
+
+    <meta name="author" content="CodePixar">
+
+    <meta name="description" content="">
+
+    <meta name="keywords" content="">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Dashboard</title>
+
+    <title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
+
+
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         * {
             margin: 0;
@@ -487,6 +507,55 @@
             border: 1px solid #ccc;
             z-index: 10;
         }
+
+        .order-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .view-details-btn,
+        .cancel-order-btn,
+        .retry-payment-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .view-details-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .view-details-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .cancel-order-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .cancel-order-btn:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+
+        .retry-payment-btn {
+            background-color: #f39c12;
+            color: white;
+            font-weight: bold;
+        }
+
+        .retry-payment-btn:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
@@ -639,6 +708,15 @@
                                                     Cancel Order
                                                 </button>
                                                 <% } %>
+
+                                                    <% if (order.paymentStatus==='Failed' ||
+                                                        order.paymentStatus==='Pending' ) { %>
+                                                        <button class="retry-payment-btn"
+                                                            onclick="retryPayment('<%= order._id %>', '<%= order.totalAmount %>')">
+                                                            Retry Payment
+                                                        </button>
+                                                        <% } %>
+
                                         </div>
                                     </div>
                                 </div>
@@ -699,91 +777,227 @@
 
 
         function cancelOrder(orderId) {
-    Swal.fire({
-        title: "Select a Cancellation Reason",
-        input: "select",
-        inputOptions: {
-            "Changed my mind": "Changed my mind",
-            "Found a better price": "Found a better price",
-            "Order delay": "Order delay",
-            "Wrong product ordered": "Wrong product ordered",
-            "Other": "Other"
-        },
-        inputPlaceholder: "Choose a reason",
-        showCancelButton: true,
-        confirmButtonText: "Next",
-        cancelButtonText: "Cancel",
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        preConfirm: (reason) => {
-            if (!reason) {
-                Swal.showValidationMessage("Please select a reason.");
-                return false;
-            }
-            return reason;
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let reason = result.value;
-
-           
             Swal.fire({
-                title: "Are you sure?",
-                text: `Do you really want to cancel this order? Reason: ${reason}`,
-                icon: "warning",
+                title: "Select a Cancellation Reason",
+                input: "select",
+                inputOptions: {
+                    "Changed my mind": "Changed my mind",
+                    "Found a better price": "Found a better price",
+                    "Order delay": "Order delay",
+                    "Wrong product ordered": "Wrong product ordered",
+                    "Other": "Other"
+                },
+                inputPlaceholder: "Choose a reason",
                 showCancelButton: true,
+                confirmButtonText: "Next",
+                cancelButtonText: "Cancel",
                 confirmButtonColor: "#d33",
                 cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, cancel it!",
-                cancelButtonText: "No, keep it"
+                preConfirm: (reason) => {
+                    if (!reason) {
+                        Swal.showValidationMessage("Please select a reason.");
+                        return false;
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let reason = result.value;
 
-            }).then((confirmResult) => {
-                if (confirmResult.isConfirmed) {
-                    fetch(`/user/orderCancel/${orderId}`, {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ reason: reason })
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP Error! Status: ${response.status}`);
+
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `Do you really want to cancel this order? Reason: ${reason}`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Yes, cancel it!",
+                        cancelButtonText: "No, keep it"
+
+                    }).then((confirmResult) => {
+                        if (confirmResult.isConfirmed) {
+                            fetch(`/user/orderCancel/${orderId}`, {
+                                method: 'POST',
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({ reason: reason })
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error(`HTTP Error! Status: ${response.status}`);
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            title: "Cancelled!",
+                                            text: "Your order has been cancelled.",
+                                            icon: "success",
+                                            timer: 2000,
+                                            showConfirmButton: false
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: "Error",
+                                            text: data.message || "Error cancelling order",
+                                            icon: "error"
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error:", error);
+                                    Swal.fire({
+                                        title: "Error",
+                                        text: "Something went wrong!",
+                                        icon: "error"
+                                    });
+                                });
                         }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: "Cancelled!",
-                                text: "Your order has been cancelled.",
-                                icon: "success",
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: "Error",
-                                text: data.message || "Error cancelling order",
-                                icon: "error"
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                        Swal.fire({
-                            title: "Error",
-                            text: "Something went wrong!",
-                            icon: "error"
-                        });
                     });
                 }
             });
         }
+
+
+
+
+
+        function retryPayment(orderId, totalAmount) {
+            Swal.fire({
+                title: "Retry Payment?",
+                text: `Your order total is ₹${totalAmount}. Do you want to proceed?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, retry!",
+                cancelButtonText: "No, cancel",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    return fetch(`/user/createRetryPayment/${orderId}`, { 
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            amount: totalAmount*100 , 
+                            currency: "INR",
+                            receipt: "receipt_" + Date.now()
+                        })
+                    })
+                        .then(response => response.json()) 
+                        .then(data => {
+                            if (data.success) {
+                                console.log("order",data.order)
+                                retryRazorpay(data.order, data.amount,orderId);
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Retry Failed",
+                                    text: data.message || "Something went wrong. Please try again.",
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            Swal.fire({
+                                icon: "error",
+                                title: "Server Error",
+                                text: "Failed to retry payment. Please try again later.",
+                            });
+                        });
+                }
+            });
+        }
+
+
+
+
+
+
+        function retryRazorpay(order, totalAmount,orderId) {
+
+            var options = {
+                "key": "rzp_test_av7bn0QCiETOX0",
+                "amount": totalAmount,
+                "currency": "INR",
+                "name": "Build Your Dream",
+                "description": "Test Transaction",
+                "order_id": order,
+                "handler": function (response) {
+                    console.log("order.id",order.id)
+
+                    updatePayment(response,order.id,orderId)
+                },
+                "prefill": {
+                    "name": "John Doe",
+                    "email": "johndoe@example.com",
+                    "contact": "9999999999"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                }
+            };
+
+            var rzp = new Razorpay(options);
+
+            rzp.on('payment.failed', function (response) {
+                console.log("Payment Failed:", response.error);
+
+            });
+
+            rzp.open();
+        }
+
+
+
+        function updatePayment(response,orderid,orderId) {
+            console.log("orderId",orderId)
+            
+    fetch(`/user/updateRetryPayment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            orderId: orderId,
+            razorpayPaymentId: response.razorpay_payment_id
+        })
+    })
+    .then(response => {
+        if (!response.ok) { 
+            throw new Error(`HTTP error! Status: ${response.status}`); 
+        }
+        return response.json(); 
+    })
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Payment Successful!",
+                text: "Your payment has been successfully updated.",
+                timer: 2000,
+                showConfirmButton: false,
+            }).then(() => {
+                window.location.reload(); 
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Update Failed",
+                text: data.message || "Something went wrong. Please try again.",
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error updating payment:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Server Error",
+            text: "Failed to update payment. Please try again later.",
+        });
     });
 }
+
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
