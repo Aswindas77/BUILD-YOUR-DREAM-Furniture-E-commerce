@@ -851,9 +851,12 @@ const loadBanProduct = async (req, res) => {
 
 const buyNow = async (req, res) => {
     try {
-        const { selectedAddressId, paymentMethod, cartId, peymentStatus } = req.body;
+        const { selectedAddressId, paymentMethod, cartId, peymentStatus,couponCode } = req.body;
         const userId = req.session.User._id;
 
+        const coupon = await Coupon.findOne({ code: couponCode });
+
+        console.log("looo",coupon)
 
 
 
@@ -918,6 +921,9 @@ const buyNow = async (req, res) => {
                 });
 
                 await newOrder.save();
+                coupon.usedBy.push(userId);
+                
+                await coupon.save()
 
                 await Cart.findByIdAndDelete(cartId);
 
@@ -953,11 +959,11 @@ const buyNow = async (req, res) => {
 
 
 
-            if (totalAmount > 10000) {
+            if (totalAmount > 20000) {
 
                 return res.status(404).json({
                     success: false,
-                    message: "sorry user COD available only 10000rs"
+                    message: "sorry user COD available only 20000rs"
                 })
             }
 

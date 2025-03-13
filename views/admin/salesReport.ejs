@@ -7,24 +7,25 @@
     <title>Admin Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="/public/adminAssets/css/adminDashboard.css">
-   
+
 </head>
 
 <body>
-    
 
-    
+
+
 
     <!-- Orders Table Section -->
+     <h1>sales-report</h1>
     <div class="sales-section">
         <div class="sales-header">
-            <h2 class="sales-title">Sales report</h2>
+            <h2 class="sales-title">Sales Revenue - <span id="period-text">Daily</span></h2>
             <div class="period-buttons">
-                <button class="period-button active">Daily</button>
-                <button class="period-button">Weekly</button>
-                <button class="period-button">Monthly</button>
-                <button class="period-button">Yearly</button>
-                <button class="period-button">Custom</button>
+                <button class="period-button active" data-period="daily">Daily</button>
+                <button class="period-button" data-period="weekly">Weekly</button>
+                <button class="period-button" data-period="monthly">Monthly</button>
+                <button class="period-button" data-period="yearly">Yearly</button>
+                <button class="period-button" data-period="custom">Custom</button>
             </div>
             <div class="export-buttons">
                 <!-- <button class="export-button excel-button">
@@ -36,50 +37,213 @@
             </div>
         </div>
 
-        <table class="sales-table">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>User ID</th>
-                    <th>Items</th>
-                    <th>Total Amount</th>
-                    <th>Payment Status</th>
-                    <th>Payment Method</th>
-                    <th>Order Status</th>
-                    <th>Order Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Dummy data for now -->
-                <tr>
-                    <td>#ORD001</td>
-                    <td>USR123</td>
-                    <td>3 items</td>
-                    <td>₹110,557</td>
-                    <td>Pending</td>
-                    <td>Cash on Delivery</td>
-                    <td>Delivered</td>
-                    <td>03 Mar, 2024</td>
-                </tr>
-                <tr>
-                    <td>#ORD002</td>
-                    <td>USR456</td>
-                    <td>2 items</td>
-                    <td>₹85,999</td>
-                    <td>Paid</td>
-                    <td>UPI</td>
-                    <td>Processing</td>
-                    <td>02 Mar, 2024</td>
-                </tr>
-                <!-- Add more dummy rows as needed -->
-            </tbody>
-        </table>
+        <!-- Add pagination controls -->
+        <div class="table-container">
+            <table class="sales-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User ID</th>
+                        <th>Items</th>
+                        <th>Total Amount</th>
+                        <th>Payment Status</th>
+                        <th>Payment Method</th>
+                        <th>Order Status</th>
+                        <th>Order Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dummy data for now -->
+                    <tr>
+                        <td>#ORD001</td>
+                        <td>USR123</td>
+                        <td>3 items</td>
+                        <td>₹110,557</td>
+                        <td>Pending</td>
+                        <td>Cash on Delivery</td>
+                        <td>Delivered</td>
+                        <td>03 Mar, 2024</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD002</td>
+                        <td>USR456</td>
+                        <td>2 items</td>
+                        <td>₹85,999</td>
+                        <td>Paid</td>
+                        <td>UPI</td>
+                        <td>Processing</td>
+                        <td>02 Mar, 2024</td>
+                    </tr>
+                    <!-- Add more dummy rows as needed -->
+                </tbody>
+            </table>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing <span id="showing-start">0</span> to <span id="showing-end">0</span> of <span
+                        id="total-items">0</span> entries
+                </div>
+                <div class="pagination-controls">
+                    <button id="prev-page" class="pagination-button">&laquo; Previous</button>
+                    <div id="page-numbers" class="page-numbers"></div>
+                    <button id="next-page" class="pagination-button">Next &raquo;</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Add this HTML for custom date range modal -->
+    <div id="customDateModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Select Date Range</h2>
+            <div class="date-inputs">
+                <div class="input-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" required>
+                </div>
+            </div>
+            <button id="applyDateRange" class="apply-btn">Apply</button>
+        </div>
+    </div>
+
+    <style>
+        /* Add these styles */
+        .pagination-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .pagination-info {
+            color: #666;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination-button {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .pagination-button:hover {
+            background: #f0f0f0;
+        }
+
+        .pagination-button:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-number {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .page-number.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .date-inputs {
+            margin: 20px 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .apply-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .apply-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const periodButtons = document.querySelectorAll('.period-button');
             const tableBody = document.querySelector('.sales-table tbody');
+            const periodText = document.getElementById('period-text');
+
+            // Pagination variables
+            let currentPage = 1;
+            let itemsPerPage = 10;
+            let totalItems = 0;
+            let currentData = [];
 
             // Function to format date
             function formatDate(dateString) {
@@ -96,198 +260,255 @@
                 return '₹' + Number(amount).toLocaleString('en-IN');
             }
 
-            // Function to update table with new data
-            function updateTable(orders) {
-                console.log(orders)
-                tableBody.innerHTML = orders.map(order => `
-                    <tr>
-                        <td>#${order._id}</td>
-                        <td>${order.userId}</td>
-                        <td>${order.items.length} items</td>
-                        <td>${formatCurrency(order.totalAmount)}</td>
-                        <td>${order.paymentStatus}</td>
-                        <td>${order.paymentMethod}</td>
-                        <td>${order.status}</td>
-                        <td>${formatDate(order.createdAt)}</td>
-                    </tr>
-                `).join('');
+            // Function to update heading
+            function updateHeading(period) {
+                periodText.textContent = period.charAt(0).toUpperCase() + period.slice(1);
             }
 
-            // Add click event to all period buttons
+            // Function to render pagination
+            function renderPagination(total) {
+                const totalPages = Math.ceil(total / itemsPerPage);
+                const pageNumbers = document.getElementById('page-numbers');
+                const prevButton = document.getElementById('prev-page');
+                const nextButton = document.getElementById('next-page');
+
+                // Update info text
+                const start = (currentPage - 1) * itemsPerPage + 1;
+                const end = Math.min(start + itemsPerPage - 1, total);
+                document.getElementById('showing-start').textContent = start;
+                document.getElementById('showing-end').textContent = end;
+                document.getElementById('total-items').textContent = total;
+
+                // Generate page numbers
+                pageNumbers.innerHTML = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => {
+                        currentPage = i;
+                        renderTable();
+                        renderPagination(total);
+                    });
+                    pageNumbers.appendChild(pageButton);
+                }
+
+                // Update prev/next buttons
+                prevButton.disabled = currentPage === 1;
+                nextButton.disabled = currentPage === totalPages;
+            }
+
+            // Function to render table with current page data
+            function renderTable() {
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageData = currentData.slice(start, end);
+
+                tableBody.innerHTML = pageData.map(order => `
+                <tr>
+                    <td>#${order._id}</td>
+                    <td>${order.userId}</td>
+                    <td>${order.items.length} items</td>
+                    <td>${formatCurrency(order.totalAmount)}</td>
+                    <td>${order.paymentStatus}</td>
+                    <td>${order.paymentMethod}</td>
+                    <td>${order.status}</td>
+                    <td>${formatDate(order.createdAt)}</td>
+                </tr>
+            `).join('');
+            }
+
+            // Update click event for period buttons
             periodButtons.forEach(button => {
                 button.addEventListener('click', async function () {
-                    // Remove active class from all buttons
                     periodButtons.forEach(btn => btn.classList.remove('active'));
-                    // Add active class to clicked button
                     this.classList.add('active');
 
-                    const period = this.textContent.toLowerCase();
+                    const period = this.dataset.period;
+                    updateHeading(period);
 
                     try {
                         const response = await fetch(`/admin/orders/${period}`);
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
+                        if (!response.ok) throw new Error('Network response was not ok');
+
                         const data = await response.json();
-                        updateTable(data);
+                        currentData = data;
+                        totalItems = data.length;
+                        currentPage = 1; // Reset to first page
+
+                        renderTable();
+                        renderPagination(totalItems);
                     } catch (error) {
                         console.error('Error fetching orders:', error);
-                        
                     }
                 });
             });
 
-            // Trigger click on Daily button to load initial data
+            // Add pagination button listeners
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                    renderPagination(totalItems);
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', () => {
+                if (currentPage < Math.ceil(totalItems / itemsPerPage)) {
+                    currentPage++;
+                    renderTable();
+                    renderPagination(totalItems);
+                }
+            });
+
+            // Initial load
             document.querySelector('.period-button').click();
 
-            // Add PDF export functionality
-            const pdfButton = document.querySelector('.pdf-button');
+            // Custom Date Range Modal
+            const modal = document.getElementById('customDateModal');
+            const customButton = document.querySelector('[data-period="custom"]');
+            const closeBtn = document.querySelector('.close');
+            const applyBtn = document.getElementById('applyDateRange');
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
 
+            // Open modal when clicking custom button
+            customButton.addEventListener('click', function () {
+                modal.style.display = "block";
+            });
+
+            // Close modal
+            closeBtn.addEventListener('click', function () {
+                modal.style.display = "none";
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+
+            // Apply custom date range
+            applyBtn.addEventListener('click', async function () {
+                if (!startDate.value || !endDate.value) {
+                    alert('Please select both start and end dates');
+                    return;
+                }
+
+                const start = new Date(startDate.value);
+                const end = new Date(endDate.value);
+
+                if (end < start) {
+                    alert('End date must be after start date');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/admin/orders/custom', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            startDate: startDate.value,
+                            endDate: endDate.value
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const data = await response.json();
+                    currentData = data;
+                    totalItems = data.length;
+                    currentPage = 1;
+
+                    // Update heading with date range
+                    const formattedStart = new Date(startDate.value).toLocaleDateString();
+                    const formattedEnd = new Date(endDate.value).toLocaleDateString();
+                    periodText.textContent = `Custom (${formattedStart} - ${formattedEnd})`;
+
+                    renderTable();
+                    renderPagination(totalItems);
+                    modal.style.display = "none";
+                } catch (error) {
+                    console.error('Error fetching custom date range:', error);
+                    alert('Error fetching data for custom date range');
+                }
+            });
+
+            // Updated PDF Export Function
             function generatePDF() {
-                // Create PDF content container
-                const pdfContent = document.createElement('div');
-                pdfContent.classList.add('pdf-wrapper');
+                const element = document.createElement('div');
+                element.innerHTML = `
+                    <div class="pdf-container" style="padding: 20px;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h1 style="color: #333;">Build Your Dream</h1>
+                            <h2>Sales Report</h2>
+                            <p>Period: ${document.getElementById('period-text').textContent}</p>
+                            <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h3>Summary</h3>
+                            <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+                                <tr>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Total Orders</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Total Revenue</th>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${totalItems}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">₹${calculateTotalRevenue()}</td>
+                                </tr>
+                            </table>
+                        </div>
 
-                // Add header with logo and company info
-                const header = document.createElement('div');
-                header.classList.add('pdf-header');
-
-
-
-                // Add report title and date
-                const titleSection = document.createElement('div');
-                titleSection.classList.add('pdf-title-section');
-                const activePeriod = document.querySelector('.period-button.active').textContent;
-                const currentDate = new Date().toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric'
-                });
-                titleSection.innerHTML = `
-                    <h2>Sales Report</h2>
-                    <div class="report-meta">
-                        <p><strong>Period:</strong> ${activePeriod}</p>
-                        <p><strong>Generated on:</strong> ${currentDate}</p>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Order ID</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">User ID</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Items</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Total Amount</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Payment Status</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Order Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${currentData.map(order => `
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">#${order._id}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.userId}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.items.length}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">₹${order.totalAmount}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.paymentStatus}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.status}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 `;
-                pdfContent.appendChild(titleSection);
 
-                // Add summary section
-                const summarySection = document.createElement('div');
-                summarySection.classList.add('pdf-summary');
-                summarySection.innerHTML = `
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <h3>Total Orders</h3>
-                            <p>${document.querySelector('.orders-card .card-value').textContent}</p>
-                        </div>
-                        <div class="summary-item">
-                            <h3>Total Revenue</h3>
-                            <p>${document.querySelector('.revenue-card .card-value').textContent}</p>
-                        </div>
-                        <div class="summary-item">
-                            <h3>Total Products</h3>
-                            <p>${document.querySelector('.products-card .card-value').textContent}</p>
-                        </div>
-                    </div>
-                `;
-                pdfContent.appendChild(summarySection);
-
-                // Add main table
-                const tableSection = document.createElement('div');
-                tableSection.classList.add('pdf-table-section');
-                const tableClone = document.querySelector('.sales-table').cloneNode(true);
-                tableClone.classList.add('pdf-table');
-                tableSection.appendChild(tableClone);
-                pdfContent.appendChild(tableSection);
-
-                // Add footer
-                const footer = document.createElement('div');
-                footer.classList.add('pdf-footer');
-
-                pdfContent.appendChild(footer);
-
-                // Add CSS styles specific to PDF
-                const style = document.createElement('style');
-                style.textContent = `
-                    .pdf-wrapper {
-                        padding: 20px;
-                        background: white;
-                        font-family: Arial, sans-serif;
-                    }
-                    .pdf-header {
-                        text-align: center;
-                        margin-bottom: 20px;
-                        padding-bottom: 20px;
-                        border-bottom: 2px solid #333;
-                    }
-                    .company-info h1 {
-                        color: #333;
-                        margin-bottom: 10px;
-                    }
-                    .pdf-title-section {
-                        text-align: center;
-                        margin-bottom: 30px;
-                    }
-                    .report-meta {
-                        margin-top: 10px;
-                        font-size: 14px;
-                    }
-                    .pdf-summary {
-                        margin-bottom: 30px;
-                    }
-                    .summary-grid {
-                        display: grid;
-                        grid-template-columns: repeat(3, 1fr);
-                        gap: 20px;
-                        margin-bottom: 20px;
-                    }
-                    .summary-item {
-                        text-align: center;
-                        padding: 15px;
-                        background: #f8f9fa;
-                        border-radius: 8px;
-                    }
-                    .pdf-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-bottom: 30px;
-                    }
-                    .pdf-table th, .pdf-table td {
-                        border: 1px solid #ddd;
-                        padding: 12px;
-                        text-align: left;
-                    }
-                    .pdf-table th {
-                        background-color: #f4f4f4;
-                        font-weight: bold;
-                    }
-                    .pdf-footer {
-                        text-align: center;
-                        margin-top: 30px;
-                        padding-top: 20px;
-                        border-top: 1px solid #ddd;
-                        font-size: 12px;
-                        color: #666;
-                    }
-                `;
-                pdfContent.appendChild(style);
-
-                // PDF export options
                 const opt = {
-                    margin: [0.5, 0.5],
-                    filename: `Build your dream-sales-report-${activePeriod.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`,
+                    margin: 1,
+                    filename: `sales-report-${new Date().toISOString().slice(0, 10)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2 },
                     jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
                 };
 
-                // Generate PDF
-                html2pdf().set(opt).from(pdfContent).save();
+                html2pdf().set(opt).from(element).save();
+            }
+
+            // Helper function to calculate total revenue
+            function calculateTotalRevenue() {
+                return currentData.reduce((total, order) => total + order.totalAmount, 0)
+                    .toLocaleString('en-IN');
             }
 
             // Add click event to PDF button
-            pdfButton.addEventListener('click', generatePDF);
+            document.querySelector('.pdf-button').addEventListener('click', generatePDF);
         });
     </script>
 </body>
