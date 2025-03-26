@@ -16,7 +16,7 @@
     <meta charset="UTF-8">
     <!-- Site Title -->
     <title>BUILD YOUR DREAM |Buy Modern Furniture Online</title>
-
+ 
     <!--
             CSS
             ============================================= -->
@@ -619,7 +619,7 @@
                         paymentMethod: selectedPaymentMethod,
                         couponCode: couponCode || null,
                         cartId: cartId,
-                        grandTotal: grandTotal, 
+                        grandTotal: grandTotal,
                         peymentStatus: peymentStatus,
                     };
 
@@ -686,13 +686,13 @@
 
 
                 function initiateRazorpayPayment(requestData) {
-                    fetch('/user/createOrder', {
+                    fetch('/user/createOrder', { 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            amount: requestData.grandTotal * 100,
+                            amount: requestData.grandTotal * 100, 
                             currency: "INR",
                             receipt: "receipt_" + Date.now()
                         })
@@ -722,7 +722,7 @@
                         "currency": order.currency,
                         "name": "Build Your Dream",
                         "description": "Test Transaction",
-                        "order_id": order.id,
+                        "order_id": order.id, 
                         "handler": function (response) {
                             console.log("Payment Successful:", response);
                             verifyAndUpdatePayment(response, order.id, requestData);
@@ -749,7 +749,7 @@
                 }
 
                 function verifyAndUpdatePayment(response, orderId, requestData) {
-                    fetch('/user/verifyPayment', {
+                    fetch('/user/verifyPayment', { 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -813,9 +813,9 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                showRetrySwal(requestData, orderId, response)
-
-
+                                showRetrySwal(requestData,orderId,response) 
+                                
+                                
                             } else {
                                 Swal.fire({
                                     title: "Order Placement Failed!",
@@ -836,7 +836,7 @@
 
 
 
-                function showRetrySwal(requestData, orderId, response) {
+                function showRetrySwal(requestData, orderId,response) {
                     Swal.fire({
                         title: "Payment Failed!",
                         text: "Do you want to retry the payment or pay later?",
@@ -846,14 +846,14 @@
                         cancelButtonText: "Pay Later"
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            razorpay(requestData, orderId, response);
+                            razorpay(requestData, orderId,response); 
                         } else {
-                            payLater(orderId);
+                            payLater(orderId); 
                         }
                     });
                 }
 
- 
+
 
                 function payLater(orderId) {
                     Swal.fire({

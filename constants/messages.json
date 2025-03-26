@@ -1,0 +1,15 @@
+{
+    "SUCCESS": "Operation completed successfully",
+    "USER_NOT_FOUND": "User not found",
+    "INTERNAL_ERROR": "An error occurred, please try again later",
+    "INVALID_CREDENTIALS": "Invalid username or password",
+    "UNAUTHORIZED_ACCESS": "You are not authorized to perform this action",
+    "ACCOUNT_CREATED": "Your account has been created successfully",
+    "PAYMENT_SUCCESS": "Payment processed successfully",
+    "PAYMENT_FAILED": "Payment failed, please try again",
+    "MISSING_FIELDS": "Please fill in all required fields"
+  }
+
+
+
+   

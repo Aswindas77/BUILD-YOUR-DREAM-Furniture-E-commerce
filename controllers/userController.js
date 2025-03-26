@@ -22,7 +22,8 @@ const Wallet = require("../models/walletModel");
 const { deductFromWallet } = require("../controllers/walletController");
 const Razorpay = require('razorpay');
 const walletModel = require('../models/walletModel');
-const { userInfo } = require('os');
+const HttpStatus = require('../constants/httpStatus');
+const Messages = require('../constants/messages.json');
 
 
 
@@ -35,7 +36,6 @@ const { userInfo } = require('os');
 const loadHome = async (req, res) => {
 
     const user = req.session?.User
-    console.log("userr data===========", user)
     const products = await Products.aggregate([
         {
             $lookup: {
@@ -83,6 +83,7 @@ const loadLogin = async (req, res) => {
         res.render("userLogin", { emailError: "", passwordError: "", message, categories, user });
     } catch (err) {
         console.log(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -112,52 +113,49 @@ const verifyUser = async (req, res) => {
         //     console.log("verifiationresponseeee===", verificationResponse.data)
 
         //     if (!captchaResponse) {
-        //         return res.status(400).json({
+        //         return res.status(HttpStatus.BAD_REQUEST).json({
         //             success: false,
         //             emailError: 'reCAPTCHA response is missing'
         //         });
         //     }
 
         //     if (!verificationResponse.data.success) {
-        //         return res.status(400).json({
+        //         return res.status(HttpStatus.BAD_REQUEST).json({
         //             success: false,
         //             emailError: 'reCAPTCHA verification failed'
         //         });
         //     }
         // } catch (captchaError) {
         //     console.error('reCAPTCHA verification error:', captchaError);
-        //     return res.status(500).json({
-        //         success: false,
-        //         emailError: 'reCAPTCHA verification failed'
-        //     });
+        //    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
         // }
 
         const user = await User.findOne({ email: email });
 
         if (!user) {
-            return res.status(400).json({ emailError: "user not found!" });
+            return res.status(HttpStatus.BAD_REQUEST).json({ emailError: "user not found!" });
 
         }
 
 
         // Check if the user is blocked
         if (user.isBlocked) {
-            return res.status(400).json({ emailError: "sorry you have been blocked!" });
+            return res.status(HttpStatus.BAD_REQUEST).json({ emailError: "sorry you have been blocked!" });
 
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({ passwordError: "Invalid password!" });
+            return res.status(HttpStatus.BAD_REQUEST).json({ passwordError: "Invalid password!" });
         }
 
         req.session.User = user;
         req.session.logged = true;
-        res.status(200).json({ success: true });
+        res.status(HttpStatus.OK).json({ success: true ,message:Messages.SUCCESS });
     } catch (err) {
         console.log(err.message);
-        res.status(500).json({ error: " internal Server Error" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -177,6 +175,7 @@ const ForgotPassword = async (req, res) => {
         res.render("forgotPassword", { message, products, categories, user })
     } catch (err) {
         console.error(err.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -209,9 +208,10 @@ const genOtpForgotPass = async (req, res) => {
             otp
         )
 
-        res.status(200).render("userotp");
+        res.status(HttpStatus.OK).render("userotp");
     } catch (err) {
         console.log(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
 
     }
 };
@@ -227,6 +227,7 @@ const loadOtpForgetPass = async (req, res) => {
         res.render("passOtp")
     } catch (err) {
         console.error(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -240,6 +241,7 @@ const changePassword = async (req, res) => {
         res.render("changePassword")
     } catch (err) {
         console.log(err)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -256,6 +258,7 @@ const otpVerifyForgotPassword = async (req, res) => {
         }
     } catch (err) {
         console.error(err.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -276,6 +279,7 @@ const loadSingUp = async (req, res) => {
         }
     } catch (err) {
         console.log(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -296,7 +300,7 @@ const registration = async (req, res) => {
         console.log("Existing User:", existingUser);
 
         if (existingUser) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 emailError: "Email already exists. Please use a different email."
             });
@@ -315,14 +319,14 @@ const registration = async (req, res) => {
 
             console.log(`your email is:${otp}`)
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
                 message: "OTP sent successfully"
             });
         }
     } catch (err) {
         console.log(err.message)
-        res.status(500).send("internal Server Error");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
 
     }
 };
@@ -351,7 +355,7 @@ const googleAuth = async (req, res) => {
         res.redirect("/dashboard");
     } catch (err) {
         console.error("Google Auth Error:", err.message);
-        res.redirect("/user/signup"); // Redirect on error
+        res.redirect("/user/signup");
     }
 };
 // otp page load
@@ -364,6 +368,7 @@ const loadOtp = async (req, res) => {
         res.render("userotp", { message });
     } catch (err) {
         console.log(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -401,6 +406,7 @@ async function sendotp(otp, email) {
         console.log('Email sent: ' + info.response);
     } catch (error) {
         console.error('Error sending email: ', error);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -429,7 +435,7 @@ const verifyOtp = async (req, res) => {
 
         if (checkData == "singUp") {
             if (!req.body.otp) {
-                return res.status(400).send('OTP is required');
+                return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
             }
             console.log(`session: ${req.session.otp} ,,,
                 body: ${req.body.otp}`)
@@ -442,7 +448,7 @@ const verifyOtp = async (req, res) => {
 
                 if (currentTime - req.session.time > 60000) {
 
-                    return res.status(404).send("your OTP time expired ")
+                    return res.status(HttpStatus.NOT_FOUND).send("your OTP time expired ")
                 }
 
                 const { username, email, password } = req.session.data;
@@ -464,7 +470,7 @@ const verifyOtp = async (req, res) => {
                 req.session.User = newUser;
                 req.session.logged = true;
                 req.session.otp = null;
-                return res.status(200).send('account created successfully ')
+                return res.status(HttpStatus.OK).send('account created successfully ')
 
 
 
@@ -472,7 +478,7 @@ const verifyOtp = async (req, res) => {
             }
 
             else {
-                res.status(400).send('invalid OTP')
+                res.status(HttpStatus.BAD_REQUEST).send('invalid OTP')
             }
 
 
@@ -482,7 +488,7 @@ const verifyOtp = async (req, res) => {
 
 
             if (!req.body.otp) {
-                return res.status(400).send('OTP is required');
+                return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
             }
 
 
@@ -501,8 +507,7 @@ const verifyOtp = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).send('Something went wrong.');
-
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -556,12 +561,12 @@ const resendOtp = async (req, res) => {
 
         const info = await transporter.sendMail(mail);
 
-        res.status(200).redirect("/user/otp")
+        res.status(HttpStatus.OK).redirect("/user/otp")
 
 
     } catch (err) {
-
         console.log(err.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
 
     }
 }
@@ -587,6 +592,7 @@ const loadShopCategory = async (req, res) => {
         res.render("shopCategory", { products, categories, user });
     } catch (err) {
         console.log(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -681,7 +687,7 @@ const loadShop = async (req, res) => {
                 message: 'Error loading products'
             });
         }
-        res.status(500).render('error', { message: 'Error loading products' });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -706,7 +712,7 @@ const searchProducts = async (req, res) => {
         res.json(products);
     } catch (err) {
         console.log(err.message);
-        res.status(500).json({ error: "Server error" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -729,6 +735,7 @@ const loadProductView = async (req, res) => {
         res.render("userProductView", { product, categories, user });
     } catch (err) {
         console.log(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -742,6 +749,7 @@ const loadAbout = async (req, res) => {
         res.render("about");
     } catch (err) {
         console.log(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -759,6 +767,7 @@ const loadContact = async (req, res) => {
         res.render("contact", { user, products, categories });
     } catch (err) {
         console.error(err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -778,6 +787,7 @@ const logOut = async (req, res) => {
         })
     } catch (err) {
         console.error(err.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -818,7 +828,7 @@ const googleLogin = async (req, res) => {
 
     } catch (error) {
         console.log(error.message);
-        res.status(500).send("Server Error");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -839,6 +849,7 @@ const loadBanProduct = async (req, res) => {
         res.render("productBan", { products, categories, user });
     } catch (err) {
         console.error(err.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -851,23 +862,21 @@ const loadBanProduct = async (req, res) => {
 
 const buyNow = async (req, res) => {
     try {
-        const { selectedAddressId, paymentMethod, cartId, peymentStatus,couponCode } = req.body;
+        const { selectedAddressId, paymentMethod, cartId, peymentStatus, couponCode } = req.body;
         const userId = req.session.User._id;
 
-        const coupon = await Coupon.findOne({ code: couponCode });
-
-        console.log("looo",coupon)
+        const coupon = await Coupon.findOne({ code: couponCode, isActive: true, isDeleted: false });
 
 
 
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+        if (!user) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "User not found" });
 
 
 
 
         const cart = await Cart.findById(cartId).populate("products.productId");
-        if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+        if (!cart) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Cart not found" });
 
         let totalAmount = cart.products.reduce((total, item) => total + item.quantity * item.salesPrice, 0);
         if (cart.discount) totalAmount -= cart.discount;
@@ -888,14 +897,14 @@ const buyNow = async (req, res) => {
                 const product = await Products.findById(item.productId);
 
                 if (!product) {
-                    return res.status(404).json({
+                    return res.status(HttpStatus.NOT_FOUND).json({
                         success: false,
                         message: `Product with ID ${item.productId} not found`,
                     });
                 }
 
                 if (product.stock < item.quantity) {
-                    return res.status(400).json({
+                    return res.status(HttpStatus.BAD_REQUEST).json({
                         success: false,
                         message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
                     });
@@ -922,18 +931,17 @@ const buyNow = async (req, res) => {
 
                 await newOrder.save();
                 coupon.usedBy.push(userId);
-                
                 await coupon.save()
 
                 await Cart.findByIdAndDelete(cartId);
 
-                return res.status(200).json({
+                return res.status(HttpStatus.OK).json({
                     success: true,
                     message: "Order placed successfully using Wallet",
                     orderId: newOrder._id,
                 });
             } else {
-                return res.status(400).json({
+                return res.status(HttpStatus.BAD_REQUEST).json({
                     success: false,
                     message: "Insufficient Wallet Balance",
                 });
@@ -946,7 +954,7 @@ const buyNow = async (req, res) => {
             console.log(paymentMethod, 'method inside the payoap')
             const { orderId, paypalRedirectUrl } = await createPayPalOrder(totalAmount, userId);
             console.log(paypalRedirectUrl, 'paypal order inside paypal approvalLinkapprovalLinkapprovalLink');
-            return res.status(200).json({
+            return res.status(HttpStatus.OK).json({
                 success: true,
                 message: "Redirect to PayPal",
                 orderId: orderId,
@@ -959,11 +967,11 @@ const buyNow = async (req, res) => {
 
 
 
-            if (totalAmount > 20000) {
+            if (totalAmount > 10000) {
 
-                return res.status(404).json({
+                return res.status(HttpStatus.NOT_FOUND).json({
                     success: false,
-                    message: "sorry user COD available only 20000rs"
+                    message: "sorry user COD available only 10000rs"
                 })
             }
 
@@ -971,14 +979,14 @@ const buyNow = async (req, res) => {
                 const product = await Products.findById(item.productId);
 
                 if (!product) {
-                    return res.status(404).json({
+                    return res.status(HttpStatus.NOT_FOUND).json({
                         success: false,
                         message: `Product with ID ${item.productId} not found`,
                     });
                 }
 
                 if (product.stock < item.quantity) {
-                    return res.status(400).json({
+                    return res.status(HttpStatus.BAD_REQUEST).json({
                         success: false,
                         message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
                     });
@@ -1002,7 +1010,7 @@ const buyNow = async (req, res) => {
             await newOrder.save()
             await Cart.findByIdAndDelete(cartId);
 
-            return res.status(200).json({
+            return res.status(HttpStatus.OK).json({
                 success: true,
                 message: "Order placed successfully. Pay on delivery.",
                 orderId: newOrder._id,
@@ -1017,14 +1025,14 @@ const buyNow = async (req, res) => {
                 const product = await Products.findById(item.productId);
 
                 if (!product) {
-                    return res.status(404).json({
+                    return res.status(HttpStatus.NOT_FOUND).json({
                         success: false,
                         message: `Product with ID ${item.productId} not found`,
                     });
                 }
 
                 if (product.stock < item.quantity) {
-                    return res.status(400).json({
+                    return res.status(HttpStatus.BAD_REQUEST).json({
                         success: false,
                         message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
                     });
@@ -1055,7 +1063,7 @@ const buyNow = async (req, res) => {
                 receipt: newOrder._id.toString()
             });
 
-            return res.status(200).json({
+            return res.status(HttpStatus.OK).json({
                 success: true,
                 message: "Order created, proceed with payment",
                 orderId: newOrder._id,
@@ -1067,7 +1075,7 @@ const buyNow = async (req, res) => {
 
     } catch (error) {
         console.error("Error in buyNow:", error);
-        res.status(500).json({ success: false, message: "Error processing order" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -1216,12 +1224,12 @@ const filterProducts = async (req, res) => {
     } catch (error) {
         console.error('Filter error:', error);
         if (req.xhr || req.headers.accept.includes('application/json')) {
-            return res.status(500).json({
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: 'Error filtering products'
             });
         }
-        res.status(500).render('error', { message: 'Error filtering products' });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).render('error', { message: 'Error filtering products' });
     }
 };
 
@@ -1264,7 +1272,7 @@ const loadWhishList = async (req, res) => {
         res.render("whishList", { user, categories, wishlist });
     } catch (error) {
         console.error("Error loading wishlist:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -1277,13 +1285,13 @@ const addWhishList = async (req, res) => {
         const user = req.session?.User;
 
         if (!user) {
-            return res.status(401).json({ success: false, message: "User not authenticated" });
+            return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: "User not authenticated" });
         }
 
 
         const userData = await User.findOne({ email: user.email });
         if (!userData) {
-            return res.status(404).json({ success: false, message: "User not found" });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "User not found" });
         }
 
         const userId = userData._id;
@@ -1292,12 +1300,12 @@ const addWhishList = async (req, res) => {
 
         const product = await Products.findById(productId);
         if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found" });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Product not found" });
         }
 
         const cart = await Cart.findOne({ userId, "products.productId": productId })
         if (cart) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: "Product is already in your cart. Cannot add to wishlist."
             })
@@ -1309,7 +1317,7 @@ const addWhishList = async (req, res) => {
         if (wishlist) {
 
             if (wishlist.products.some(p => p.productId.toString() === productId)) {
-                return res.status(400).json({
+                return res.status(HttpStatus.BAD_REQUEST).json({
                     success: false,
                     message: "Product already in wishlist"
                 });
@@ -1329,18 +1337,14 @@ const addWhishList = async (req, res) => {
         await wishlist.save();
 
 
-        res.status(201).json({
+        res.status(HttpStatus.CREATED).json({
             success: true,
             message: "Product added to wishlist"
         });
 
     } catch (error) {
 
-        res.status(500).json({
-            success: false,
-            message: "Internal server error",
-            error: error.message
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -1357,24 +1361,24 @@ const deleteWhishlist = async (req, res) => {
 
 
         if (!whishlist || !whishlist.products || whishlist.products.length === 0) {
-            return res.status(400).json({ success: false, message: "Whishlist is empty" });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Whishlist is empty" });
         }
 
         const productIndex = whishlist.products.findIndex(item => item.productId.toString() === productId);
 
         if (productIndex === -1) {
-            return res.status(404).json({ success: false, message: "Product not found in whishlist" });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Product not found in whishlist" });
         }
 
         whishlist.products.splice(productIndex, 1);
         console.log("product deleted")
         await whishlist.save();
-        return res.status(200).json({ success: true, message: "Product removed from wishlist" });
+        return res.status(HttpStatus.OK).json({ success: true, message: "Product removed from wishlist" });
 
 
     } catch (error) {
         console.log(error.message)
-        return res.status(500).json({ success: false, message: "Server error" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -1403,7 +1407,7 @@ const createOrder = async (req, res) => {
         res.json({ success: true, order });
     } catch (error) {
         console.error("Error creating order:", error);
-        res.status(500).json({ success: false, message: "Failed to create order." });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -1436,14 +1440,14 @@ const verifyPayment = async (req, res) => {
             const product = await Products.findById(item.productId);
 
             if (!product) {
-                return res.status(404).json({
+                return res.status(HttpStatus.NOT_FOUND).json({
                     success: false,
                     message: `Product with ID ${item.productId} not found`,
                 });
             }
 
             if (product.stock < item.quantity) {
-                return res.status(400).json({
+                return res.status(HttpStatus.BAD_REQUEST).json({
                     success: false,
                     message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
                 });
@@ -1477,7 +1481,7 @@ const verifyPayment = async (req, res) => {
         res.json({ success: true, message: "Payment verified & order saved successfully", order: newOrder });
     } catch (error) {
         console.error(" Payment verification error:", error);
-        res.status(500).json({ success: false, message: "Payment verification failed" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 
 }
@@ -1511,7 +1515,7 @@ const placePendingOrder = async (req, res) => {
         res.json({ success: true, message: "Order placed with pending payment", order: newOrder });
     } catch (error) {
         console.error(" Error placing pending order:", error);
-        res.status(500).json({ success: false, message: "Failed to place pending order." });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to place pending order." });
     }
 };
 
@@ -1528,8 +1532,8 @@ const downloadInvoice = async (req, res) => {
         res.contentType("application/pdf");
         res.download(filePath, `invoice-${orderId}.pdf`);
     } catch (error) {
-
         console.error(error.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
 
     }
 }

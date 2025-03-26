@@ -198,10 +198,10 @@ userRouter.get("/shop/filter", userController.filterProducts);
 // Order details route
 userRouter.get('/orderdetails/:orderId', profileController.getOrderDetails);
 
-userRouter.post('/createRetryPayment/:orderId',isBan,orderController.createRetryPayment)
+userRouter.post('/createRetryPayment/:orderId', isBan, orderController.createRetryPayment)
 
 // order retry payment 
-userRouter.post("/updateRetryPayment",isBan,orderController.retryPayment)
+userRouter.post("/updateRetryPayment", isBan, orderController.retryPayment)
 
 
 
@@ -212,6 +212,8 @@ userRouter.post('/request-return', isBan, orderController.requestReturn)
 userRouter.get('/orderCancel/:orderId', isBan, orderController.orderCancel);
 
 userRouter.get('/orderInvoice/:orderId', isBan, orderController.generateInvoice);
+
+
 
 
 

@@ -10,7 +10,9 @@ const Order = require('../models/ordermodel');
 const { log } = require("console");
 const { logOut } = require("./userController");
 const Wallet = require("../models/walletModel");
-const Return =require("../models/returnModel");
+const Return = require("../models/returnModel");
+const HttpStatus = require('../constants/httpStatus');
+const Messages =require('../constants/messages.json');
 
 
 
@@ -32,31 +34,31 @@ const userProfile = async (req, res) => {
         const { search = "", page = 1 } = req.query;
         const userId = req.session.User._id;
         const user = req.session.User;
-        const limit =2;
-        const skip =(page-1)*limit;
+        const limit = 2;
+        const skip = (page - 1) * limit;
 
-        const totalOrders = await Order.countDocuments({userId});
-        const totalPages =Math.ceil(totalOrders / limit);
+        const totalOrders = await Order.countDocuments({ userId });
+        const totalPages = Math.ceil(totalOrders / limit);
 
         const orders = await Order.find({ userId })
             .populate('items.productId')
             .lean()
             .sort({ createdAt: -1 })
             .skip(skip)
-        .limit(limit);
+            .limit(limit);
 
-        const WalletBalance =await Wallet.findOne({userId:userId})
+        const WalletBalance = await Wallet.findOne({ userId: userId })
 
-        const userAddress = await Address.findOne({ userId: userId }).lean(); 
+        const userAddress = await Address.findOne({ userId: userId }).lean();
 
         const activeOrders = await Order.find({
             userId: userId,
-            status: { $nin: ["Delivered", "Cancelled"] } 
+            status: { $nin: ["Delivered", "Cancelled"] }
         }).lean();
-        
-        
 
-        
+
+
+
 
         orders.forEach(order => {
             if (!order.totalAmount) {
@@ -65,19 +67,19 @@ const userProfile = async (req, res) => {
         });
 
         res.render("profile/profileView", {
-             user,
-              orders,
-              totalOrders,
-              activeOrders,
-              currentPage:parseInt(page),
+            user,
+            orders,
+            totalOrders,
+            activeOrders,
+            currentPage: parseInt(page),
             totalPages,
-            walletBalance:WalletBalance ? WalletBalance.balance || 0 : 0,
-            userAddress:userAddress ? userAddress?.address?.length || 0 :0,
-             });
+            walletBalance: WalletBalance ? WalletBalance.balance || 0 : 0,
+            userAddress: userAddress ? userAddress?.address?.length || 0 : 0,
+        });
 
     } catch (error) {
         console.error("Error in userProfile:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -143,6 +145,7 @@ const updateProfile = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -181,6 +184,7 @@ const loaduserAddress = async (req, res) => {
 
     } catch (error) {
         console.error(error.message)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -210,24 +214,24 @@ const addAddress = async (req, res) => {
 
         const user = req.session?.User;
         if (!user) {
-            return res.status(401).json({ success: false, message: "Unauthorized. Please log in." });
+            return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: Messages.UNAUTHORIZED_ACCESS });
         }
         console.log("Address User Data:", user);
 
         const { houseNumber, landmark, city, country, pincode, phone } = addressData;
 
         if (!houseNumber || !landmark || !city || !country || !pincode || !phone) {
-            return res.status(400).json({ success: false, message: "All fields are required." });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "All fields are required." });
         }
 
         const phoneRegex = /^[6-9]\d{9}$/;
         if (!phoneRegex.test(phone)) {
-            return res.status(400).json({ success: false, message: "Invalid phone number format." });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Invalid phone number format." });
         }
 
         const pincodeRegex = /^\d{6}$/;
         if (!pincodeRegex.test(pincode)) {
-            return res.status(400).json({ success: false, message: "Invalid pincode format. Must be 6 digits." });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Invalid pincode format. Must be 6 digits." });
         }
 
         let address = await Address.findOne({ userId: user._id });
@@ -244,17 +248,16 @@ const addAddress = async (req, res) => {
             address.address.push(newAddress);
         }
 
-        
+
 
 
         await address.save();
         console.log("Address Saved:", address);
 
-        return res.status(201).json({ success: true, message: "Address added successfully!", address });
+        return res.status(HttpStatus.CREATED).json({ success: true, message: "Address added successfully!", address });
     } catch (error) {
         console.error("Error Adding Address:", error);
-        return res.status(500).json({ success: false, message: "Internal server error" });
-    }
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });    }
 };
 
 
@@ -269,7 +272,7 @@ const loadEditAddress = async (req, res) => {
 
 
         if (!mongoose.Types.ObjectId.isValid(addressId)) {
-            return res.status(400).send("Invalid Address ID");
+            return res.status(HttpStatus.BAD_REQUEST).send("Invalid Address ID");
         }
 
         const userAddress = await Address.findOne({ "address._id": addressId });
@@ -277,14 +280,14 @@ const loadEditAddress = async (req, res) => {
 
 
         if (!userAddress) {
-            return res.status(404).send("Address not found");
+            return res.status(HttpStatus.NOT_FOUND).send("Address not found");
         }
 
 
         const address = userAddress.address.find(addr => addr._id.toString() === addressId);
 
         if (!address) {
-            return res.status(404).send("Address not found inside document");
+            return res.status(HttpStatus.NOT_FOUND).send("Address not found inside document");
         }
 
 
@@ -293,7 +296,7 @@ const loadEditAddress = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Error loading edit address page");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -302,44 +305,44 @@ const loadEditAddress = async (req, res) => {
 
 //====================================================================================================================================================
 
-const updateAddress = async (req, res) => { 
+const updateAddress = async (req, res) => {
     try {
         const { addressId, houseNumber, city, landmark, country, pincode, phone } = req.body;
         const { _id } = req.session.User._id
         const userId = _id
 
-        console.log("addressId",addressId)
+        console.log("addressId", addressId)
 
         const userAddress = await Address.findOne({ "address._id": addressId });
-        
-         console.log("user address",userAddress);
-         
+
+        console.log("user address", userAddress);
+
         const errors = [];
         if (!/^[6-9]\d{9}$/.test(phone)) {
-            return res.status(404).json('Invalid phone number format');
+            return res.status(HttpStatus.NOT_FOUND).json('Invalid phone number format');
         }
         const existingPhone = await Address.findOne({
             user: userId,
             phone: phone,
             _id: { $ne: addressId }
         });
-        console.log("existing phone",existingPhone)
+        console.log("existing phone", existingPhone)
 
         if (existingPhone) {
-            return res.status(404).send('Phone number already exists in your addresses');
+            return res.status(HttpStatus.NOT_FOUND).send('Phone number already exists in your addresses');
         }
         if (!userAddress) {
-            return res.status(404).json("Address not found");
+            return res.status(HttpStatus.NOT_FOUND).json("Address not found");
         }
 
-        
+
         const addressToUpdate = userAddress.address.find(addr => addr._id.toString() === addressId);
 
         if (!addressToUpdate) {
-            return res.status(404).json("Address not found in user document");
+            return res.status(HttpStatus.NOT_FOUND).json("Address not found in user document");
         }
 
-        
+
         addressToUpdate.houseNumber = houseNumber;
         addressToUpdate.city = city;
         addressToUpdate.landmark = landmark;
@@ -347,23 +350,19 @@ const updateAddress = async (req, res) => {
         addressToUpdate.pincode = pincode;
         addressToUpdate.phone = phone;
 
-        
+
         await userAddress.save();
-   
-       
-       
-        res.status(200).json({
-            success:true,
-            message:"Address updated successfully!",
+
+
+
+        res.status(HttpStatus.OK).json({
+            success: true,
+            message: "Address updated successfully!",
 
         })
     } catch (error) {
         console.error('Error updating address:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-            error: error.message
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -381,7 +380,7 @@ const deleteAddress = async (req, res) => {
 
 
         if (!addressId) {
-            return res.status(400).json({ error: "Address ID is required." });
+            return res.status(HttpStatus.BAD_REQUEST).json({ error: "Address ID is required." });
         }
 
         const result = await Address.findOneAndUpdate(
@@ -393,14 +392,14 @@ const deleteAddress = async (req, res) => {
         console.log("blaaa", result);
 
         if (!result) {
-            return res.status(404).json({ error: "Address not found." });
+            return res.status(HttpStatus.NOT_FOUND).json({ error: "Address not found." });
         }
 
-        
-        res.status(200).json({ message: "Address deleted successfully." });
+
+        res.status(HttpStatus.OK).json({ message: "Address deleted successfully." });
     } catch (error) {
         console.error("Server error:", error);
-        res.status(500).json({ error: "Failed to delete address." });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -417,7 +416,7 @@ const loadChangePassword = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -429,26 +428,26 @@ const loadChangePassword = async (req, res) => {
 const updatePassword = async (req, res) => {
     try {
         if (!req.session.User) {
-            return res.status(401).json({ success: false, message: 'Please login first' });
+            return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: 'Please login first' });
         }
 
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const userId = req.session.User._id;
 
-        console.log("currentPass",currentPassword);
-        console.log("newpass",newPassword);
-        console.log("currentPass",confirmPassword);
+        console.log("currentPass", currentPassword);
+        console.log("newpass", newPassword);
+        console.log("currentPass", confirmPassword);
 
-   
-        
+
+
         if (newPassword !== confirmPassword) {
-            return res.status(400).json({ success: false, message: 'New passwords do not match' });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'New passwords do not match' });
         }
 
-        
+
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
         if (!passwordRegex.test(newPassword)) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: 'Password must be at least 8 characters long and contain at least one letter, one number, and one special character'
             });
@@ -456,26 +455,26 @@ const updatePassword = async (req, res) => {
 
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'User not found' });
         }
-        
-       
+
+
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Current password is incorrect' });
         }
 
-        
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        
-        user.password = hashedPassword;
-        await user.save();  
 
-        res.status(200).json({ success: true, message: 'Password updated successfully' });
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(HttpStatus.OK).json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -490,56 +489,56 @@ const getOrderDetails = async (req, res) => {
             return res.redirect("/user/login");
         }
         const orderId = req.params?.orderId;
-        const userId = req.session.User?._id; 
+        const userId = req.session.User?._id;
 
-        
+
         const order = await Order.findById(orderId)
             .populate('items.productId')
-           
-        
-      
-           
-            
+
+
+
+
+
 
         if (!order) {
             return res.status(404).json({
                 success: false,
                 message: 'Order not found'
             });
-        } 
+        }
 
-        
-           let selectedAddress =null;
-           if(order.addressId){
+
+        let selectedAddress = null;
+        if (order.addressId) {
             const userAddress = await Address.findOne(
-                {"address._id":order.addressId},
-                {"address.$":1}
+                { "address._id": order.addressId },
+                { "address.$": 1 }
             );
             if (userAddress && userAddress.address.length > 0) {
-                selectedAddress = userAddress.address[0]; 
+                selectedAddress = userAddress.address[0];
             }
-           }
-          
-        
-        
-        
+        }
+
+
+
+
         if (!order.totalAmount) {
             order.totalAmount = order.items.reduce((total, item) => {
                 return total + (item.price * item.quantity);
             }, 0);
         }
 
-        
+
         const orderTimeline = [];
         const progressPercentage =
             order.status === 'Delivered' ? 100 :
                 order.status === 'Shipped' ? 66 :
                     order.status === 'Processing' ? 33 : 0;
 
-       
-        const returnRequest =await Return.findOne({orderId,userId}).lean();
 
-       console.log("noo",returnRequest)
+        const returnRequest = await Return.findOne({ orderId, userId }).lean();
+
+        console.log("noo", returnRequest)
 
         const formattedOrder = {
             _id: order._id,
@@ -559,7 +558,7 @@ const getOrderDetails = async (req, res) => {
                 quantity: item.quantity || 0,
                 price: item.price || 0
             })),
-            
+
             paymentMethod: order.paymentMethod || 'Not Specified',
             paymentStatus: order.paymentStatus || 'Pending',
             totalAmount: order.totalAmount || 0,
@@ -567,24 +566,24 @@ const getOrderDetails = async (req, res) => {
             progress: progressPercentage,
             timeline: orderTimeline,
             returnRequest,
-           
-            
+
+
         };
 
-        console.log('Formatted Order:', formattedOrder); 
+        console.log('Formatted Order:', formattedOrder);
 
-        
+
         res.render('profile/orderDetails', {
             order: formattedOrder,
-            returnOrder:returnRequest,
+            returnOrder: returnRequest,
             user: req.session.User,
             selectedAddress
-            
+
         });
 
     } catch (error) {
         console.error('Error in getOrderDetails:', error);
-        res.status(500).send('Error loading order details');
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -605,7 +604,7 @@ module.exports = {
     loadChangePassword,
     updatePassword,
     getOrderDetails,
-    
+
 }
 
 

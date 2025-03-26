@@ -34,11 +34,13 @@
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select class="form-select" id="category" name="category">
-                        <% categories.forEach(category=> { %>
-                            <option value="<%= category._id %>">
+                        <option value="" disabled selected>Select a Category</option>
+                        <% categories.forEach(category => { %>
+                            <option value="<%= category._id %>" 
+                                <%= category.toString() === category._id.toString() ? 'selected' : '' %>>
                                 <%= category.name %>
                             </option>
-                            <% }); %>
+                        <% }); %>
                     </select>
                     <div class="error" id="categoryError">Please select a category.</div>
                 </div>
@@ -68,17 +70,7 @@
                 </div>
 
                 <!-- Rating -->
-                <div class="mb-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <select class="form-select" id="rating" name="rating">
-                        <option value="1">1 Star</option>
-                        <option value="2">2 Stars</option>
-                        <option value="3">3 Stars</option>
-                        <option value="4">4 Stars</option>
-                        <option value="5">5 Stars</option>
-                    </select>
-                    <div class="error" id="ratingError">Please select a rating.</div>
-                </div>
+               
 
                 <!-- Status -->
                 <div class="mb-3">
@@ -123,7 +115,7 @@
                         <img id="prev2" class="cropper-preview" style="display: none; max-width: 100%;" />
                     </div>
                     <div class="error" id="image2Error" style="display: none;">Please upload Image 2.</div>
-
+ 
                     <label for="image3" class="text-center mt-3">Image 3</label>
                     <input onchange="cropper(3)" id="image3" type="file" accept="image/*"
                         class="form-control form-control-sm w-50">
@@ -132,7 +124,7 @@
                     </div>
                     <div class="error" id="image3Error" style="display: none;">Please upload Image 3.</div>
                 </div>
-
+ 
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary w-100">Add Product</button>
             </form>
@@ -155,24 +147,23 @@
                     croppers[index].destroy();
                 }
                 croppers[index] = new Cropper(preview, {
-                    aspectRatio: 1, // Maintain a square crop area
-                    viewMode: 1, // Restrict image within canvas
-                    dragMode: 'move', // Allow moving the image
-                    cropBoxMovable: true, // Allow moving the crop box
-                    cropBoxResizable: true, // Allow resizing the crop box
-                    zoomable: true, // Allow zooming in and out
+                    aspectRatio: 1, 
+                    viewMode: 1, 
+                    dragMode: 'move',
+                    cropBoxMovable: true,
+                    cropBoxResizable: true, 
+                    zoomable: true, 
                     scalable: true,
                 });
             }
         }
 
         function productAdder(e) {
-            e.preventDefault(); // Prevent form submission
+            e.preventDefault(); 
 
-            // Initialize validity flag 
+            
             let isValid = true;
 
-            // Get all input values
             const name = document.getElementById("name").value.trim();
             const description = document.getElementById("description").value.trim();
             const category = document.getElementById("category").value;
@@ -183,12 +174,12 @@
             const image2 = document.getElementById("image2").files.length > 0;
             const image3 = document.getElementById("image3").files.length > 0;
 
-            // Reset all error messages
+           
             document.querySelectorAll(".error").forEach((error) => {
                 error.style.display = "none";
             });
 
-            // Validation rules 
+            
             if (name.length < 3) {
                 document.getElementById("nameError").style.display = "block";
                 isValid = false;
@@ -234,44 +225,40 @@
                 isValid = false;
             }
 
-            // If validation fails, stop the function here
+            
             if (!isValid) {
                 return;
             }
 
-            // Proceed with image processing and form submission if validation passed
             let images = [];
             for (let i = 1; i < 4; i++) {
-                const canvas = croppers[i]?.getCroppedCanvas(); // Assuming croppers[i] exists
-                const base64Image = canvas?.toDataURL("image/png"); // Convert canvas to Base64
+                const canvas = croppers[i]?.getCroppedCanvas(); 
+                const base64Image = canvas?.toDataURL("image/png"); 
                 images.push(base64Image);
             }
 
-            const formdata = new FormData(e.target); // Create FormData from form
+            const formdata = new FormData(e.target); 
 
-            // Append images to formdata with proper keys
             images.forEach((image, index) => {
-                formdata.append(`image${index}`, image); // Properly use template literal
+                formdata.append(`image${index}`, image); 
             });
 
-            // Convert FormData to a plain object
             const formObject = {};
             formdata.forEach((value, key) => {
                 formObject[key] = value;
             });
 
-            // Send the form object as JSON via fetch
             fetch("/admin/addproduct", {
                 method: "post",
-                body: JSON.stringify(formObject), // Convert object to JSON
-                headers: { "Content-Type": "application/json" }, // Set headers
+                body: JSON.stringify(formObject), 
+                headers: { "Content-Type": "application/json" }, 
             })
                 .then((r) => r.text())
                 .then((html) => {
-                    window.location.href = '/admin/productManagement' // Update UI
+                    window.location.href = '/admin/productManagement'
                 })
                 .catch((error) => {
-                    console.error("Error during fetch:", error); // Handle errors
+                    console.error("Error during fetch:", error); 
                 });
         }
 

@@ -31,7 +31,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        * {
+        * { 
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -419,6 +419,23 @@
         .add-money-btn:hover {
             background: var(--hover-color);
         }
+
+        .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .pagination a {
+        margin: 5px;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #ffc107;
+        border: 1px solid  #FF8F00;
+        border-radius: 5px;
+    }
+    .pagination a.active {
+        background-color:  #FF8F00;
+        color: white;
+    }
     </style>
 </head>
 
@@ -478,7 +495,7 @@
                         <h3>Recent Transactions</h3> 
                     </div>
                     <div class="transaction-list">
-                        <% walletHistory.slice(0, 8).forEach(transaction=> { %>
+                        <% walletHistory.forEach(transaction=> { %>
                             <div class="transaction-item <%= transaction.type %>">
                                 <div class="transaction-info">
                                     <div class="transaction-icon">
@@ -503,6 +520,21 @@
                             </div>
                             <% }) %>
                     </div>
+
+                    <div class="pagination">
+                        <% if (currentPage > 1) { %>
+                            <a href="?page=<%= currentPage - 1 %>">Previous</a>
+                        <% } %>
+                    
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <a href="?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                        <% } %>
+                    
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>">Next</a>
+                        <% } %>
+                    </div>  
+
                 </div>
             </div>
         </main>

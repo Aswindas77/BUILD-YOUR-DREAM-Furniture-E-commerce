@@ -1,5 +1,7 @@
 const Coupon = require("../models/couponModel");
 const Cart = require("../models/cartModel");
+const HttpStatus = require('../constants/httpStatus');
+const Messages =require('../constants/messages.json')
 
 
 
@@ -17,7 +19,7 @@ const loadCoupon = async (req, res) => {
     } catch (error) {
 
         console.error(error.message);
-        res.status(500).send("Internal Server Error");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
 
     }
 };
@@ -29,9 +31,9 @@ const loadCoupon = async (req, res) => {
 const addCoupon = async (req, res) => {
     try {
         console.log("Received coupon data:", req.body);
-   
-        
-       
+
+
+
         const {
             code,
             description,
@@ -41,7 +43,7 @@ const addCoupon = async (req, res) => {
             expiryDate
         } = req.body;
 
-        if(discountPercentage<50){
+        if (discountPercentage < 50) {
             console.log("hhhh")
         }
 
@@ -52,7 +54,7 @@ const addCoupon = async (req, res) => {
         console.log(existingCoupon);
 
         if (existingCoupon) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: "Coupon code already exists"
             });
@@ -67,12 +69,12 @@ const addCoupon = async (req, res) => {
             startDate: new Date(startDate),
             expiryDate: new Date(expiryDate),
             isActive: true,
-            updatedAt:new Date()
+            updatedAt: new Date()
         });
 
         await newCoupon.save();
 
-        return res.status(201).json({
+        return res.status(HttpStatus.CREATED).json({
             success: true,
             message: "Coupon created successfully!",
             coupon: newCoupon
@@ -80,10 +82,7 @@ const addCoupon = async (req, res) => {
 
     } catch (error) {
         console.error("Error creating coupon:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -98,20 +97,17 @@ const editCoupon = async (req, res) => {
         console.log(id)
         const coupon = await Coupon.findById(id);
         if (!coupon) {
-            return res.status(404).json({ message: "Coupon not found" });
+            return res.status(HttpStatus.NOT_FOUND).json({ message: "Coupon not found" });
         }
         console.log("jiii", coupon)
 
-        res.status(200).json({
+        res.status(HttpStatus.OK).json({
             success: true,
             coupon
         });
     } catch (error) {
         console.error("Error editing coupon:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -124,9 +120,9 @@ const updateCoupon = async (req, res) => {
     try {
         const couponId = req.params.id;
         const updateData = req.body;
-        console.log("nii",updateData)
+        console.log("nii", updateData)
 
-        updateData.updatedAt =new Date();
+        updateData.updatedAt = new Date();
 
         const coupon = await Coupon.findByIdAndUpdate(
             couponId,
@@ -135,15 +131,16 @@ const updateCoupon = async (req, res) => {
         );
 
         if (!coupon) {
-            return res.status(404).json({ message: 'Coupon not found' });
+            return res.status(HttpStatus.NOT_FOUND).json({ message: 'Coupon not found' });
         }
 
         res.json(coupon);
     } catch (error) {
         console.error('Error updating coupon:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-};
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+}
+
+}
 
 
 // delete coupon 
@@ -164,9 +161,9 @@ const deleteCoupon = async (req, res) => {
             throw new Error("Coupon not found.");
         }
         console.log("coo", softdelete)
-        return res.status(200).json({ message: "coupon successfully marked as deleted." });
+        return res.status(HttpStatus.OK).json({ message: "coupon successfully marked as deleted." });
     } catch (error) {
-
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -174,7 +171,7 @@ const deleteCoupon = async (req, res) => {
 
 
 
-            // ! user side coupon controller //
+// ! user side coupon controller //
 
 
 
@@ -187,7 +184,7 @@ const getAvailableCoupons = async (req, res) => {
         const total = parseFloat(req.query.total);
         const currentDate = new Date();
 
-        
+
         const coupons = await Coupon.find({
             minPurchase: { $lte: total },
             startDate: { $lte: currentDate },
@@ -198,7 +195,7 @@ const getAvailableCoupons = async (req, res) => {
         res.json({ success: true, coupons });
     } catch (error) {
         console.error('Error fetching coupons:', error);
-        res.status(500).json({ success: false, message: 'Error fetching coupons' });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -212,9 +209,9 @@ const applyCoupon = async (req, res) => {
         const { couponCode, cartId, grandTotal } = req.body;
         const userId = req.session.User._id;
 
-        console.log("joo",userId)
+        console.log("joo", userId)
 
-       
+
         const coupon = await Coupon.findOne({
             code: couponCode,
             startDate: { $lte: new Date() },
@@ -224,21 +221,21 @@ const applyCoupon = async (req, res) => {
 
         if (!coupon) {
             return res.json({
-                success: false, 
+                success: false,
                 message: 'Invalid or expired coupon code'
             });
         }
 
-        
+
         if (coupon.usedBy && coupon.usedBy.some(id => id.toString() === userId.toString())) {
             return res.json({
                 success: false,
                 message: 'You have already used this coupon'
             });
         }
-        
 
-        
+
+
         if (grandTotal < coupon.minPurchase) {
             return res.json({
                 success: false,
@@ -246,20 +243,20 @@ const applyCoupon = async (req, res) => {
             });
         }
 
-       
+
         const discountAmount = (grandTotal * coupon.discountPercentage) / 100;
         const finalAmount = grandTotal - discountAmount;
 
-        
+
         await Cart.findByIdAndUpdate(cartId, {
             couponApplied: couponCode,
             discount: discountAmount,
             finalAmount: finalAmount
         });
 
-        
 
-        
+
+
         res.json({
             success: true,
             originalAmount: grandTotal,
@@ -269,10 +266,7 @@ const applyCoupon = async (req, res) => {
 
     } catch (error) {
         console.error('Error applying coupon:', error);
-        res.json({
-            success: false,
-            message: 'Error applying coupon'
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -284,9 +278,9 @@ const applyCoupon = async (req, res) => {
 
 const removeCoupon = async (req, res) => {
     try {
-        const { cartId ,grandTotal} = req.body;
+        const { cartId, grandTotal } = req.body;
 
-        console.log("gooo",grandTotal)
+        console.log("gooo", grandTotal)
 
         const cart = await Cart.findById(cartId);
 
@@ -297,7 +291,7 @@ const removeCoupon = async (req, res) => {
             });
         }
 
-        
+
         cart.couponApplied = null;
         cart.discount = 0;
         cart.finalAmount = cart.totalAmount;
@@ -312,10 +306,7 @@ const removeCoupon = async (req, res) => {
 
     } catch (error) {
         console.error('Error removing coupon:', error);
-        res.json({
-            success: false,
-            message: 'Error removing coupon'
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 

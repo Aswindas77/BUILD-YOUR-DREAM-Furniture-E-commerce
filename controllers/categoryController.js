@@ -1,22 +1,23 @@
 const Categories = require("../models/categoryModel");
 const product = require("../models/productModel");
 const mongoose = require('mongoose');
-
+const HttpStatus = require('../constants/httpStatus');
+const Messages =require('../constants/messages.json')
 
 
 
 // load category page 
-
+ 
 //====================================================================================================================================================
 
 const loadCategory = async (req, res) => {
   try {
     const searchQuery = req.query.search || "";
-    const page = parseInt(req.query.page) || 1; 
+    const page = parseInt(req.query.page) || 1;
     const limit = 4;
     const skip = (page - 1) * limit;
 
- 
+
     const totalCategories = await Categories.countDocuments({
       name: { $regex: searchQuery, $options: "i" },
     });
@@ -59,7 +60,8 @@ const loadAddCategory = async (req, res) => {
   try {
     res.render("addCategory")
   } catch (error) {
-    console.log(error.message)
+    console.error(error.message)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 }
 
@@ -87,11 +89,11 @@ const addCategory = async (req, res) => {
     })
     await category.save();
 
-    return res.status(200).json({ message: 'Category added successfully!' });
+    return res.status(HttpStatus.OK).json({ message: 'Category added successfully!' });
 
   } catch (error) {
     console.log(error.message)
-    return res.status(500).json({ message: 'Something went wrong. Please try again.' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -108,6 +110,7 @@ const loadEditCategory = async (req, res) => {
     res.render("editCategory")
   } catch (error) {
     console.log(error.message)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 }
 
@@ -150,9 +153,10 @@ const updateCategory = async (req, res) => {
 
     const existingCategory = await Categories.findOne({ name })
 
-    if (existingCategory) {
 
-    }
+
+
+
 
     const updatedCategory = await Categories.findByIdAndUpdate(
       id,
@@ -193,11 +197,11 @@ const deleteCategory = async (req, res) => {
     if (!softdelete) {
       throw new Error("Category not found.");
     }
-    return res.status(200).json({ success: true, message: "Category deleted successfully." });
+    return res.status(HttpStatus.OK).json({ success: true, message: "Category deleted successfully." });
 
   } catch (error) {
     console.log(error.message)
-    return res.status(500).json({ success: false, message: "An error occurred." });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -213,7 +217,7 @@ const toggleListCategory = async (req, res) => {
 
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
       console.log("Invalid userId:", categoryId);
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         message: "Invalid category ID"
       });
@@ -222,7 +226,7 @@ const toggleListCategory = async (req, res) => {
 
     if (!["block", "unblock"].includes(action)) {
       console.log("Invalid action:", action);
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         message: "Invalid action. Use 'listed' or 'unlisted'."
       });
@@ -239,7 +243,7 @@ const toggleListCategory = async (req, res) => {
 
     if (!updateCategory) {
       console.log("Category not found in database for ID:", categoryId);
-      return res.status(404).json({
+      return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
         message: "User not found"
       });
@@ -247,7 +251,7 @@ const toggleListCategory = async (req, res) => {
     console.log("User updated successfully:", updateCategory);
 
 
-    return res.status(200).json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: `category list ${action}ed successfully`,
       isListed: updateCategory.isListed
@@ -255,10 +259,7 @@ const toggleListCategory = async (req, res) => {
 
   } catch (error) {
     console.error("Error in toggleListAccess:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error while updating user status"
-    });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 

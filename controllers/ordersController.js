@@ -11,7 +11,9 @@ const walletModel = require("../models/walletModel");
 const PDFDocument = require("pdfkit");
 const path = require("path");
 const fs = require("fs");
-const Razorpay =require('razorpay');
+const Razorpay = require('razorpay');
+const HttpStatus = require('../constants/httpStatus');
+const Messages =require('../constants/messages.json')
 
 
 
@@ -48,7 +50,7 @@ const loadOrderPage = async (req, res) => {
         });
     } catch (error) {
         console.log("Error loading orders:", error.message);
-        res.status(500).send("Internal Server Error");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -71,7 +73,7 @@ const loadOrderView = async (req, res) => {
 
 
         if (!order) {
-            return res.status(404).send('Order not found');
+            return res.status(HttpStatus.NOT_FOUND).send('Order not found');
         }
 
         console.log(order)
@@ -79,7 +81,7 @@ const loadOrderView = async (req, res) => {
         res.render("orderView", { order })
     } catch (error) {
         console.error('Error in loadOrderView:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
@@ -95,7 +97,7 @@ const updateOrderStatus = async (req, res) => {
         const order = await Orders.findById(orderId);
 
         if (!order) {
-            return res.status(404).json({
+            return res.status(HttpStatus.NOT_FOUND).json({
                 success: false,
                 message: 'Order not found'
             });
@@ -103,14 +105,14 @@ const updateOrderStatus = async (req, res) => {
 
 
         if (order.status === "Cancelled") {
-            return res.status(400).json({
+            return res.status(HttpStatus.NOT_FOUND).json({
                 success: false,
                 message: 'Status change not allowed. Order is already cancelled.'
             });
         }
 
         if (order.status === "Returned") {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: 'Status change not allowed. Order is already returned.'
             });
@@ -135,10 +137,7 @@ const updateOrderStatus = async (req, res) => {
         });
     } catch (error) {
         console.error("Error updating order status:", error.stack);
-        res.status(500).json({
-            success: false,
-            message: 'Error updating order status'
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -168,7 +167,7 @@ const getOrderDetails = async (req, res) => {
 
 
         if (!order) {
-            return res.status(404).render('userError', {
+            return res.status(HttpStatus.NOT_FOUND).render('userError', {
                 message: 'Order not found'
             });
         }
@@ -176,9 +175,7 @@ const getOrderDetails = async (req, res) => {
         res.render('profile/orderDetais', { order, selectedAddress });
     } catch (error) {
         console.log("Error fetching order details:", error.message);
-        res.status(500).render('userError', {
-            message: 'Error fetching order details'
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -202,7 +199,7 @@ const orderCancel = async (req, res) => {
 
 
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: 'Invalid order ID format'
             });
@@ -212,7 +209,7 @@ const orderCancel = async (req, res) => {
 
 
         if (!order) {
-            return res.status(404).json({
+            return res.status(HttpStatus.NOT_FOUND).json({
                 success: false,
                 message: 'Order not found'
             });
@@ -220,7 +217,7 @@ const orderCancel = async (req, res) => {
 
 
         if (order.userId.toString() !== req.session.User._id.toString()) {
-            return res.status(403).json({
+            return res.status(HttpStatus.FORBIDDEN).json({
                 success: false,
                 message: 'Unauthorized to cancel this order'
             });
@@ -228,14 +225,14 @@ const orderCancel = async (req, res) => {
 
 
         if (order.status === 'Delivered') {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: 'Cannot cancel a delivered order'
             });
         }
 
         if (order.status === 'Cancelled') {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: 'Order is already cancelled'
             });
@@ -266,18 +263,14 @@ const orderCancel = async (req, res) => {
         await order.save();
 
 
-        res.status(200).json({
+        res.status(HttpStatus.OK).json({
             success: true,
             message: 'Order cancelled successfully'
         });
 
     } catch (error) {
         console.error("Error cancelling order:", error);
-        res.status(500).json({
-            success: false,
-            message: 'Error cancelling order',
-            error: error.message
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -291,11 +284,11 @@ const requestReturn = async (req, res) => {
         const order = await Orders.findById(orderId);
 
         if (!orderId) {
-            return res.status(400).json({ success: false, message: 'Order ID is required' });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Order ID is required' });
         }
 
         if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Order not found' });
         }
 
 
@@ -322,9 +315,10 @@ const requestReturn = async (req, res) => {
         res.json({ success: true, message: 'Return request submitted successfully' });
     } catch (error) {
         console.error('Return Request Error:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
-    }
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
 };
+
+}
 
 
 
@@ -362,10 +356,7 @@ const loadReturnOrder = async (req, res) => {
 
     } catch (error) {
         console.error(" Error loading return orders:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to load return orders"
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -387,7 +378,7 @@ const updateReturnStatus = async (req, res) => {
         const returnRequest = await Return.findById(returnId).populate('orderId');
 
         if (!returnRequest) {
-            return res.status(404).json({
+            return res.status(HttpStatus.NOT_FOUND).json({
                 success: false,
                 message: 'Return request not found'
             });
@@ -435,10 +426,7 @@ const updateReturnStatus = async (req, res) => {
 
     } catch (error) {
         console.error('Error updating return status:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -462,7 +450,7 @@ const generateInvoice = async (req, res) => {
             .populate("addressId");
 
         if (!order) {
-            return res.status(404).json({ success: false, message: "Order not found" });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Order not found" });
         }
 
         const doc = new PDFDocument({
@@ -617,16 +605,33 @@ const generateInvoice = async (req, res) => {
         doc.end();
     } catch (error) {
         console.error("Error generating invoice:", error);
-        res.status(500).json({
-            success: false,
-            message: "Error generating invoice",
-            error: error.message,
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
 
+const retryPayment = async (req, res) => {
+    try {
+        const { orderId, razorpayPaymentId } = req.body
 
+        const order = await Orders.findById(orderId);
+        if (!order) {
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Order not found" });
+        }
+
+        order.paymentStatus = "Paid";
+        order.isPaid = true;
+        order.razorpayPaymentId = razorpayPaymentId;
+        await order.save();
+
+        res.json({ success: true, message: "Payment status updated successfully" });
+
+    } catch (error) {
+        console.error("Error updating payment status:", error);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    }
+
+}
 
 
 
@@ -636,65 +641,36 @@ const razorpay = new Razorpay({
     key_secret: "wehlBhfqQlWoouA0ZGxYB373",
 });
 
-const createRetryPayment = async (req,res)=>{
+const createRetryPayment = async (req, res) => {
     try {
-        const { receipt, currency,amount } = req.body;
-        const {orderId} =req.params
+        const { receipt, currency, amount } = req.body;
 
-        console.log("receipt",receipt)
-        console.log("currency",currency)
-        console.log("amount",amount)
+        conso
 
         const newOrder = await razorpay.orders.create({
             amount,
             currency,
             receipt,
-            
+
         });
 
         res.json({
             success: true,
             razorpayOrderId: newOrder.id,
-            amount:amount,
-            order:newOrder
+            amount: totalAmount,
+            orderId: orderId
         });
 
     } catch (error) {
         console.error("Error creating Razorpay order:", error);
-        res.status(500).json({ success: false, message: "Server Error" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 }
 
 
 
-const retryPayment = async (req, res) => {
-    try {
-     const {orderId,razorpayPaymentId} =req.body
- 
-     const order = await Orders.findById(orderId);
-     if (!order) {
-         return res.status(404).json({ success: false, message: "Order not found" });
-     }
 
-     console.log("order",order)
  
-     order.paymentStatus = "Paid";
-     order.paymentMethod=" razorpay"
-     order.isPaid = true;
-     order.razorpayPaymentId = razorpayPaymentId;
-     await order.save();
- 
-     res.json({ success: true, message: "Payment status updated successfully" });
- 
-    } catch (error) {
-     console.error("Error updating payment status:", error);
-     res.status(500).json({ success: false, message: "Server Error" });
-    }
- 
- } 
-
-
-
 
 
 module.exports = {

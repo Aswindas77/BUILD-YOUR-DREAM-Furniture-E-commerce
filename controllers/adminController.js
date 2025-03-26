@@ -6,10 +6,12 @@ const Order = require('../models/ordermodel');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const User = require('../models/userModel');
-const Return = require('../models/returnModel')
+const Return = require('../models/returnModel');
+const HttpStatus = require('../constants/httpStatus');
+const Messages =require('../constants/messages.json')
 
 
-
+ 
 
 
 
@@ -26,11 +28,12 @@ const Return = require('../models/returnModel')
 //====================================================================================================================================================
 
 const loadLogin = async (req, res) => {
-  try {
+  try { 
     const { email, password } = req.body;
     res.render("adminLogin", { emailError: "", passwordError: "", layout: false });
   } catch (err) {
     console.log(err.message);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -46,21 +49,21 @@ const loadDash = async (req, res) => {
 
     const admin = await adminData.findOne({ email: email });
     if (!admin) {
-      return res.status(400).json({ emailError: "Admin not found!" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ emailError: "Admin not found!" });
     }
 
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(400).json({ passwordError: "Invalid password!" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ passwordError: "Invalid password!" });
     }
 
 
     req.session.admin = admin;
-    res.status(200).json({ success: true });
+    res.status(HttpStatus.OK).json({ success: true });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -100,7 +103,7 @@ const loadusermanagment = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in loadusermanagment:", err.message);
-    res.status(500).send("Server error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 }
 
@@ -119,7 +122,7 @@ const toggleBlockAccess = async (req, res) => {
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       console.log("Invalid userId:", userId);
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         message: "Invalid user ID"
       });
@@ -128,7 +131,7 @@ const toggleBlockAccess = async (req, res) => {
     // Validate action
     if (!["block", "unblock"].includes(action)) {
       console.log("Invalid action:", action);
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         message: "Invalid action. Use 'block' or 'unblock'."
       });
@@ -147,7 +150,7 @@ const toggleBlockAccess = async (req, res) => {
     // Check if user exists
     if (!updatedUser) {
       console.log("User not found in database for ID:", userId);
-      return res.status(404).json({
+      return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
         message: "User not found"
       });
@@ -156,7 +159,7 @@ const toggleBlockAccess = async (req, res) => {
     console.log("User updated successfully:", updatedUser);
 
     // Send success response
-    return res.status(200).json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: `User ${action}ed successfully`,
       isBlocked: updatedUser.isBlocked
@@ -164,10 +167,7 @@ const toggleBlockAccess = async (req, res) => {
 
   } catch (err) {
     console.error("Error in toggleUserAccess:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Server error while updating user status"
-    });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -180,7 +180,9 @@ const logout = async (req, res) => {
     req.session.admin = null
     res.redirect("/admin/login");
   } catch (err) {
-    console.log(err)
+    console.log(err.message)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+
   }
 }
 
@@ -444,7 +446,7 @@ const getYearlySales = async (page = 1, limit = 10, startDate = null, endDate = 
 
 
 
- 
+
 
 // dashboard
 
@@ -622,7 +624,7 @@ const loadDashboard = async (req, res) => {
     let totalRevenue = 0;
 
     orders.forEach(order => {
-      if (order.status === 'Delivered') {
+      if (order.paymentStatus === 'Paid') {
         totalRevenue += order.totalAmount;
       }
     });
@@ -658,7 +660,7 @@ const loadDashboard = async (req, res) => {
     });
   } catch (error) {
     console.error("Dashboard loading error:", error);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -711,7 +713,7 @@ const loadOrderManagement = async (req, res) => {
     });
   } catch (error) {
     console.error('Error loading order management:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -729,13 +731,13 @@ const updateOrderStatus = async (req, res) => {
     );
 
     if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Order not found' });
     }
 
     res.json({ success: true, message: 'Order status updated successfully' });
   } catch (error) {
     console.error('Error updating order status:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -748,13 +750,13 @@ const viewOrder = async (req, res) => {
       .populate('items.product');
 
     if (!order) {
-      return res.status(404).send('Order not found');
+      return res.status(HttpStatus.NOT_FOUND).send('Order not found');
     }
 
     res.render('admin/orderDetails', { order });
   } catch (error) {
     console.error('Error viewing order:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -815,7 +817,7 @@ const getSalesReport = async (req, res) => {
           totalRevenue: {
             $sum: {
               $cond: [
-                { $eq: ['$items.status', 'Delivered'] },
+                { $eq: ['$items.paymentStatus', 'Paid'] },
                 '$totalAmount',
                 0
               ]
@@ -855,8 +857,8 @@ const getSalesReport = async (req, res) => {
     })));
   } catch (error) {
     console.error('Error getting sales report:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    }
 };
 
 
@@ -917,7 +919,7 @@ const getOrdersByPeriod = async (req, res) => {
     res.json(formattedOrders);
   } catch (error) {
     console.error('Error getting orders by period:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -988,7 +990,7 @@ const getGraphData = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching graph data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -1035,7 +1037,7 @@ const getSalesDataByPeriod = async (req, res) => {
         dateFormat = { year: 'numeric' };
         break;
       default:
-        return res.status(400).json({ error: 'Invalid period' });
+        return res.status(HttpStatus.BAD_REQUEST).json({ error: 'Invalid period' });
     }
 
     const results = await Order.aggregate([
@@ -1051,7 +1053,7 @@ const getSalesDataByPeriod = async (req, res) => {
           totalRevenue: {
             $sum: {
               $cond: [
-                { $eq: ["$status", "Delivered"] },
+                { $eq: ["$paymentStatus", "Paid"] },
                 "$totalAmount",
                 0
               ]
@@ -1091,7 +1093,7 @@ const getSalesDataByPeriod = async (req, res) => {
 
   } catch (error) {
     console.error('Error getting sales data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 
@@ -1109,14 +1111,14 @@ const getAnalytics = async (req, res) => {
     switch (period) {
       case 'daily':
         startDate = new Date(now);
-        startDate.setDate(startDate.getDate() - 7); 
+        startDate.setDate(startDate.getDate() - 7);
         groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } };
         dateFormat = { day: '2-digit', month: 'short' };
         break;
 
       case 'weekly':
         startDate = new Date(now);
-        startDate.setMonth(startDate.getMonth() - 3); 
+        startDate.setMonth(startDate.getMonth() - 3);
         groupBy = {
           week: { $week: "$createdAt" },
           year: { $year: "$createdAt" }
@@ -1125,7 +1127,7 @@ const getAnalytics = async (req, res) => {
 
       case 'monthly':
         startDate = new Date(now);
-        startDate.setFullYear(startDate.getFullYear() - 1); 
+        startDate.setFullYear(startDate.getFullYear() - 1);
         groupBy = {
           month: { $month: "$createdAt" },
           year: { $year: "$createdAt" }
@@ -1135,7 +1137,7 @@ const getAnalytics = async (req, res) => {
 
       case 'yearly':
         startDate = new Date(now);
-        startDate.setFullYear(startDate.getFullYear() - 5); 
+        startDate.setFullYear(startDate.getFullYear() - 5);
         groupBy = { $year: "$createdAt" };
         dateFormat = { year: 'numeric' };
         break;
@@ -1144,7 +1146,7 @@ const getAnalytics = async (req, res) => {
         return res.status(400).json({ error: 'Invalid period' });
     }
 
-    
+
     const results = await Order.aggregate([
       {
         $match: {
@@ -1169,7 +1171,7 @@ const getAnalytics = async (req, res) => {
       { $sort: { "_id": 1 } }
     ]);
 
-   
+
     const formattedData = results.map(item => {
       let label;
       if (period === 'daily') {
@@ -1191,7 +1193,7 @@ const getAnalytics = async (req, res) => {
       };
     });
 
-   
+
     res.json({
       labels: formattedData.map(item => item.label),
       sales: formattedData.map(item => item.sales),
@@ -1200,7 +1202,7 @@ const getAnalytics = async (req, res) => {
 
   } catch (error) {
     console.error('Analytics error:', error);
-    res.status(500).json({ error: 'Error fetching analytics data' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
   }
 };
 

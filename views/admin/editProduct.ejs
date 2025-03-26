@@ -17,67 +17,65 @@
     <div class="container">
         <div class="form-container">
             <h1>edit Product</h1>
-            <form method="post" action="updateProduct" onsubmit="productAdder(event)" id="add-product-form">
+            <form method="post" action="" onsubmit="productAdder(event)" id="add-product-form">
                 <input hidden type="text" id="product-name" name="id" value="<%= product._id %>">
 
                 <!-- Product Name -->
                 <div class="mb-3">
                     <label for="name" class="form-label">Product Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="<%= product.name%>" required>
+                    <input type="text" class="form-control" id="name" name="name" value="<%= product.name%>">
+                    <div class="error" id="nameError">Please enter a valid product name (at least 3 characters).</div>
+
                 </div>
 
                 <!-- Description -->
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4"
-                        required><%= product.description%></textarea>
+                    <textarea class="form-control" id="description" name="description"
+                        rows="4"><%= product.description%></textarea>
+                    <div class="error" id="descriptionError">Description must be at least 10 characters long.</div>
                 </div>
 
+                
                 <!-- Category -->
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select class="form-select" id="category" name="category">
                         <% categories.forEach(category=> { %>
-                            <option value="<%= category._id %>">
+                            <option value="<%= category._id %>" <%=product.category &&
+                                product.category.toString()===category._id.toString() ? 'selected' : "category" %>>
                                 <%= category.name %>
                             </option>
                             <% }); %>
                     </select>
-
+                    <div class="error" id="categoryError">Please select a category.</div>
                 </div>
+
 
                 <!-- Sales Price -->
                 <div class="mb-3">
                     <label for="salesPrice" class="form-label">Sales Price</label>
                     <input type="number" class="form-control" id="salesPrice" name="salesPrice"
-                        value="<%= product.salesPrice%>" step="0.01" required>
+                        value="<%= product.salesPrice%>" step="0.01">
+                    <div class="error" id="salesPriceError">Sales price must be greater than 0.</div>
                 </div>
 
                 <!-- Product Offer -->
                 <div class="mb-3">
                     <label for="productOffer" class="form-label">Product Offer (%)</label>
                     <input type="number" class="form-control" id="productOffer" name="productOffer"
-                        value="<%= product.productOffer %>" step="1" min="0">
+                        value="<%= product.productOffer %>" step="1">
+                    <div class="error" id="productOfferError">Offer must be between 0 and 100.</div>
                 </div>
 
                 <!-- Stock -->
                 <div class="mb-3">
                     <label for="stock" class="form-label">Stock</label>
-                    <input type="number" class="form-control" id="stock" name="stock" value="<%= product.stock%>"
-                        required>
+                    <input type="number" class="form-control" id="stock" name="stock" value="<%= product.stock%>">
+                    <div class="error" id="stockError">Stock must be a positive number.</div>
                 </div>
 
-                <!-- Rating -->
-                <div class="mb-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <select class="form-select" id="rating" name="rating">
-                        <option value="1" <%=product.rating===1 ? 'selected' : '' %>>1 Star</option>
-                        <option value="2" <%=product.rating===2 ? 'selected' : '' %>>2 Stars</option>
-                        <option value="3" <%=product.rating===3 ? 'selected' : '' %>>3 Stars</option>
-                        <option value="4" <%=product.rating===4 ? 'selected' : '' %>>4 Stars</option>
-                        <option value="5" <%=product.rating===5 ? 'selected' : '' %>>5 Stars</option>
-                    </select>
-                </div>
+                
 
                 <!-- Status -->
                 <div class="mb-3">
@@ -97,6 +95,7 @@
 
                         <img style="object-fit: cover;" src="<%= product.images[0] %>" alt="Image 1 Preview" id="prev1"
                             class="mb-3 img-fluid">
+                        <div class="error" id="image1Error" style="display: none;">Please upload Image 1.</div>
 
                     </div>
                     <label for="image2" class="text-center mb-2">Image 2</label>
@@ -105,6 +104,7 @@
                     <div class="cropper-container text-center">
                         <img style="object-fit: cover;" src="<%= product.images[1] %>" alt="Image 2 Preview" id="prev2"
                             class="mb-3 img-fluid">
+                        <div class="error" id="image2Error" style="display: none;">Please upload Image 2.</div>
 
                     </div>
 
@@ -116,6 +116,7 @@
                         <img style="object-fit: cover;" src="<%= product.images[2] %>" alt="Image 3 Preview" id="prev3"
                             class="mb-3 img-fluid">
                     </div>
+                    <div class="error" id="image3Error" style="display: none;">Please upload Image 3.</div>
                 </div>
 
                 <!-- Submit Button -->
@@ -128,173 +129,113 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            function validateForm(formData) {
+                let isValid = true;
+                const errors = {};
 
-        document.getElementById("add-product-form").addEventListener("submit", function (event) {
-            let isValid = true;
+                
+                const name = document.getElementById("name");
+                const description = document.getElementById("description");
+                const category = document.getElementById("category");
+                const salesPrice = document.getElementById("salesPrice");
+                const productOffer = document.getElementById("productOffer");
+                const stock = document.getElementById("stock");
+                const status = document.getElementById("status");
 
-            // Get input values
-            const name = document.getElementById("name");
-            const description = document.getElementById("description");
-            const category = document.getElementById("category");
-            const salesPrice = document.getElementById("salesPrice");
-            const productOffer = document.getElementById("productOffer");
-            const stock = document.getElementById("stock");
-            const status = document.getElementById("status");
-            const rating = document.getElementById("rating");
+                
+                document.querySelectorAll(".error").forEach(error => {
+                    error.style.display = 'none';
+                });
 
-            // Remove old error messages
-            document.querySelectorAll(".error-message").forEach(e => e.remove());
-
-            // Function to show error messages
-            function showError(input, message) {
-                input.classList.add("border", "border-danger"); // Add red border
-                const errorDiv = document.createElement("div");
-                errorDiv.className = "error-message text-danger mt-1";
-                errorDiv.innerText = message;
-                input.parentNode.appendChild(errorDiv);
-                isValid = false;
-            }
-
-            function clearError(input) {
-                input.classList.remove("border", "border-danger");
-            }
-
-            // Validate Product Name
-            if (name.value.trim().length < 3) {
-                showError(name, " Product name must be at least 3 characters.");
-            } else {
-                clearError(name);
-            }
-
-            // Validate Description
-            if (description.value.trim().length < 10) {
-                showError(description, " Description must be at least 10 characters.");
-            } else {
-                clearError(description);
-            }
-
-            // Validate Category
-            if (!category.value) {
-                showError(category, " Please select a category.");
-            } else {
-                clearError(category);
-            }
-
-            // Validate Sales Price
-            if (isNaN(salesPrice.value) || salesPrice.value <= 0) {
-                showError(salesPrice, " Sales price must be greater than 0.");
-            } else {
-                clearError(salesPrice);
-            }
-
-            // Validate Product Offer (0-100%)
-            if (isNaN(productOffer.value) || productOffer.value < 0 || productOffer.value > 100) {
-                showError(productOffer, " Product offer must be between 0% and 100%.");
-            } else {
-                clearError(productOffer);
-            }
-
-            // Validate Stock (Must be 0 or greater)
-            if (isNaN(stock.value) || stock.value < 0) {
-                showError(stock, " Stock cannot be negative.");
-            } else {
-                clearError(stock);
-            }
-
-            // Validate Status
-            if (!["active", "inactive"].includes(status.value)) {
-                showError(status, " Please select a valid status.");
-            } else {
-                clearError(status);
-            }
-
-            // Validate Rating
-            if (!rating.value || rating.value < 1 || rating.value > 5) {
-                showError(rating, "Please select a valid rating between 1 and 5.");
-            } else {
-                clearError(rating);
-            }
-
-            // Validate Images
-            for (let i = 1; i <= 3; i++) {
-                const imageInput = document.getElementById(`image${i}`);
-                if (imageInput.files.length > 0) {
-                    const file = imageInput.files[0];
-                    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-                    if (!allowedTypes.includes(file.type)) {
-                        showError(imageInput, " Only JPG, JPEG, or PNG images allowed.");
-                    }
-                    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                        showError(imageInput, " Image must be less than 2MB.");
-                    }
+                
+                if (!name.value || name.value.trim().length < 3) {
+                    errors.name = "Product name must be at least 3 characters";
+                    document.getElementById("nameError").style.display = 'block';
+                    isValid = false;
                 }
-            }
 
-            // Prevent form submission if invalid
-            if (!isValid) {
-                event.preventDefault();
-            }
-
-        });
-
-        //  this is cropper image function
-
-        let croppers = {}
-        function cropper(index) {
-            const files = document.getElementById(`image${index}`)
-            const preview = document.getElementById(`prev${index}`)
-            const file = files.files[0]
-            if (file) {
-                const objectURL = URL.createObjectURL(file)
-                preview.src = objectURL
-                preview.style.display = 'block'
-                if (croppers[index]) {
-                    croppers[index].destroy()
+                
+                if (!description.value || description.value.trim().length < 10) {
+                    errors.description = "Description must be at least 10 characters";
+                    document.getElementById("descriptionError").style.display = 'block';
+                    isValid = false;
                 }
-                croppers[index] = new Cropper(preview, {
-                    aspectRatio: NaN,
-                    cropBoxMovable: true,
-                    ready: function () {
-                        this.cropper.setCropBoxData({
-                            width: 100,
-                            height: 100,
-                        })
-                    },
-                })
+
+                
+                if (!category.value) {
+                    errors.category = "Please select a category";
+                    document.getElementById("categoryError").style.display = 'block';
+                    isValid = false;
+                }
+
+                
+                const salesPriceValue = parseFloat(salesPrice.value);
+                if (isNaN(salesPriceValue) || salesPriceValue <= 0) {
+                    errors.salesPrice = "Sales price must be greater than 0";
+                    document.getElementById("salesPriceError").style.display = 'block';
+                    isValid = false;
+                }
+
+                
+                const offerValue = parseFloat(productOffer.value);
+                if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
+                    errors.productOffer = "Offer must be between 0 and 100";
+                    document.getElementById("productOfferError").style.display = 'block';
+                    isValid = false;
+                }
+
+                
+                const stockValue = parseInt(stock.value);
+                if (isNaN(stockValue) || stockValue < 0) {
+                    errors.stock = "Stock must be a positive number";
+                    document.getElementById("stockError").style.display = 'block';
+                    isValid = false;
+                }
+
+                return { isValid, errors };
             }
-        }
 
-        function productAdder(e) {
-            console.log(e)
+            
+            async function updateProduct(formData) {
+                try {
+                    let images = [];
+                    for (let i = 1; i <= 3; i++) {
+                        if (croppers[i]) {
+                            const canvas = croppers[i].getCroppedCanvas();
+                            const base64Image = canvas.toDataURL('image/png');
+                            images.push(base64Image);
+                        } else {
+                            
+                            const prevImg = document.getElementById(`prev${i}`);
+                            images.push(prevImg.src);
+                        }
+                    }
 
-            e.preventDefault()
-            let images = []
-            for (let i = 1; i < 4; i++) {
-                const canvas = croppers[i]?.getCroppedCanvas()
-                const base64Image = canvas?.toDataURL('image/png')
-                images.push(base64Image)
-            }
-            const formdata = new FormData(e.target)
+                    const productData = {
+                        id: formData.get('id'),
+                        name: formData.get('name'),
+                        description: formData.get('description'),
+                        category: formData.get('category'),
+                        salesPrice: formData.get('salesPrice'),
+                        productOffer: formData.get('productOffer'),
+                        stock: formData.get('stock'),
+                        status: formData.get('status'),
+                        images: images
+                    };
 
-            images.forEach((image, index) => {
-                formdata.append(`image${index}`, image)
-            })
+                    const response = await fetch('/admin/updateProduct', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(productData)
+                    });
 
-            const formObject = {}
-            formdata.forEach((value, key) => {
-                formObject[key] = value
-            })
-            console.log(formObject);
+                    const data = await response.json();
 
-            fetch('/admin/updateProduct', {
-                method: 'post',
-                body: JSON.stringify(formObject),
-                headers: { 'Content-Type': 'application/json' },
-            })
-                .then(response => response.json())
-                .then(data => {
                     if (data.success) {
-                        console.log("Update successful");
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
@@ -303,16 +244,66 @@
                         }).then(() => {
                             window.location.href = "/admin/productManagement";
                         });
-
                     } else {
-                        showToast(data.message || "Failed to update product");
+                        throw new Error(data.message || 'Failed to update product');
                     }
-                })
-                .catch(error => {
-                    console.error('Error during fetch:', error);
-                    showToast("An error occurred. Please try again.");
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error.message || 'Failed to update product'
+                    });
+                }
+            }
+
+            
+            document.getElementById('add-product-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const { isValid, errors } = validateForm(formData);
+
+                if (isValid) {
+                    updateProduct(formData);
+                } else {
+                    console.log('Validation errors:', errors);
+
+                }
+            });
+        });
+
+
+
+        
+        let croppers = {};
+        function cropper(index) {
+            const files = document.getElementById(`image${index}`);
+            const preview = document.getElementById(`prev${index}`);
+            const file = files.files[0];
+
+            if (file) {
+                const objectURL = URL.createObjectURL(file);
+                preview.src = objectURL;
+                preview.style.display = 'block';
+
+                if (croppers[index]) {
+                    croppers[index].destroy();
+                }
+
+                croppers[index] = new Cropper(preview, {
+                    aspectRatio: NaN,
+                    cropBoxMovable: true,
+                    ready: function () {
+                        this.cropper.setCropBoxData({
+                            width: 100,
+                            height: 100,
+                        });
+                    },
                 });
+            }
         }
+
 
 
         function showToast(message, type) {
@@ -330,8 +321,6 @@
                 },
             }).showToast();
         }
-
-
     </script>
 </body>
 

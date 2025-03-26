@@ -4,7 +4,9 @@ const Category = require("../models/categoryModel");
 const Address = require('../models/addressModel')
 const Cart = require('../models/cartModel')
 const Coupon = require('../models/couponModel');
-const User =require ('../models/userModel.js');
+const User = require('../models/userModel.js');
+const HttpStatus = require('../constants/httpStatus.js');
+const Messages =require('../constants/messages.json')
 
 
 
@@ -21,33 +23,34 @@ const loadCart = async (req, res) => {
         }
 
         const user = req.session?.User;
-        const products = await Product.find({ isDeleted: false, isListed: false ,
-            stock:{$gt:0}
+        const products = await Product.find({
+            isDeleted: false, isListed: false,
+            stock: { $gt: 0 }
         });
 
         const categories = await Category.find({ isDeleted: false, isListed: false });
-    
 
-       
-        
+
+
+
 
         const cart = await Cart.findOne({ userId })
             .populate({
                 path: "products.productId",
-                select: "name salesPrice images stock", 
+                select: "name salesPrice images stock",
             });
 
-            
 
-            
+
+
 
         console.log("Cart Data After Populate:", JSON.stringify(cart, null, 2));
 
-        if (!cart || !cart.products || cart.products.length === 0 ) {
+        if (!cart || !cart.products || cart.products.length === 0) {
             return res.render("cart", { user, products, categories, cart: [] });
         }
 
-        if(cart.products && cart.products.length >0){
+        if (cart.products && cart.products.length > 0) {
             cart.products = cart.products.filter(p => p.productId && p.productId.stock > 0)
         }
 
@@ -55,6 +58,7 @@ const loadCart = async (req, res) => {
 
     } catch (err) {
         console.log("Error loading cart:", err.message);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -64,17 +68,17 @@ const loadCart = async (req, res) => {
 
 //====================================================================================================================================================
 
-const addcart = async (req, res) => { 
+const addcart = async (req, res) => {
     try {
 
 
         const { productId, quantity } = req.body;
 
         if (!req.session.User || !req.session.User._id) {
-            return res.status(401).json({ success: false, message: "User not authenticated" });
+            return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: "User not authenticated" });
         }
-            
-        
+
+
 
         const userId = req.session.User._id;
 
@@ -90,19 +94,19 @@ const addcart = async (req, res) => {
         if (productExists) {
 
 
-            return res.status(400).json({ success:false, message:"product is already exist" });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "product is already exist" });
         }
 
         const product = await Product.findById(productId);
 
-        if(!product.stock>0){
-            return res.status(400).json({ success:false, message: 'the products is currently unavailable' });
+        if (!product.stock > 0) {
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'the products is currently unavailable' });
         }
-        
 
-        if (!product) return res.status(404).json({ success: false, message: "Product not found" });
 
-        
+        if (!product) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Product not found" });
+
+
 
         cart.products.push({
             productId,
@@ -116,7 +120,7 @@ const addcart = async (req, res) => {
 
     } catch (err) {
         console.error("Error adding to cart:", err.message);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -132,19 +136,19 @@ const updateCart = async (req, res) => {
         const userId = req.session?.User;
 
         if (!cart || !userId) {
-            return res.status(400).json({ success: false, message: 'Invalid request' });
+            return res.status().json({ success: false, message: 'Invalid request' });
         }
 
 
         const product = await Product.findById(cart.productId);
 
         if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found" });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Product not found" });
         }
 
 
         if (product.stock === 0) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: "No stock available"
             });
@@ -152,7 +156,7 @@ const updateCart = async (req, res) => {
 
 
         if (cart.currentQty > product.stock) {
-            return res.status(401).json({
+            return res.status(HttpStatus.UNAUTHORIZED).json({
                 success: false,
                 message: `Not enough stock available. Only ${product.stock} left.`
             });
@@ -160,7 +164,7 @@ const updateCart = async (req, res) => {
 
 
         if (cart.currentQty > 5) {
-            return res.status(400).json({
+            return res.status(HttpStatus.NOT_FOUND).json({
                 success: false,
                 message: "Maximum purchase quantity is 5 products"
             });
@@ -174,14 +178,14 @@ const updateCart = async (req, res) => {
         );
 
         if (!updatedOrder) {
-            return res.status(404).json({ success: false, message: 'Cart not found' });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Cart not found' });
         }
 
-        res.status(200).json({ success: true, message: 'Cart updated successfully', cart: updatedOrder });
+        res.status(HttpStatus.OK).json({ success: true, message: 'Cart updated successfully', cart: updatedOrder });
 
     } catch (error) {
         console.error('Error updating cart:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -199,13 +203,13 @@ const deleteCart = async (req, res) => {
         const cart = await Cart.findOne({ userId });
 
         if (!cart || !cart.products || cart.products.length === 0) {
-            return res.status(400).json({ success: false, message: "Cart is empty" });
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Cart is empty" });
         }
 
         const productIndex = cart.products.findIndex(item => item.productId.toString() === productId);
 
         if (productIndex === -1) {
-            return res.status(404).json({ success: false, message: "Product not found in cart" });
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Product not found in cart" });
         }
 
         cart.products.splice(productIndex, 1);
@@ -218,9 +222,9 @@ const deleteCart = async (req, res) => {
             newTotal += item.salesPrice * item.quantity;
         });
 
-        return res.status(200).json({ success: true, message: "Product removed from cart", newTotal });
+        return res.status(HttpStatus.OK).json({ success: true, message: "Product removed from cart", newTotal });
     } catch (error) {
-
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 
 
@@ -238,7 +242,7 @@ const loadCheckout = async (req, res) => {
         const userId = req.session?.User?._id;
 
 
-        const user = await User.findById(userId ) 
+        const user = await User.findById(userId)
 
         if (!userId) {
             return res.redirect('/user/login');
@@ -248,8 +252,8 @@ const loadCheckout = async (req, res) => {
             validUntil: { $gt: new Date() },
             validFrom: { $lte: new Date() },
             $or: [
-                { usageLimit: { $exists: false } }, 
-                { usedCount: { $lt: "$usageLimit" } } 
+                { usageLimit: { $exists: false } },
+                { usedCount: { $lt: "$usageLimit" } }
             ],
             minPurchase: { $lte: grandTotal }
         });
@@ -260,7 +264,7 @@ const loadCheckout = async (req, res) => {
 
         if (!cartId) {
             console.log("Cart ID missing!");
-            return res.status(400).send("Cart ID is required");
+            return res.status(HttpStatus.BAD_REQUEST).send("Cart ID is required");
         }
 
         const cart = await Cart.findById(cartId)
@@ -270,15 +274,15 @@ const loadCheckout = async (req, res) => {
             })
             .exec();
 
-             cart.products = cart.products.filter(p => p.productId && p.productId.stock > 0)
-            
-            
+        cart.products = cart.products.filter(p => p.productId && p.productId.stock > 0)
+
+
 
         if (userAddresses) {
             userAddresses.address = userAddresses.address.filter(addr => !addr.isDeleted);
 
-            console.log("jjjjj",userAddresses.address)
-            
+           
+
         }
 
         res.render("checkOut", {
@@ -293,7 +297,7 @@ const loadCheckout = async (req, res) => {
 
     } catch (error) {
         console.error("Error in loadCheckout:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -312,14 +316,14 @@ const validateCoupon = async (req, res) => {
         });
 
         if (!coupon) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: 'Invalid coupon code'
             });
         }
 
         if (total < coupon.minPurchase) {
-            return res.status(400).json({
+            return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: `Minimum purchase amount of ₹${coupon.minPurchase} required`
             });
@@ -339,10 +343,7 @@ const validateCoupon = async (req, res) => {
 
     } catch (error) {
         console.error('Error validating coupon:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
 
@@ -353,4 +354,4 @@ module.exports = {
     loadCheckout,
     deleteCart,
     validateCoupon
-};
+}; 
