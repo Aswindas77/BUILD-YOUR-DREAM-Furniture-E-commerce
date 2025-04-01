@@ -866,10 +866,11 @@
         }
 
 
-
+ 
 
 
         function retryPayment(orderId, totalAmount) {
+            console.log("totalAmount",totalAmount)
             Swal.fire({
                 title: "Retry Payment?",
                 text: `Your order total is ₹${totalAmount}. Do you want to proceed?`,
@@ -879,6 +880,7 @@
                 cancelButtonText: "No, cancel",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    console.log("kkk")
                     return fetch(`/user/createRetryPayment/${orderId}`, { 
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -894,6 +896,7 @@
                                 console.log("order",data.order)
                                 retryRazorpay(data.order, data.amount,orderId);
                             } else {
+                                console.log("kiiii")
                                 Swal.fire({
                                     icon: "error",
                                     title: "Retry Failed",

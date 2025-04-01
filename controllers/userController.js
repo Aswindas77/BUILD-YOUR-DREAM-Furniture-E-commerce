@@ -152,7 +152,7 @@ const verifyUser = async (req, res) => {
 
         req.session.User = user;
         req.session.logged = true;
-        res.status(HttpStatus.OK).json({ success: true ,message:Messages.SUCCESS });
+        res.status(HttpStatus.OK).json({ success: true, message: Messages.SUCCESS });
     } catch (err) {
         console.log(err.message);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
@@ -640,7 +640,7 @@ const loadShop = async (req, res) => {
         const totalPages = Math.ceil(totalProducts / limit);
 
         // Get products
-        const products = await Products.find(query )
+        const products = await Products.find(query)
             .sort(sortQuery)
             .skip(skip)
             .limit(limit)
@@ -867,9 +867,9 @@ const buyNow = async (req, res) => {
 
         const coupon = await Coupon.findOne({ code: couponCode, isActive: true, isDeleted: false });
 
-        let couponPercentage =coupon?.discountPercentage||null;
+        let couponPercentage = coupon?.discountPercentage || null;
 
-        console.log(couponPercentage,"nooo")
+        console.log(couponPercentage, "nooo")
 
         const user = await User.findById(userId);
         if (!user) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "User not found" });
@@ -883,14 +883,14 @@ const buyNow = async (req, res) => {
         let totalAmount = cart.products.reduce((total, item) => total + item.quantity * item.salesPrice, 0);
         console.log(totalAmount)
 
-        const subTotal=totalAmount
+        const subTotal = totalAmount
 
-        if(coupon){
-          let discountAmount=(couponPercentage/100)*totalAmount
-            totalAmount=totalAmount-discountAmount
+        if (coupon) {
+            let discountAmount = (couponPercentage / 100) * totalAmount
+            totalAmount = totalAmount - discountAmount
 
         }
-        
+
         console.log(totalAmount, 'totalAmount')
 
         const orderItems = cart.products.map(item => ({
@@ -935,7 +935,7 @@ const buyNow = async (req, res) => {
                     items: orderItems,
                     addressId: selectedAddressId,
                     paymentMethod,
-                    subTotal:subTotal,
+                    subTotal: subTotal,
                     totalAmount,
                     paymentStatus: peymentStatus,
                     orderStatus: "Pending",
@@ -1014,11 +1014,11 @@ const buyNow = async (req, res) => {
                 items: orderItems,
                 addressId: selectedAddressId,
                 paymentMethod,
-                subTotal:subTotal,
+                subTotal: subTotal,
                 totalAmount,
                 paymentStatus: "Pending",
                 orderStatus: "Pending",
-                updatedAt:new Date(),
+                updatedAt: new Date(),
             });
 
             await newOrder.save()
@@ -1062,7 +1062,7 @@ const buyNow = async (req, res) => {
                 items: orderItems,
                 addressId: selectedAddressId,
                 paymentMethod,
-                subTotal:subTotal,
+                subTotal: subTotal,
                 totalAmount,
                 paymentStatus: "Pending",
                 orderStatus: "Pending",
@@ -1078,7 +1078,7 @@ const buyNow = async (req, res) => {
                 receipt: newOrder._id.toString()
             });
 
-            return res.status(HttpStatus.OK).json({ 
+            return res.status(HttpStatus.OK).json({
                 success: true,
                 message: "Order created, proceed with payment",
                 orderId: newOrder._id,
@@ -1411,35 +1411,35 @@ const razorpay = new Razorpay({
 
 const createOrder = async (req, res) => {
     try {
-        const { amount, currency, receipt ,totalAmount,coupon} = req.body;
-
-        
-        
-
-
-        const couponCode =await Coupon.findOne({code:coupon})
-
-        const couponPercentage =Number(couponCode?.discountPercentage) || 0;
-
-        let totalamount=Number(totalAmount);
-
-        if(couponCode){
-            let discountAmount=(couponPercentage/100)*totalamount
-            totalamount=totalamount-discountAmount
-
-          }
+        const { amount, currency, receipt, totalAmount, coupon } = req.body;
 
 
 
-        console.log("Final amount after discount:",totalamount)
+
+
+        const couponCode = await Coupon.findOne({ code: coupon })
+
+        const couponPercentage = Number(couponCode?.discountPercentage) || 0;
+
+        let totalamount = Number(totalAmount);
+
+        if (couponCode) {
+            let discountAmount = (couponPercentage / 100) * totalamount
+            totalamount = totalamount - discountAmount
+
+        }
+
+
+
+        console.log("Final amount after discount:", totalamount)
 
         const finalAmount = Math.round(totalamount * 100);
 
         const order = await razorpay.orders.create({
-            amount:finalAmount,
+            amount: finalAmount,
             currency,
             receipt,
-            
+
         });
 
         res.status(HttpStatus.OK).json({ success: true, order });
@@ -1458,33 +1458,33 @@ const verifyPayment = async (req, res) => {
 
         const userId = req.session?.User?._id
 
-       
+
 
         const cartId = requestData.cartId;
 
-        const codeCoupon =requestData?.couponCode;
+        const codeCoupon = requestData?.couponCode;
 
         const coupon = await Coupon.findOne({ code: codeCoupon, isActive: true, isDeleted: false });
 
-        let couponPercentage =coupon?.discountPercentage||null;
+        let couponPercentage = coupon?.discountPercentage || null;
 
-        
+
 
 
         const cart = await Cart.findById(cartId).populate("products.productId");
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
         let totalAmount = cart.products.reduce((total, item) => total + item.quantity * item.salesPrice, 0);
-        
-        const subTotal=Number(totalAmount);
-        console.log("subtotal",subTotal);
 
-        if(coupon){
-            let discountAmount=(couponPercentage/100)*totalAmount
-              totalAmount=totalAmount-discountAmount
-  
-          }
-          
+        const subTotal = Number(totalAmount);
+        console.log("subtotal", subTotal);
+
+        if (coupon) {
+            let discountAmount = (couponPercentage / 100) * totalAmount
+            totalAmount = totalAmount - discountAmount
+
+        }
+
 
         const orderItems = cart.products.map(item => ({
             productId: item.productId._id,
@@ -1523,7 +1523,7 @@ const verifyPayment = async (req, res) => {
             paymentMethod: requestData.paymentMethod,
             couponCode: requestData.couponCode || null,
             totalAmount: totalAmount,
-            subTotal:subTotal,
+            subTotal: subTotal,
             paymentStatus: "Paid",
             razorpayOrderId: orderId,
             razorpayPaymentId: paymentId
@@ -1554,13 +1554,35 @@ const placePendingOrder = async (req, res) => {
         console.log("req.body;", req.body)
         const userId = req.session?.User?._id
 
+        const coupon = requestData.couponCode
+
+        const totalAmount = requestData.grandTotal
+
+        const subTotal = Number(totalAmount);
+
+        const couponCode = await Coupon.findOne({ code: coupon })
+
+        const couponPercentage = Number(couponCode?.discountPercentage) || 0;
+
+        let totalamount = Number(totalAmount);
+
+
+
+        if (couponCode) {
+            let discountAmount = (couponPercentage / 100) * totalamount
+            totalamount = totalamount - discountAmount
+
+        }
+
+
         const newOrder = new ordermodel({
             userId: userId,
             addressId: requestData.selectedAddressId,
             cartId: requestData.cartId,
             paymentMethod: requestData.paymentMethod,
             couponCode: requestData.couponCode || null,
-            totalAmount: parseInt(requestData.grandTotal.trim()),
+            totalAmount: totalamount,
+            subTotal: subTotal,
             paymentStatus: "Pending",
             razorpayOrderId: orderId,
             razorpayPaymentId: paymentId || ""

@@ -16,7 +16,7 @@ const HttpStatus = require('../constants/httpStatus');
 const Messages =require('../constants/messages.json')
 
 
-
+ 
 // load order page
 
 //====================================================================================================================================================
@@ -614,7 +614,13 @@ const generateInvoice = async (req, res) => {
 
 const retryPayment = async (req, res) => {
     try {
-        const { orderId, razorpayPaymentId } = req.body
+        const {  razorpayPaymentId,amount } = req.body
+
+        
+
+        const {orderId} =req.params;
+
+        
 
         const order = await Orders.findById(orderId);
         if (!order) {
@@ -634,32 +640,36 @@ const retryPayment = async (req, res) => {
     }
 
 }
+ 
 
 
 
-
-const razorpay = new Razorpay({
+const razorpay = new Razorpay({ 
     key_id: "rzp_test_av7bn0QCiETOX0",
     key_secret: "wehlBhfqQlWoouA0ZGxYB373",
 });
-
+ 
 const createRetryPayment = async (req, res) => {
     try {
-        const { receipt, currency, amount } = req.body;
+        const { receipt, currency, amount ,requestData } = req.body;
+
+        
+
 
         
 
         const newOrder = await razorpay.orders.create({
-            amount,
+            subtotal:amount,
             currency,
-            receipt,
+            receipt, 
 
         });
 
         res.json({
             success: true,
             razorpayOrderId: newOrder.id,
-            amount,
+            subtotal,
+
             orderId: orderId
         });
 

@@ -382,7 +382,7 @@
                                         </ul>
                                         <ul class="list list_2">
 
-                                            <li><a href="#">Total <span>₹<%= Number(grandTotal).toFixed(2)  %></span></a></li>
+                                            <li><a href="#">Total <span>₹<%= Number(grandTotal).toFixed(2)  %></span></a></li> 
                                         </ul>
                                         <div class="payment_item">
                                             <div class="radion_btn">
@@ -394,12 +394,7 @@
 
                                         </div>
                                         <div class="payment_item active">
-                                            <div class="radion_btn">
-                                                <input type="radio" id="f-option6" value="paypal" name="paymentMethod">
-                                                <label for="f-option6">online payment (paypal)</label>
-                                                <img src="/public/userAssets/images/product/card.jpg" alt="">
-                                                <div class="check"></div>
-                                            </div>
+                                           
                                             <div class="radion_btn">
 
                                                 <input type="radio" id="f-option7" value="razorpay"
@@ -408,7 +403,7 @@
                                                 <img src="/public/userAssets/images/product/card.jpg" alt="">
                                                 <div class="check"></div>
 
-                                            </div>
+                                            </div> 
 
                                             <div class="payment_item active">
                                                 <div class="radion_btn">
@@ -841,7 +836,7 @@
 
 
 
-                function showRetrySwal(requestData, orderId,response) {
+                function showRetrySwal(requestData, orderId,response,) {
                     Swal.fire({
                         title: "Payment Failed!",
                         text: "Do you want to retry the payment or pay later?",
@@ -853,14 +848,14 @@
                         if (result.isConfirmed) {
                             openRazorpay(requestData); 
                         } else {
-                            payLater(orderId); 
+                            payLater(orderId,requestData,); 
                         }
                     });
                 }
 
 
 
-                function payLater(orderId) {
+                function payLater(orderId,requestData) {
                     Swal.fire({
                         title: "Order Placed!",
                         text: "You can complete the payment later from your orders page.",
