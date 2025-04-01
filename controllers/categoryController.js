@@ -2,12 +2,12 @@ const Categories = require("../models/categoryModel");
 const product = require("../models/productModel");
 const mongoose = require('mongoose');
 const HttpStatus = require('../constants/httpStatus');
-const Messages =require('../constants/messages.json')
+const Messages = require('../constants/messages.json')
 
 
 
 // load category page 
- 
+
 //====================================================================================================================================================
 
 const loadCategory = async (req, res) => {
@@ -73,29 +73,37 @@ const loadAddCategory = async (req, res) => {
 
 const addCategory = async (req, res) => {
   try {
-    const { name, description } = req.body
-    console.log(name, description)
+    const { name, description, categoryOffer, minimumPrice, claimableAmount } = req.body;
+
+    const changedName = name.trim().toLowerCase();
+
+    console.log(changedName, description, "njjjjjjjjnnn");
 
     const existingCategory = await Categories.findOne({
       name: { $regex: new RegExp("^" + name + "$", "i") }
     });
 
     if (existingCategory) {
-      return res.status(400).json({ message: 'Category already exists!' })
+      return res.status(400).json({ message: 'Category already exists!' });
     }
-    const category = new Categories({
-      name,
-      description,
-    })
-    await category.save();
 
-    return res.status(HttpStatus.OK).json({ message: 'Category added successfully!' });
+    const category = new Categories({
+      name: changedName,
+      description: description,
+      offerPercentage: categoryOffer,
+      minimumPrice: minimumPrice,
+      claimableAmount: claimableAmount,
+    });
+
+    await category.save();
+    return res.status(200).json({ message: 'Category added successfully!' });
 
   } catch (error) {
-    console.log(error.message)
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    console.log(error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 
 //====================================================================================================================================================
 
@@ -130,6 +138,12 @@ const EditCategory = async (req, res) => {
 
     if (!category) return res.send("category not found")
 
+    console.log("catname", category.name)
+    console.log("discription", category.description)
+    console.log("offerPercentage", category.offerPercentage)
+    console.log("minimumPrice", category.minimumPrice)
+    console.log("claimableAmount", category.claimableAmount)
+
     res.render("editCategory", { category })
 
   } catch (error) {
@@ -148,19 +162,19 @@ const EditCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
 
-    const { name, description, id } = req.body;
-    console.log(req.body)
+    const { name, description, id, categoryOffer, minimumPrice ,claimableAmount} = req.body;
 
-    const existingCategory = await Categories.findOne({ name })
-
-
-
-
-
-
+    console.log(claimableAmount,minimumPrice,categoryOffer)
+   
     const updatedCategory = await Categories.findByIdAndUpdate(
       id,
-      { name, description },
+      {
+        name,
+        description,
+        offerPercentage:categoryOffer,
+        minimumPrice,
+        claimableAmount,
+      },
       { new: true }
     );
 

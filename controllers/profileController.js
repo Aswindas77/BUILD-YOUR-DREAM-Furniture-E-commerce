@@ -3,7 +3,8 @@ const crypto = require('crypto');
 const mongoose = require("mongoose");
 const Products = require("../models/productModel");
 const Category = require("../models/categoryModel");
-const Address = require('../models/addressModel')
+const Address = require('../models/addressModel');
+const Coupon = require('../models/couponModel');
 const bcrypt = require('bcrypt');
 const { Types } = require('mongoose');
 const Order = require('../models/ordermodel');
@@ -495,8 +496,20 @@ const getOrderDetails = async (req, res) => {
         const order = await Order.findById(orderId)
             .populate('items.productId')
 
+            const codeCoupon=order?.couponCode
 
+            const coupon = await Coupon.findOne({ code: codeCoupon, isActive: true, isDeleted: false });
 
+            let couponPercentage =coupon?.discountPercentage||null;
+
+        let discountAmount=null;
+            if(coupon){
+                 discountAmount=(couponPercentage/100)*order?.totalAmount
+                  discountAmount = Number(discountAmount.toFixed(2));
+      
+              }
+
+              console.log("discount Amount",discountAmount)
 
 
 
@@ -527,6 +540,9 @@ const getOrderDetails = async (req, res) => {
                 return total + (item.price * item.quantity);
             }, 0);
         }
+
+        
+
 
 
         const orderTimeline = [];
@@ -570,11 +586,18 @@ const getOrderDetails = async (req, res) => {
 
         };
 
+
+        console.log("subtotal :",order.subTotal)
+        
+
         console.log('Formatted Order:', formattedOrder);
 
 
         res.render('profile/orderDetails', {
             order: formattedOrder,
+            subTotal:order.subTotal,
+            discountAmount:discountAmount,
+            coupon :coupon,
             returnOrder: returnRequest,
             user: req.session.User,
             selectedAddress

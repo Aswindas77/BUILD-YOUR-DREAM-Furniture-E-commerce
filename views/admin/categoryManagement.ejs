@@ -8,6 +8,124 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
     <link rel="stylesheet" href="/public/adminAssets/css/catManagement.css">
+    <style>
+      .table-responsive {
+          overflow-x: auto;
+          margin: 20px 0;
+      }
+  
+      .category-table {
+          border-collapse: collapse;
+          background: #fff;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          width: 100%;
+      }
+  
+      .category-table th,
+      .category-table td {
+          padding: 12px 15px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+          vertical-align: middle;
+      }
+  
+      .category-table th {
+          background-color: #f5f5f5;
+          font-weight: 600;
+      }
+  
+      .category-table tr:hover {
+          background-color: #f9f9f9;
+      }
+  
+      .col-index { width: 5%; }
+      .col-name { width: 25%; }
+      .col-desc { width: 40%; }
+      .col-actions { width: 30%; }
+  
+      .action-buttons {
+          display: flex;
+          gap: 8px; /* Reduced from 10px for tighter spacing */
+          align-items: center;
+          flex-wrap: nowrap; /* Prevent wrapping unless necessary */
+      }
+  
+      .btn {
+          padding: 8px 16px; /* Consistent padding for all buttons */
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          font-size: 14px; /* Consistent font size */
+          min-width: 80px; /* Minimum width for consistency */
+          text-align: center;
+      }
+  
+      .btn-edit {
+          background-color: #007bff;
+          color: white;
+      }
+  
+      .btn-edit:hover {
+          background-color: #0056b3;
+      }
+  
+      .btn-delete {
+          background-color: #dc3545;
+          color: white;
+      }
+  
+      .btn-delete:hover {
+          background-color: #b02a37;
+      }
+  
+      .btn-status {
+          background-color: #28a745; /* Default for success */
+          color: white;
+      }
+  
+      .btn-danger {
+          background-color: #dc3545;
+      }
+  
+      .btn-success {
+          background-color: #28a745;
+      }
+  
+      .btn-status:hover {
+          filter: brightness(85%);
+      }
+  
+      .inline-form {
+          display: inline-block;
+          margin: 0;
+      }
+  
+      .spinner-border {
+          width: 1rem;
+          height: 1rem;
+          vertical-align: middle;
+      }
+  
+      @media (max-width: 768px) {
+          .action-buttons {
+              flex-direction: column;
+              gap: 6px;
+              align-items: flex-start;
+          }
+  
+          .btn {
+              width: 100%; /* Full width on mobile */
+              min-width: unset; /* Remove min-width constraint */
+              padding: 6px 12px;
+          }
+  
+          .category-table th,
+          .category-table td {
+              padding: 8px;
+          }
+      }
+  </style>
 </head>
 <body>
     <h1 style="margin-left: 40%">Category Management</h1>
@@ -23,48 +141,48 @@
 
     <div class="categories-table">
       <h2 style="margin-top: 20px;">Existing Categories</h2>
-      <table width="100%">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Category Name</th>
-            <th>Description</th>
-            <th>Update</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% categories.forEach((category, index) => { %>
-            <tr>
-              <td><%= (currentPage - 1) * 4 + index + 1 %></td>
-              <td><%= category.name %></td>
-              <td><%= category.description %></td>
-              <td>
-                <form method="post" action="editcategory">
-                  <input hidden type="text" name="id" value="<%= category._id %>">
-                  <button type="submit" class="btn" style="width: 77px;">Edit</button>
-                </form>
-                <button type="submit" class="btn btn-delete" onclick="deleteCategory('<%= category._id %>')">
-                  Delete
-                </button>
-                
-                <button style="margin-top:22px"
-                class="btn <%= category.isListed ? 'btn-danger' : 'btn-success' %> btn-sm access-btn" 
-                data-id="<%= category._id %>"
-                data-status="<%= category.isListed ? 'unlisted' : 'active' %>"
-              >
-                <span class="button-text">
-                  <%= category.isListed ? 'listed' : 'unlisted' %>
-                </span>
-                <span class="spinner-border spinner-border-sm d-none" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </span>
-              </button> 
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
+      <div class="table-responsive">
+          <table class="category-table" width="100%">
+              <thead>
+                  <tr>
+                      <th class="col-index">#</th>
+                      <th class="col-name">Category Name</th>
+                      <th class="col-desc">Description</th>
+                      <th class="col-actions">Actions</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% categories.forEach((category, index) => { %>
+                      <tr>
+                          <td><%= (currentPage - 1) * 4 + index + 1 %></td>
+                          <td><%= category.name %></td>
+                          <td><%= category.description %></td>
+                          <td class="action-buttons">
+                              <form method="post" action="editcategory" class="inline-form">
+                                  <input hidden type="text" name="id" value="<%= category._id %>">
+                                  <button type="submit" class="btn btn-edit">Edit</button>
+                              </form>
+                              <button type="button" class="btn btn-delete" 
+                                      onclick="deleteCategory('<%= category._id %>')">
+                                  Delete
+                              </button>
+                              <button class="btn btn-status <%= category.isListed ? 'btn-danger' : 'btn-success' %> access-btn" 
+                                      data-id="<%= category._id %>"
+                                      data-status="<%= category.isListed ? 'unlisted' : 'active' %>">
+                                  <span class="button-text">
+                                      <%= category.isListed ? 'Listed' : 'Unlisted' %>
+                                  </span>
+                                  <span class="spinner-border spinner-border-sm d-none" role="status">
+                                      <span class="visually-hidden">Loading...</span>
+                                  </span>
+                              </button>
+                          </td>
+                      </tr>
+                  <% }) %>
+              </tbody>
+          </table>
+      </div>
+  </div>
 
     <!-- Pagination Links -->
     <div class="pagination" style="margin-top: 20px; text-align: center;">

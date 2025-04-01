@@ -640,7 +640,7 @@ const loadShop = async (req, res) => {
         const totalPages = Math.ceil(totalProducts / limit);
 
         // Get products
-        const products = await Products.find(query)
+        const products = await Products.find(query )
             .sort(sortQuery)
             .skip(skip)
             .limit(limit)
@@ -867,7 +867,9 @@ const buyNow = async (req, res) => {
 
         const coupon = await Coupon.findOne({ code: couponCode, isActive: true, isDeleted: false });
 
+        let couponPercentage =coupon?.discountPercentage||null;
 
+        console.log(couponPercentage,"nooo")
 
         const user = await User.findById(userId);
         if (!user) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "User not found" });
@@ -879,7 +881,16 @@ const buyNow = async (req, res) => {
         if (!cart) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Cart not found" });
 
         let totalAmount = cart.products.reduce((total, item) => total + item.quantity * item.salesPrice, 0);
-        if (cart.discount) totalAmount -= cart.discount;
+        console.log(totalAmount)
+
+        const subTotal=totalAmount
+
+        if(coupon){
+          let discountAmount=(couponPercentage/100)*totalAmount
+            totalAmount=totalAmount-discountAmount
+
+        }
+        
         console.log(totalAmount, 'totalAmount')
 
         const orderItems = cart.products.map(item => ({
@@ -910,13 +921,13 @@ const buyNow = async (req, res) => {
                     });
                 }
 
-                product.stock -= item.quantity;
+                // product.stock -= item.quantity;
 
                 await product.save();
             }
 
             if (wallet.balance >= totalAmount) {
-                wallet.balance -= totalAmount;
+                // wallet.balance -= totalAmount;
                 await wallet.save();
 
                 const newOrder = new ordermodel({
@@ -924,14 +935,15 @@ const buyNow = async (req, res) => {
                     items: orderItems,
                     addressId: selectedAddressId,
                     paymentMethod,
+                    subTotal:subTotal,
                     totalAmount,
                     paymentStatus: peymentStatus,
                     orderStatus: "Pending",
                 });
 
                 await newOrder.save();
-                coupon.usedBy.push(userId);
-                await coupon.save()
+                // coupon.usedBy.push(userId);
+                // await coupon.save()
 
                 await Cart.findByIdAndDelete(cartId);
 
@@ -967,13 +979,13 @@ const buyNow = async (req, res) => {
 
 
 
-            if (totalAmount > 10000) {
+            // if (totalAmount > 10000) {
 
-                return res.status(HttpStatus.NOT_FOUND).json({
-                    success: false,
-                    message: "sorry user COD available only 10000rs"
-                })
-            }
+            //     return res.status(HttpStatus.NOT_FOUND).json({
+            //         success: false,
+            //         message: "sorry user COD available only 10000rs"
+            //     })
+            // }
 
             for (let item of orderItems) {
                 const product = await Products.findById(item.productId);
@@ -992,7 +1004,7 @@ const buyNow = async (req, res) => {
                     });
                 }
 
-                product.stock -= item.quantity;
+                // product.stock -= item.quantity;
 
                 await product.save();
             }
@@ -1002,9 +1014,11 @@ const buyNow = async (req, res) => {
                 items: orderItems,
                 addressId: selectedAddressId,
                 paymentMethod,
+                subTotal:subTotal,
                 totalAmount,
                 paymentStatus: "Pending",
                 orderStatus: "Pending",
+                updatedAt:new Date(),
             });
 
             await newOrder.save()
@@ -1048,6 +1062,7 @@ const buyNow = async (req, res) => {
                 items: orderItems,
                 addressId: selectedAddressId,
                 paymentMethod,
+                subTotal:subTotal,
                 totalAmount,
                 paymentStatus: "Pending",
                 orderStatus: "Pending",
@@ -1063,7 +1078,7 @@ const buyNow = async (req, res) => {
                 receipt: newOrder._id.toString()
             });
 
-            return res.status(HttpStatus.OK).json({
+            return res.status(HttpStatus.OK).json({ 
                 success: true,
                 message: "Order created, proceed with payment",
                 orderId: newOrder._id,
@@ -1396,15 +1411,38 @@ const razorpay = new Razorpay({
 
 const createOrder = async (req, res) => {
     try {
-        const { amount, currency, receipt } = req.body;
+        const { amount, currency, receipt ,totalAmount,coupon} = req.body;
+
+        
+        
+
+
+        const couponCode =await Coupon.findOne({code:coupon})
+
+        const couponPercentage =Number(couponCode?.discountPercentage) || 0;
+
+        let totalamount=Number(totalAmount);
+
+        if(couponCode){
+            let discountAmount=(couponPercentage/100)*totalamount
+            totalamount=totalamount-discountAmount
+
+          }
+
+
+
+        console.log("Final amount after discount:",totalamount)
+
+        const finalAmount = Math.round(totalamount * 100);
 
         const order = await razorpay.orders.create({
-            amount,
+            amount:finalAmount,
             currency,
-            receipt
+            receipt,
+            
         });
 
-        res.json({ success: true, order });
+        res.status(HttpStatus.OK).json({ success: true, order });
     } catch (error) {
         console.error("Error creating order:", error);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
@@ -1420,14 +1458,33 @@ const verifyPayment = async (req, res) => {
 
         const userId = req.session?.User?._id
 
-        console.log("Received Payment Data:", req.body);
+       
 
-        const cartId = requestData.cartId
+        const cartId = requestData.cartId;
 
+        const codeCoupon =requestData?.couponCode;
+
+        const coupon = await Coupon.findOne({ code: codeCoupon, isActive: true, isDeleted: false });
+
+        let couponPercentage =coupon?.discountPercentage||null;
+
+        
 
 
         const cart = await Cart.findById(cartId).populate("products.productId");
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+
+        let totalAmount = cart.products.reduce((total, item) => total + item.quantity * item.salesPrice, 0);
+        
+        const subTotal=Number(totalAmount);
+        console.log("subtotal",subTotal);
+
+        if(coupon){
+            let discountAmount=(couponPercentage/100)*totalAmount
+              totalAmount=totalAmount-discountAmount
+  
+          }
+          
 
         const orderItems = cart.products.map(item => ({
             productId: item.productId._id,
@@ -1453,7 +1510,7 @@ const verifyPayment = async (req, res) => {
                 });
             }
 
-            product.stock -= item.quantity;
+            // product.stock -= item.quantity;
 
             await product.save();
         }
@@ -1465,11 +1522,13 @@ const verifyPayment = async (req, res) => {
             cartId: requestData.cartId,
             paymentMethod: requestData.paymentMethod,
             couponCode: requestData.couponCode || null,
-            totalAmount: parseInt(requestData.grandTotal.trim()),
+            totalAmount: totalAmount,
+            subTotal:subTotal,
             paymentStatus: "Paid",
             razorpayOrderId: orderId,
             razorpayPaymentId: paymentId
         });
+
 
 
         await newOrder.save();

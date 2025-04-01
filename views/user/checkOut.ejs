@@ -17,7 +17,7 @@
     <!-- Site Title -->
     <title>BUILD YOUR DREAM |Buy Modern Furniture Online</title>
  
-    <!--
+    <!-- 
             CSS
             ============================================= -->
     <link rel="stylesheet" href="/public/userAssets/css/linearicons.css">
@@ -289,7 +289,7 @@
                         </div>
                         <div class="coupon-input-area mt-3">
                             <input type="text" id="couponCode" placeholder="Enter coupon code">
-                            <a class="tp_btn" onclick="applyCoupon()">Apply Coupon</a>
+                            <a class="tp_btn " style="user-select: none ;" onclick="applyCoupon()">Apply Coupon</a>
                         </div>
                         <div id="appliedCouponArea" style="display: none;" class="mt-3">
                             <div class="applied-coupon-box">
@@ -382,7 +382,7 @@
                                         </ul>
                                         <ul class="list list_2">
 
-                                            <li><a href="#">Total <span>₹<%=grandTotal%></span></a></li>
+                                            <li><a href="#">Total <span>₹<%= Number(grandTotal).toFixed(2)  %></span></a></li>
                                         </ul>
                                         <div class="payment_item">
                                             <div class="radion_btn">
@@ -476,7 +476,7 @@
                                             <div style="position: absolute; left: -5000px;">
                                                 <input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1"
                                                     value="" type="text">
-                                            </div>
+                                             </div>
 
 
                                         </div>
@@ -611,7 +611,10 @@
                     }
 
                     const grandTotal = ' <%= grandTotal %>';
+                    console.log("first",grandTotal)
+
                     const cartId = '<%= cart?._id %>';
+
 
                     let peymentStatus = 'Pending'
                     const requestData = {
@@ -619,7 +622,7 @@
                         paymentMethod: selectedPaymentMethod,
                         couponCode: couponCode || null,
                         cartId: cartId,
-                        grandTotal: grandTotal,
+                        grandTotal: grandTotal ,
                         peymentStatus: peymentStatus,
                     };
 
@@ -678,14 +681,14 @@
                         console.log("requestData.orderId", requestData)
                         console.log("requestData.grandTotal", requestData.grandTotal)
 
-                        initiateRazorpayPayment(requestData, requestData.grandTotal);
+                        initiateRazorpayPayment(requestData, requestData.grandTotal,requestData.couponCode);
 
                     }
 
                 });
 
 
-                function initiateRazorpayPayment(requestData) {
+                function initiateRazorpayPayment(requestData,grandTotal,couponCode) {
                     fetch('/user/createOrder', { 
                         method: 'POST',
                         headers: {
@@ -694,12 +697,16 @@
                         body: JSON.stringify({
                             amount: requestData.grandTotal * 100, 
                             currency: "INR",
-                            receipt: "receipt_" + Date.now()
+                            receipt: "receipt_" + Date.now(),
+                            totalAmount:grandTotal,
+                            coupon:couponCode
+
                         })
                     })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
+                                console.log("orderAmount",data.order.totalamount)
                                 openRazorpay(data.order, requestData);
                             } else {
                                 console.error("Error creating Razorpay order:", data.message);
@@ -718,7 +725,7 @@
                 function openRazorpay(order, requestData) {
                     var options = {
                         "key": "rzp_test_av7bn0QCiETOX0",
-                        "amount": order.amount,
+                        "amount": order.totalamount,
                         "currency": order.currency,
                         "name": "Build Your Dream",
                         "description": "Test Transaction",
@@ -834,8 +841,6 @@
 
 
 
-
-
                 function showRetrySwal(requestData, orderId,response) {
                     Swal.fire({
                         title: "Payment Failed!",
@@ -846,7 +851,7 @@
                         cancelButtonText: "Pay Later"
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            razorpay(requestData, orderId,response); 
+                            openRazorpay(requestData); 
                         } else {
                             payLater(orderId); 
                         }
@@ -935,6 +940,7 @@
 
 
                 async function applyCoupon() {
+                    
                     const couponCode = document.getElementById('couponCode').value;
                     const cartId = '<%= cart?._id %>';
                     const grandTotal = ' <%= grandTotal %>';
@@ -965,7 +971,11 @@
                             document.getElementById('couponCode').disabled = true;
                             document.querySelector('.tp_btn').style.display = 'none';
 
-                            updateOrderSummary(data.originalAmount, data.discount, data.finalAmount);
+                            const finalAmount =Number(data.finalAmount).toFixed(2)
+
+                            console.log("orginal",finalAmount);
+
+                            updateOrderSummary(data.originalAmount, data.discount, finalAmount);
 
                             messageDiv.innerHTML = `
                             <div class="alert alert-success">
@@ -1013,7 +1023,11 @@
 
                             document.getElementById('appliedCouponArea').style.display = 'none';
 
-                            updateOrderSummary(data.originalAmount, 0, data.originalAmount);
+                            const finalAmount =Number(data.finalAmount).toFixed(2)
+
+                            console.log("original",finalAmount)
+
+                            updateOrderSummary(data.originalAmount, 0, finalAmount);
 
                             document.getElementById('couponMessage').innerHTML = `
                             <div class="alert alert-success">

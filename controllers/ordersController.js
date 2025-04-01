@@ -191,12 +191,14 @@ const getOrderDetails = async (req, res) => {
 
 const orderCancel = async (req, res) => {
     try {
+       
         const orderId = req.params.orderId;
         const { reason } = req.body;
+        
 
-        console.log("reee", reason)
-
-
+       console.log("orderId",orderId)
+       console.log("reason",reason);
+ 
 
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return res.status(HttpStatus.BAD_REQUEST).json({
@@ -645,7 +647,7 @@ const createRetryPayment = async (req, res) => {
     try {
         const { receipt, currency, amount } = req.body;
 
-        conso
+        
 
         const newOrder = await razorpay.orders.create({
             amount,
@@ -657,7 +659,7 @@ const createRetryPayment = async (req, res) => {
         res.json({
             success: true,
             razorpayOrderId: newOrder.id,
-            amount: totalAmount,
+            amount,
             orderId: orderId
         });
 

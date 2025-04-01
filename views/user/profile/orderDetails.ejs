@@ -5,39 +5,39 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
+    <link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
 
-	<meta name="author" content="CodePixar">
+    <meta name="author" content="CodePixar">
 
-	<meta name="description" content="">
+    <meta name="description" content="">
 
-	<meta name="keywords" content="">
+    <meta name="keywords" content="">
 
-	<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-	<title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
-
-
-	<link rel="stylesheet" href="/public/userAssets/css/linearicons.css">
-	<link rel="stylesheet" href="/public/userAssets/css/font-awesome.min.css">
-	<link rel="stylesheet" href="/public/userAssets/css/themify-icons.css">
-	<link rel="stylesheet" href="/public/userAssets/css/bootstrap.css">
-	<link rel="stylesheet" href="/public/userAssets/css/owl.carousel.css">
-	<link rel="stylesheet" href="/public/userAssets/css/nice-select.css">
-	<link rel="stylesheet" href="/public/userAssets/css/nouislider.min.css">
-	<link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.css" />
-	<link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.skinFlat.css" />
-	<link rel="stylesheet" href="/public/userAssets/css/magnific-popup.css">
-	<link rel="stylesheet" href="/public/userAssets/css/main.css">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-	<link href="css/font-awesome.css" rel="stylesheet">
-	<link rel="stylesheet"
-		href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
 
 
-	<link rel="stylesheet" href="/public/userAssets/css/custom.css">
+    <link rel="stylesheet" href="/public/userAssets/css/linearicons.css">
+    <link rel="stylesheet" href="/public/userAssets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/public/userAssets/css/themify-icons.css">
+    <link rel="stylesheet" href="/public/userAssets/css/bootstrap.css">
+    <link rel="stylesheet" href="/public/userAssets/css/owl.carousel.css">
+    <link rel="stylesheet" href="/public/userAssets/css/nice-select.css">
+    <link rel="stylesheet" href="/public/userAssets/css/nouislider.min.css">
+    <link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.css" />
+    <link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.skinFlat.css" />
+    <link rel="stylesheet" href="/public/userAssets/css/magnific-popup.css">
+    <link rel="stylesheet" href="/public/userAssets/css/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
+    <link rel="stylesheet" href="/public/userAssets/css/custom.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/public/userAssets/css/profileAsset/orderDetails.css">
 </head>
@@ -149,30 +149,26 @@
         <div class="price-summary">
             <div class="price-row">
                 <span>Subtotal</span>
-                <span>₹<%= order.totalAmount.toFixed(2) %></span>
+                <span>₹<%= subTotal.toFixed(2) %></span>
             </div>
-            <% if (order.discount> 0) { %>
+            <% if (coupon && coupon !==null) { %>
                 <div class="price-row">
-                    <span>Discount</span>
-                    <span>-₹<%= order.discount.toFixed(2) %></span>
+                    <span>Discount Amount</span>
+                    <span>- ₹<%= (discountAmount ? discountAmount.toFixed(2) : "0.00" ) %></span>
                 </div>
                 <% } %>
-                    <div class="price-row">
-                        <span>Shipping</span>
-                        <span>₹0.00</span>
-                    </div>
                     <div class="price-row total-row">
                         <span>Total</span>
                         <span>₹<%= (order.totalAmount - order.discount).toFixed(2) %></span>
                     </div>
                     <div class="row mt-4 mb-5 d-flex justify-content-center">
                         <div class="col-12 text-center">
-                            <% if(order.paymentStatus==='Paid' && order.status==='Delivered') {%>
+                            <% if(order.paymentStatus==='Paid' && order.status==='Delivered' ) {%>
                                 <button onclick="downloadInvoice('<%= order._id %>')">Download Invoice</button>
                                 <% } %>
-                            <button type="button" class="btn h" onclick="backToOrder()">
-                                <i class="fas fa-arrow-left me-2"></i>Back to Orders
-                            </button>
+                                    <button type="button" class="btn h" onclick="backToOrder()">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                                    </button>
 
 
                         </div>
@@ -450,73 +446,73 @@
 
 
         function downloadInvoice(orderId) {
-    // Step 1: Show Confirmation Popup
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to download the invoice?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, download!',
-        cancelButtonText: 'Cancel',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Step 2: Show Loading Swal
+            // Step 1: Show Confirmation Popup
             Swal.fire({
-                title: 'Generating Invoice',
-                text: 'Please wait...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
+                title: 'Are you sure?',
+                text: 'Do you want to download the invoice?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, download!',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Step 2: Show Loading Swal
+                    Swal.fire({
+                        title: 'Generating Invoice',
+                        text: 'Please wait...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Step 3: Fetch the Invoice
+                    fetch(`/user/orderInvoice/${orderId}`, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/pdf' }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(err => { throw new Error(err); });
+                            }
+                            return response.blob();
+                        })
+                        .then(blob => {
+                            // Step 4: Close Loading Swal
+                            Swal.close();
+
+                            // Step 5: Create and Trigger File Download
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = `invoice-${orderId}.pdf`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+
+                            // Cleanup
+                            setTimeout(() => window.URL.revokeObjectURL(url), 100);
+
+                            // Step 6: Show Success Message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Invoice downloaded successfully',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: error.message || 'Failed to generate invoice!'
+                            });
+                        });
                 }
-            });
-
-            // Step 3: Fetch the Invoice
-            fetch(`/user/orderInvoice/${orderId}`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/pdf' }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(err => { throw new Error(err); });
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                // Step 4: Close Loading Swal
-                Swal.close();
-
-                // Step 5: Create and Trigger File Download
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = `invoice-${orderId}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                // Cleanup
-                setTimeout(() => window.URL.revokeObjectURL(url), 100);
-
-                // Step 6: Show Success Message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Invoice downloaded successfully',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: error.message || 'Failed to generate invoice!'
-                });
             });
         }
-    });
-}
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

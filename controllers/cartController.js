@@ -237,12 +237,19 @@ const deleteCart = async (req, res) => {
 const loadCheckout = async (req, res) => {
     try {
         const Id = req.query.id;
-        const grandTotal = req.query.total;
+        const Total = req.query.total
         const cartId = new mongoose.Types.ObjectId(Id);
         const userId = req.session?.User?._id;
 
 
         const user = await User.findById(userId)
+
+        console.log("Total",Total)
+        
+
+        const grandTotal=Number(Total).toFixed(2)
+
+        console.log("grandTotal",grandTotal);
 
         if (!userId) {
             return res.redirect('/user/login');
@@ -259,6 +266,11 @@ const loadCheckout = async (req, res) => {
         });
 
         const products = await Product.find({ isDeleted: false, isListed: false });
+
+        if(!products){
+            return res.redirect('/user/login');
+        }
+        
         const categories = await Category.find({ isDeleted: false, isListed: false });
         const userAddresses = await Address.findOne({ userId: userId }).populate("userId");
 

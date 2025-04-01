@@ -49,8 +49,8 @@
                             <% }); %>
                     </select>
                     <div class="error" id="categoryError">Please select a category.</div>
-                </div>
-
+                </div> 
+ 
 
                 <!-- Sales Price -->
                 <div class="mb-3">
@@ -60,12 +60,12 @@
                     <div class="error" id="salesPriceError">Sales price must be greater than 0.</div>
                 </div>
 
-                <!-- Product Offer -->
+                <!-- Product Offer --> 
                 <div class="mb-3">
                     <label for="productOffer" class="form-label">Product Offer (%)</label>
                     <input type="number" class="form-control" id="productOffer" name="productOffer"
                         value="<%= product.productOffer %>" step="1">
-                    <div class="error" id="productOfferError">Offer must be between 0 and 100.</div>
+                    <div class="error" id="productOfferError">Offer must be between 0 and 99.</div>
                 </div>
 
                 <!-- Stock -->
@@ -180,8 +180,8 @@
 
                 
                 const offerValue = parseFloat(productOffer.value);
-                if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
-                    errors.productOffer = "Offer must be between 0 and 100";
+                if (isNaN(offerValue) || offerValue < 0 || offerValue >= 99) {
+                    errors.productOffer = "Offer must be between 0 and 99";
                     document.getElementById("productOfferError").style.display = 'block';
                     isValid = false;
                 }
@@ -324,4 +324,4 @@
     </script>
 </body>
 
-</html>
+</html> 

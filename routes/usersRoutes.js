@@ -24,7 +24,7 @@ userRouter.use(
     })
 );
 
-
+ 
 
 // default route
 userRouter.get("/", isBan, userController.loadHome);
@@ -132,7 +132,7 @@ userRouter.post("/checkout", userController.buyNow)
 
 userRouter.post('/paypal/success', userController.paypalSuccess)
 
-userRouter.get('/orderCancel', orderController.orderCancel)
+userRouter.post('/orderCancel/:orderId', orderController.orderCancel)
 
 
 // load whishlist
@@ -198,7 +198,7 @@ userRouter.get("/shop/filter", userController.filterProducts);
 // Order details route
 userRouter.get('/orderdetails/:orderId', profileController.getOrderDetails);
 
-userRouter.post('/createRetryPayment/:orderId', isBan, orderController.createRetryPayment)
+userRouter.post('/createRetryPayment/:orderId', isBan, orderController.retryPayment)
 
 // order retry payment 
 userRouter.post("/updateRetryPayment", isBan, orderController.retryPayment)

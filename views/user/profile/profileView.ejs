@@ -709,14 +709,15 @@
                                                 </button>
                                                 <% } %>
 
-                                                    <% if (order.paymentStatus==='Failed' ||
+                                                    <% if(order.paymentMethod=="razorpay"){ %>
+                                                        <% if (order.paymentStatus==='Failed' ||
                                                         order.paymentStatus==='Pending' ) { %>
                                                         <button class="retry-payment-btn"
                                                             onclick="retryPayment('<%= order._id %>', '<%= order.totalAmount %>')">
                                                             Retry Payment
                                                         </button>
                                                         <% } %>
-
+                                                 <% } %>
                                         </div>
                                     </div>
                                 </div>
@@ -825,6 +826,7 @@
                                 body: JSON.stringify({ reason: reason })
                             })
                                 .then(response => {
+                                    console.log(response)
                                     if (!response.ok) {
                                         throw new Error(`HTTP Error! Status: ${response.status}`);
                                     }
@@ -946,7 +948,7 @@
                 console.log("Payment Failed:", response.error);
 
             });
- 
+
             rzp.open();
         }
 

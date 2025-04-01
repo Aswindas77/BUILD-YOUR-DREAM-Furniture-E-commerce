@@ -294,7 +294,7 @@ const removeCoupon = async (req, res) => {
 
         cart.couponApplied = null;
         cart.discount = 0;
-        cart.finalAmount = cart.totalAmount;
+        cart.finalAmount = cart.totalAmount ||0;
 
         await cart.save();
 

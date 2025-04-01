@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
     <link rel="stylesheet" href="/public/adminAssets/css/editCat.css">
 </head>
+
 <body>
     <div class="container">
         <h1>Edit Category</h1>
@@ -16,13 +18,33 @@
             <!-- hidden input -->
             <input hidden type="text" name="id" value="<%= category._id%>">
             <div class="form-group">
-                <input type="text" id="category-name" name="name" value="<%= category.name %>" placeholder=" " required>
+                <input type="text" id="category-name" name="name" value="<%= category.name %>" placeholder=" " >
                 <label for="category-name">Category Name</label>
             </div>
             <div class="form-group">
-                <textarea id="category-description" name="description" placeholder=" " required><%= category.description %></textarea>
+                <textarea id="category-description" name="description" placeholder=" "
+                    required><%= category.description %></textarea>
                 <label for="category-description">Category Description</label>
             </div>
+            <div class="mt-3">
+
+                <label for="categoryOffer" class="form-label">Offer Percentage</label>
+                <input type="number" class="form-control" id="categoryOffer" name="categoryOffer"
+                    value="<%= category.offerPercentage %>" step="1">
+            </div>
+            <div class="mt-3">
+
+                <label for="minPrice" class="form-label">Minimum Price</label>
+                <input type="number" class="form-control" id="minPrice" name="minimumPrice"
+                    value="<%= category.minimumPrice %>" step="1" >
+            </div>
+            <div class="mt-3">
+
+                <label for="claimableAmount" class="form-label">Claimable Amount</label>
+                <input type="number" class="form-control" id="claimableAmount" name="claimableAmount"
+                    value="<%= category.claimableAmount %>" step="1" >
+            </div>
+
             <button type="submit" id="btn-submit" class="btn">Update Category</button>
         </form>
         <div class="note">* Ensure all fields are filled before submitting.</div>
@@ -31,11 +53,13 @@
     <script>
         async function handleSubmit(event) {
             event.preventDefault();
-            
+
             const categoryName = document.getElementById('category-name').value;
             const categoryDescription = document.getElementById('category-description').value;
+            const categoryOffer = document.getElementById('categoryOffer').value;
+            const minimumPrice = document.getElementById('minPrice').value;
+            const claimableAmount = document.getElementById('claimableAmount').value;
 
-            // Validate that fields are not empty
             if (!categoryName.trim() || !categoryDescription.trim()) {
                 await Swal.fire({
                     icon: 'error',
@@ -46,7 +70,36 @@
                 return false;
             }
 
-            // Show success message
+            if (categoryOffer && (categoryOffer < 0 || categoryOffer > 100 || isNaN(categoryOffer))) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Offer Percentage',
+                    text: 'Offer percentage must be a number between 0 and 100.',
+                    confirmButtonColor: '#007bff'
+                });
+                return false;
+            }
+
+            if (!minimumPrice || minimumPrice < 0 || isNaN(minimumPrice)) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Minimum Price',
+                    text: 'Minimum price must be a non-negative number.',
+                    confirmButtonColor: '#007bff'
+                });
+                return false;
+            }
+
+            if (!claimableAmount || claimableAmount < 0 || isNaN(claimableAmount)) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Claimable Amount',
+                    text: 'Claimable amount must be a non-negative number.',
+                    confirmButtonColor: '#007bff'
+                });
+                return false;
+            }
+
             await Swal.fire({
                 icon: 'success',
                 title: 'Success!',
@@ -56,12 +109,12 @@
                 showConfirmButton: false
             });
 
-            // Submit the form
+
             document.getElementById('add-category-form').submit();
             return true;
         }
 
-        // If there's an error message from the server
+
         if (typeof errorMessage !== 'undefined' && errorMessage) {
             Swal.fire({
                 icon: 'error',
@@ -72,4 +125,5 @@
         }
     </script>
 </body>
+
 </html>

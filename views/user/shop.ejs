@@ -67,12 +67,10 @@
 			<div style="margin-top: 50px;" class="container-centered">
 				<div class="container">
 					<div class="row">
-
-
-
-						<div class="col-xl-9 col-lg-8 col-md-7 mx-auto">
-
+						<div class="col-xl-9 col-lg-10 col-md-12 mx-auto">
+							<!-- Top Bar -->
 							<div class="top-bar">
+								
 								<div class="search-container">
 									<input type="text" class="search-input" id="searchInput"
 										placeholder="Search products..." value="<%= filters?.search || '' %>">
@@ -83,417 +81,405 @@
 									</svg>
 								</div>
 
-								<select class="sort-select" id="sortSelect">
-									<option value="">Sort By</option>
-									<option value="nameAsc" <%=filters?.sort==='nameAsc' ? 'selected' : '' %>>Name (A-Z)
-									</option>
-									<option value="nameDesc" <%=filters?.sort==='nameDesc' ? 'selected' : '' %>>Name
-										(Z-A)</option>
-									<option value="priceAsc" <%=filters?.sort==='priceAsc' ? 'selected' : '' %>>Price:
-										Low to High</option>
-									<option value="priceDesc" <%=filters?.sort==='priceDesc' ? 'selected' : '' %>>Price:
-										High to Low</option>
-								</select>
-
-								<select class="sort-select" id="categorySelect">
-									<option value="">All Categories</option>
-									<% categories.forEach(category=> { %>
-										<option value="<%= category.name %>" <%=filters?.category===category.name
-											? 'selected' : '' %>>
-											<%= category.name %>
-										</option>
-										<% }) %>
-								</select>
-								<button id="applyFilters" class="filter-btn apply">
-									<i class="fas fa-filter"></i> Apply Filters
-								</button>
-								<button id="resetFilters" class="filter-btn reset" onclick="resetFilters()">
-									<i class="fas fa-undo"></i> Reset
-								</button>
-
+								<!-- Collapsible Filter Section -->
+								<div class="filter-container">
+									<button class="filter-toggle-btn" id="filterToggleBtn">
+										<i class="fas fa-filter"></i> Filters
+									</button>
+									<div class="filter-options" id="filterOptions">
+										<select class="sort-select" id="sortSelect">
+											<option value="">Sort By</option>
+											<option value="nameAsc" <%=filters?.sort==='nameAsc' ? 'selected' : '' %>
+												>Name (A-Z)</option>
+											<option value="nameDesc" <%=filters?.sort==='nameDesc' ? 'selected' : '' %>
+												>Name (Z-A)</option>
+											<option value="priceAsc" <%=filters?.sort==='priceAsc' ? 'selected' : '' %>
+												>Price: Low to High</option>
+											<option value="priceDesc" <%=filters?.sort==='priceDesc' ? 'selected' : ''
+												%>>Price: High to Low</option>
+										</select>
+										<select class="sort-select" id="categorySelect">
+											<option value="">All Categories</option>
+											<% categories.forEach(category=> { %>
+												<option value="<%= category.name %>"
+													<%=filters?.category===category.name ? 'selected' : '' %>>
+													<%= category.name %>
+												</option>
+												<% }) %>
+										</select>
+										<button id="applyFilters" class="filter-btn apply">
+											<i class="fas fa-filter"></i> Apply Filters
+										</button>
+										<button id="resetFilters" class="filter-btn reset" onclick="resetFilters()">
+											<i class="fas fa-undo"></i> Reset
+										</button>
+									</div>
+								</div>
 							</div>
 
 
 
 							<!-- Product Grid -->
-							<div class="container">
-								<div class="product-grid">
-									<% products.forEach(product=> { %>
-										<div class="product-card">
-											<div class="product-badge">
-												<% if (product.productOffer> 0) { %>
-													<span class="badge badge-danger">SAVE <%= product.productOffer %>
-															%</span>
-													<% } %>
-														<% if (product.isNew) { %>
-															<span class="badge badge-primary">NEW ARRIVAL</span>
-															<% } %>
-																<% if (product.isBestSeller) { %>
-																	<span class="badge badge-success">BESTSELLER</span>
-																	<% } %>
-											</div>
-
-											<div class="product-image-wrap">
-												<% if (product.images && product.images.length> 0) { %>
-													<div class="product-image-slider">
-														<% product.images.slice(0, 3).forEach(image=> { %>
-															<img src="<%= image %>" alt="<%= product.name %>"
-																class="product-image">
-															<% }) %>
-													</div>
-													<% } else { %>
-														<img src="/default-product.jpg" alt="<%= product.name %>"
-															class="product-image">
+							<div class="product-grid">
+								<% products.forEach(product=> { %>
+									<div class="product-card">
+										<div class="product-badge">
+											<% if (product.productOffer> 0) { %>
+												<span class="badge badge-danger">SAVE <%= product.productOffer %>
+														%</span>
+												<% } %>
+													<% if (product.isNew) { %>
+														<span class="badge badge-primary">NEW ARRIVAL</span>
 														<% } %>
-
-															<div class="product-hover-overlay">
-																<button class="quick-view-btn"
-																	onclick="quickView('<%= product._id %>')">
-																	View Product</button>
-															</div>
-											</div>
-
-											<div class="product-info">
-												<div class="product-rating">
-													<div class="stars">
-														<% let rating=Number(product.ratings) || 0; %>
-															<% for(let i=1; i <=5; i++) { %>
-																<i class="fa fa-star<%= i <=rating? '': 'o' %>"></i>
+															<% if (product.isBestSeller) { %>
+																<span class="badge badge-success">BESTSELLER</span>
 																<% } %>
-													</div>
-													<span class="rating-count">(<%= product.ratings || 0 %>
-															reviews)</span>
+										</div>
+										<div class="product-image-wrap">
+											<% if (product.images && product.images.length> 0) { %>
+												<div class="product-image-slider">
+													<% product.images.slice(0, 3).forEach(image=> { %>
+														<img src="<%= image %>" alt="<%= product.name %>"
+															class="product-image">
+														<% }) %>
 												</div>
-
-												<h3 class="product-title">
-													<a onclick="quickView('<%= product._id %>')">
-														<%= product.name %>
-													</a>
-												</h3>
-
-												<div class="product-price">
-													<% if (product.productOffer> 0) { %>
-														<span class="price-sale">₹<%= product.salesPrice.toFixed(2) %>
-														</span>
-														<span class="price-original">₹<%= (product.salesPrice / (1 -
-																product.productOffer / 100)).toFixed(2) %></span>
-														<% } else { %>
-															<span class="price-sale">₹<%= product.salesPrice.toFixed(2)
-																	%>
-															</span>
+												<% } else { %>
+													<img src="/default-product.jpg" alt="<%= product.name %>"
+														class="product-image">
+													<% } %>
+														<div class="product-hover-overlay">
+															<button class="quick-view-btn"
+																onclick="quickView('<%= product._id %>')">View
+																Product</button>
+														</div>
+										</div>
+										<div class="product-info">
+											<div class="product-rating">
+												<div class="stars">
+													<% let rating=Number(product.ratings) || 0; %>
+														<% for(let i=1; i <=5; i++) { %>
+															<i class="fa fa-star<%= i <= rating ? '' : '-o' %>"></i>
 															<% } %>
 												</div>
-
-												<% if(product.stock>0){ %>
-													<button class="add-to-cart"
-														onclick="addToCart('<%= product._id %>')">
-														<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
-													</button>
-													<% }else{ %>
-														<button class="add-to-cart" onclick="">
-															<i class="fa fa-shopping-cart me-2"></i>product unAvailable
-														</button>
+												<span class="rating-count">(<%= product.ratings || 0 %> reviews)</span>
+											</div>
+											<h3 class="product-title">
+												<a onclick="quickView('<%= product._id %>')">
+													<%= product.name %>
+												</a>
+											</h3>
+											<div class="product-price">
+												<% if (product.productOffer> 0) { %>
+													<span class="price-sale">₹<%= product.salesPrice.toFixed(2) %>
+															</span>
+													<span class="price-original">₹<%= (product.salesPrice / (1 -
+															product.productOffer / 100)).toFixed(2) %></span>
+													<% } else { %>
+														<span class="price-sale">₹<%= product.salesPrice.toFixed(2) %>
+																</span>
 														<% } %>
 											</div>
-
-											<div class="product-actions">
-												<button
-													class="action-btn wishlist <% if (wishlistProducts.includes(product._id.toString())) { %> active <% } %>"
-													onclick="addToWhishList('<%= product._id %>')"
-													id="wishlist-btn-<%= product._id %>">
-
-													<% if (wishlistProducts.includes(product._id.toString())) { %>
-														<i class="fa fa-heart"></i>
-														<% } else { %>
-															<i class="fa fa-heart-o"></i>
-															<% } %>
+											<% if(product.stock> 0) { %>
+												<button class="add-to-cart" onclick="addToCart('<%= product._id %>')">
+													<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
 												</button>
-											</div>
-
+												<% } else { %>
+													<button class="add-to-cart" disabled>
+														<i class="fa fa-shopping-cart me-2"></i>PRODUCT UNAVAILABLE
+													</button>
+													<% } %>
 										</div>
-										<% }); %>
-								</div>
+										<div class="product-actions">
+											<button
+												class="action-btn wishlist <% if (wishlistProducts.includes(product._id.toString())) { %> active <% } %>"
+												onclick="addToWhishList('<%= product._id %>')"
+												id="wishlist-btn-<%= product._id %>">
+												<% if (wishlistProducts.includes(product._id.toString())) { %>
+													<i class="fa fa-heart"></i>
+													<% } else { %>
+														<i class="fa fa-heart-o"></i>
+														<% } %>
+											</button>
+										</div>
+									</div>
+									<% }); %>
 							</div>
-
 						</div>
 					</div>
 				</div>
 
-				<div class="pagination" style="margin-top: 57px; margin-left: 44%;">
+				<!-- Pagination -->
+				<div class="pagination">
 					<% if (currentPage> 1) { %>
-						<a href="#" class="page-link" data-page="<%= currentPage - 1 %>"
-							style="text-decoration: none; padding: 5px 5px; width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
+						<a href="#" class="page-link" data-page="<%= currentPage - 1 %>">Previous</a>
 						<% } %>
-
 							<% for (let i=1; i <=totalPages; i++) { %>
 								<a href="#" class="page-link pagination-link <%= currentPage === i ? 'active' : '' %>"
 									data-page="<%= i %>">
 									<%= i %>
 								</a>
 								<% } %>
-
-
 									<% if (currentPage < totalPages) { %>
-										<a href="#" class="page-link" data-page="<%= currentPage + 1 %>"
-											style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
+										<a href="#" class="page-link" data-page="<%= currentPage + 1 %>">Next</a>
 										<% } %>
 				</div>
+			</div>
 
-				<!-- Start related-product Area -->
-				<section class="related-product-area section_gap">
-					<div class="container">
-						<div class="row justify-content-center">
-							<div class="col-lg-6 text-center">
-								<div class="section-title">
-									<h1>Deals of the Week</h1>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-										incididunt ut labore et dolore magna aliqua.</p>
-								</div>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-lg-9">
-								<div class="row">
-									<!-- Repeat for related products -->
-								</div>
-							</div>
-							<div class="col-lg-3">
-								<div class="ctg-right">
-									<a href="#" target="_blank">
-										<img class="img-fluid d-block mx-auto" src="img/category/c5.jpg" alt="">
-									</a>
-								</div>
+			<!-- Start related-product Area -->
+			<section class="related-product-area section_gap">
+				<div class="container">
+					<div class="row justify-content-center">
+						<div class="col-lg-6 text-center">
+							<div class="section-title">
+								<h1>Deals of the Week</h1>
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+									incididunt ut labore et dolore magna aliqua.</p>
 							</div>
 						</div>
 					</div>
-				</section>
-				<!-- End related-product Area -->
+					<div class="row">
+						<div class="col-lg-9">
+							<div class="row">
+								<!-- Repeat for related products -->
+							</div>
+						</div>
+						<div class="col-lg-3">
+							<div class="ctg-right">
+								<a href="#" target="_blank">
+									<img class="img-fluid d-block mx-auto" src="img/category/c5.jpg" alt="">
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- End related-product Area -->
 
-				<!-- Start footer Area -->
-				<%- include("../partials/userPartial/userFooter") %>
-					<!-- End footer Area -->
+			<!-- Start footer Area -->
+			<%- include("../partials/userPartial/userFooter") %>
+				<!-- End footer Area -->
 
 
 
-					<!-- Scripts -->
-					<script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
-					<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
-						integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
-						crossorigin="anonymous"></script>
-					<script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
-					<script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
-					<script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
-					<script src="/public/userAssets/js/jquery.sticky.js"></script>
-					<script src="/public/userAssets/js/nouislider.min.js"></script>
-					<script src="/public/userAssets/js/countdown.js"></script>
-					<script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
-					<script src="/public/userAssets/js/owl.carousel.min.js"></script>
-					<!--gmaps Js-->
-					<script
-						src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
-					<script src="/public/userAssets/js/gmaps.min.js"></script>
-					<script src="/public/userAssets/js/main.js"></script>
-					<script>
+				<!-- Scripts -->
+				<script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
+				<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+					integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+					crossorigin="anonymous"></script>
+				<script src="/public/userAssets/js/vendor/bootstrap.min.js"></script>
+				<script src="/public/userAssets/js/jquery.ajaxchimp.min.js"></script>
+				<script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
+				<script src="/public/userAssets/js/jquery.sticky.js"></script>
+				<script src="/public/userAssets/js/nouislider.min.js"></script>
+				<script src="/public/userAssets/js/countdown.js"></script>
+				<script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
+				<script src="/public/userAssets/js/owl.carousel.min.js"></script>
+				<!--gmaps Js-->
+				<script
+					src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
+				<script src="/public/userAssets/js/gmaps.min.js"></script>
+				<script src="/public/userAssets/js/main.js"></script>
+				<script>
 
-						function quickView(productId) {
-							window.location.href = `/user/product_view/${productId}`;
-						}
+					function quickView(productId) {
+						window.location.href = `/user/product_view/${productId}`;
+					}
 
-						function addToCart(productId) {
-							console.log(productId)
-							fetch("/user/cart", {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json"
-								},
-								body: JSON.stringify({
-									productId,
-									quantity: 1
-								})
+					function addToCart(productId) {
+						console.log(productId)
+						fetch("/user/cart", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({
+								productId,
+								quantity: 1
 							})
-								.then(response => response.json())
-								.then(data => {
-									if (data.message) {
-										showToast(data.message);
-									}
-								})
-								.catch(error => {
-									showToast("Something went wrong.", "error");
-								});
+						})
+							.then(response => response.json())
+							.then(data => {
+								if (data.message) {
+									showToast(data.message);
+								}
+							})
+							.catch(error => {
+								showToast("Something went wrong.", "error");
+							});
+					}
+
+					function showToast(message, type) {
+						Toastify({
+							text: message,
+							duration: 3000,
+							gravity: "top",
+							position: "center",
+							close: true,
+							style: {
+								background: "orange",
+								color: "white",
+								fontWeight: "bold",
+								borderRadius: "8px",
+							},
+						}).showToast();
+					}
+
+
+
+
+					document.getElementById('filterModal').addEventListener('click', function (e) {
+						if (e.target === this) {
+							this.classList.remove('active');
 						}
+					});
 
-						function showToast(message, type) {
-							Toastify({
-								text: message,
-								duration: 3000,
-								gravity: "top",
-								position: "center",
-								close: true,
-								style: {
-									background: "orange",
-									color: "white",
-									fontWeight: "bold",
-									borderRadius: "8px",
-								},
-							}).showToast();
-						}
+
+
+					document.getElementById("searchBox").addEventListener("input", async function () {
+						let query = this.value.trim();
+						console.log("Search Query:", query);
 
 
 
 
-						document.getElementById('filterModal').addEventListener('click', function (e) {
-							if (e.target === this) {
-								this.classList.remove('active');
-							}
-						});
+						if (query.length > 0) {
+							const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+							const products = await response.json();
 
 
+							let productList = document.getElementById("productList");
+							productList.innerHTML = "";
 
-						document.getElementById("searchBox").addEventListener("input", async function () {
-							let query = this.value.trim();
-							console.log("Search Query:", query);
-
-
-
-
-							if (query.length > 0) {
-								const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
-								const products = await response.json();
-
-
-								let productList = document.getElementById("productList");
-								productList.innerHTML = "";
-
-								products.forEach(product => {
-									let item = `<div class="product-item">
+							products.forEach(product => {
+								let item = `<div class="product-item">
 							<h3>${product.name}</h3>
 							<p>${product.price}</p>
 						</div>`;
-									productList.innerHTML += item;
-								});
-							}
+								productList.innerHTML += item;
+							});
+						}
+					});
+
+				</script>
+
+				<script>
+
+					document.addEventListener('DOMContentLoaded', function () {
+						const searchInput = document.getElementById('searchInput');
+						const sortSelect = document.getElementById('sortSelect');
+						const categorySelect = document.getElementById('categorySelect');
+						const applyButton = document.getElementById('applyFilters');
+						const resetButton = document.getElementById('resetFilters');
+						const productGrid = document.querySelector('.product-grid');
+
+						let currentFilters = {
+							search: searchInput.value || '',
+							sort: sortSelect.value || '',
+							category: categorySelect.value || '',
+							page: 1
+						};
+
+						// Separate search function
+						function handleSearch(searchValue) {
+							currentFilters.search = searchValue;
+							currentFilters.page = 1;
+
+							// Update URL and fetch products immediately
+							const queryParams = new URLSearchParams(window.location.search);
+							queryParams.set('search', searchValue);
+							queryParams.set('page', '1');
+
+							updateProducts(currentFilters);
+						}
+
+						// Add debounced search listener
+						searchInput.addEventListener('input', debounce(function (e) {
+							handleSearch(e.target.value);
+						}, 1000));
+
+						// Other filter changes (sort and category) will still use the apply button
+						applyButton.addEventListener('click', function () {
+							currentFilters.sort = sortSelect.value;
+							currentFilters.category = categorySelect.value;
+							currentFilters.page = 1;
+							updateProducts(currentFilters);
 						});
 
-					</script>
-
-					<script>
-
-						document.addEventListener('DOMContentLoaded', function () {
-							const searchInput = document.getElementById('searchInput');
-							const sortSelect = document.getElementById('sortSelect');
-							const categorySelect = document.getElementById('categorySelect');
-							const applyButton = document.getElementById('applyFilters');
-							const resetButton = document.getElementById('resetFilters');
-							const productGrid = document.querySelector('.product-grid');
-
-							let currentFilters = {
-								search: searchInput.value || '',
-								sort: sortSelect.value || '',
-								category: categorySelect.value || '',
+						resetButton.addEventListener('click', function () {
+							searchInput.value = '';
+							sortSelect.value = '';
+							categorySelect.value = '';
+							currentFilters = {
+								search: '',
+								sort: '',
+								category: '',
 								page: 1
 							};
+							updateProducts(currentFilters);
+						});
 
-							// Separate search function
-							function handleSearch(searchValue) {
-								currentFilters.search = searchValue;
-								currentFilters.page = 1;
+						function updateProducts(filters) {
+							// Show loading state
+							productGrid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
 
-								// Update URL and fetch products immediately
-								const queryParams = new URLSearchParams(window.location.search);
-								queryParams.set('search', searchValue);
-								queryParams.set('page', '1');
+							// Build query string
+							const queryParams = new URLSearchParams();
+							if (filters.search) queryParams.append('search', filters.search);
+							if (filters.sort) queryParams.append('sort', filters.sort);
+							if (filters.category) queryParams.append('category', filters.category);
+							if (filters.page) queryParams.append('page', filters.page);
 
-								updateProducts(currentFilters);
-							}
+							// Update URL immediately
+							window.history.pushState({}, '', `/user/shop?${queryParams.toString()}`);
 
-							// Add debounced search listener
-							searchInput.addEventListener('input', debounce(function (e) {
-								handleSearch(e.target.value);
-							}, 1000));
-
-							// Other filter changes (sort and category) will still use the apply button
-							applyButton.addEventListener('click', function () {
-								currentFilters.sort = sortSelect.value;
-								currentFilters.category = categorySelect.value;
-								currentFilters.page = 1;
-								updateProducts(currentFilters);
-							});
-
-							resetButton.addEventListener('click', function () {
-								searchInput.value = '';
-								sortSelect.value = '';
-								categorySelect.value = '';
-								currentFilters = {
-									search: '',
-									sort: '',
-									category: '',
-									page: 1
-								};
-								updateProducts(currentFilters);
-							});
-
-							function updateProducts(filters) {
-								// Show loading state
-								productGrid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
-
-								// Build query string
-								const queryParams = new URLSearchParams();
-								if (filters.search) queryParams.append('search', filters.search);
-								if (filters.sort) queryParams.append('sort', filters.sort);
-								if (filters.category) queryParams.append('category', filters.category);
-								if (filters.page) queryParams.append('page', filters.page);
-
-								// Update URL immediately
-								window.history.pushState({}, '', `/user/shop?${queryParams.toString()}`);
-
-								// Make the fetch request
-								fetch(`/user/shop?${queryParams.toString()}`, {
-									method: 'GET',
-									headers: {
-										'Accept': 'application/json'
-									}
+							// Make the fetch request
+							fetch(`/user/shop?${queryParams.toString()}`, {
+								method: 'GET',
+								headers: {
+									'Accept': 'application/json'
+								}
+							})
+								.then(response => {
+									if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+									return response.json();
 								})
-									.then(response => {
-										if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-										return response.json();
-									})
-									.then(data => {
-										if (!data.products || data.products.length === 0) {
-											productGrid.innerHTML = `
+								.then(data => {
+									if (!data.products || data.products.length === 0) {
+										productGrid.innerHTML = `
 											<div class="text-center" style="width: 100%; padding: 20px;">
 												<h3>No matching products found</h3>
 												<p>Try different search terms or clear filters</p>
 											</div>`;
-											updatePagination(1, 1);
-										} else {
-											renderProducts(data.products, data.wishlistProducts);
-											updatePagination(data.currentPage, data.totalPages);
-										}
-									})
-									.catch(error => {
-										console.error('Filter error:', error);
-										productGrid.innerHTML = `
+										updatePagination(1, 1);
+									} else {
+										renderProducts(data.products, data.wishlistProducts);
+										updatePagination(data.currentPage, data.totalPages);
+									}
+								})
+								.catch(error => {
+									console.error('Filter error:', error);
+									productGrid.innerHTML = `
 										<div class="text-center">
 											<h3>Error loading products</h3>
 											<p>Please try again later</p>
 										</div>`;
-										showToast('Error applying filters. Please try again.', 'error');
-									});
-							}
+									showToast('Error applying filters. Please try again.', 'error');
+								});
+						}
 
-							// Debounce function
-							function debounce(func, wait) {
-								let timeout;
-								return function (...args) {
-									clearTimeout(timeout);
-									timeout = setTimeout(() => {
-										func.apply(this, args);
-									}, wait);
-								};
-							}
+						// Debounce function
+						function debounce(func, wait) {
+							let timeout;
+							return function (...args) {
+								clearTimeout(timeout);
+								timeout = setTimeout(() => {
+									func.apply(this, args);
+								}, wait);
+							};
+						}
 
-							function renderProducts(products, wishlistProducts) {
-								productGrid.innerHTML = products.map(product => `
+						function renderProducts(products, wishlistProducts) {
+							productGrid.innerHTML = products.map(product => `
 									<div class="product-card">
 										<div class="product-badge">
 											${product.productOffer > 0 ? `<span class="badge badge-danger">SAVE ${product.productOffer}%</span>` : ''}
@@ -525,19 +511,19 @@
 											<h3 class="product-title"><a onclick="quickView('${product._id}')">${product.name}</a></h3>
 											<div class="product-price">
 												${product.productOffer > 0
-										? `<span class="price-sale">₹${product.salesPrice.toFixed(2)}</span>
+									? `<span class="price-sale">₹${product.salesPrice.toFixed(2)}</span>
 													   <span class="price-original">₹${(product.salesPrice / (1 - product.productOffer / 100)).toFixed(2)}</span>`
-										: `<span class="price-sale">₹${product.salesPrice.toFixed(2)}</span>`
-									}
+									: `<span class="price-sale">₹${product.salesPrice.toFixed(2)}</span>`
+								}
 											</div>
 											${product.stock > 0
-										? `<button class="add-to-cart" onclick="addToCart('${product._id}')">
+									? `<button class="add-to-cart" onclick="addToCart('${product._id}')">
 													<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
 												   </button>`
-										: `<button class="add-to-cart" disabled>
+									: `<button class="add-to-cart" disabled>
 													<i class="fa fa-shopping-cart me-2"></i>PRODUCT UNAVAILABLE
 												   </button>`
-									}
+								}
 										</div>
 										<div class="product-actions">
 											<button class="action-btn wishlist ${wishlistProducts.includes(product._id.toString()) ? 'active' : ''}" 
@@ -548,107 +534,134 @@
 										</div>
 									</div>
 								`).join('');
-							}
+						}
 
 
-							function resetFilters() {
-								document.getElementById('sortSelect').value = "";
-								document.getElementById('categorySelect').value = "";
+						function resetFilters() {
+							document.getElementById('sortSelect').value = "";
+							document.getElementById('categorySelect').value = "";
 
 
-								applyFilters();
-							}
+							applyFilters();
+						}
 
-							function updatePagination(currentPage, totalPages) {
-								const paginationContainer = document.querySelector('.pagination');
-								if (!paginationContainer) return;
+						function updatePagination(currentPage, totalPages) {
+							const paginationContainer = document.querySelector('.pagination');
+							if (!paginationContainer) return;
 
-								let html = '';
+							let html = '';
 
-								if (currentPage > 1) {
-									html += `
+							if (currentPage > 1) {
+								html += `
 										<a href="#" class="page-link" data-page="${currentPage - 1}" 
 										   style="text-decoration: none; padding: 5px 5px; width: 85px; border: 1px solid #ccc; margin-right: 5px;">
 										   Previous
 										</a>`;
-								}
+							}
 
-								for (let i = 1; i <= totalPages; i++) {
-									html += `
+							for (let i = 1; i <= totalPages; i++) {
+								html += `
 										<a href="#" class="page-link pagination-link ${currentPage === i ? 'active' : ''}" 
 										   data-page="${i}">
 										   ${i}
 										</a>`;
-								}
+							}
 
-								if (currentPage < totalPages) {
-									html += `
+							if (currentPage < totalPages) {
+								html += `
 										<a href="#" class="page-link" data-page="${currentPage + 1}" 
 										   style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">
 										   Next
 										</a>`;
-								}
-
-								paginationContainer.innerHTML = html;
-								attachPaginationListeners();
 							}
 
-							function attachPaginationListeners() {
-								document.querySelectorAll('.page-link').forEach(link => {
-									link.addEventListener('click', function (e) {
-										e.preventDefault();
-										currentFilters.page = parseInt(this.dataset.page);
-										updateProducts(currentFilters);
-										productGrid.scrollIntoView({ behavior: 'smooth' });
-									});
+							paginationContainer.innerHTML = html;
+							attachPaginationListeners();
+						}
+
+						function attachPaginationListeners() {
+							document.querySelectorAll('.page-link').forEach(link => {
+								link.addEventListener('click', function (e) {
+									e.preventDefault();
+									currentFilters.page = parseInt(this.dataset.page);
+									updateProducts(currentFilters);
+									productGrid.scrollIntoView({ behavior: 'smooth' });
 								});
+							});
+						}
+					});
+
+
+					function addToWhishList(productId) {
+
+						let button = document.getElementById(`wishlist-btn-${productId}`);
+						let icon = button.querySelector("i");
+
+
+						fetch(`/user/whishList`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify({ productId })
+						})
+							.then(response => response.json())
+							.then(data => {
+								if (data.success) {
+
+									showToast(data.message);
+
+									button.classList.toggle("active");
+
+									if (icon.classList.contains('fa-heart-o')) {
+										icon.classList.remove('fa-heart-o');
+										icon.classList.add('fa-heart');
+									} else {
+										icon.classList.remove('fa-heart');
+										icon.classList.add('fa-heart-o');
+									}
+								} else {
+									showToast(data.message);
+								}
+
+							})
+							.catch(error => {
+								console.error('Error adding to wishlist:', error);
+							});
+
+					}
+
+
+					document.addEventListener('DOMContentLoaded', function () {
+						const topBar = document.querySelector('.top-bar');
+						const filterToggleBtn = document.getElementById('filterToggleBtn');
+						const filterOptions = document.getElementById('filterOptions');
+
+						// Scroll Event Listener
+						window.addEventListener('scroll', function () {
+							if (window.scrollY > 50) { 
+								topBar.classList.add('scrolled');
+							} else {
+								topBar.classList.remove('scrolled');
+								filterOptions.classList.remove('active'); 
 							}
 						});
 
+						// Toggle Filter Dropdown
+						filterToggleBtn.addEventListener('click', function () {
+							filterOptions.classList.toggle('active');
+						});
 
-						function addToWhishList(productId) {
-
-							let button = document.getElementById(`wishlist-btn-${productId}`);
-							let icon = button.querySelector("i");
-
-
-							fetch(`/user/whishList`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json"
-								},
-								body: JSON.stringify({ productId })
-							})
-								.then(response => response.json())
-								.then(data => {
-									if (data.success) {
-
-										showToast(data.message);
-
-										button.classList.toggle("active");
-
-										if (icon.classList.contains('fa-heart-o')) {
-											icon.classList.remove('fa-heart-o');
-											icon.classList.add('fa-heart');
-										} else {
-											icon.classList.remove('fa-heart');
-											icon.classList.add('fa-heart-o');
-										}
-									} else {
-										showToast(data.message);
-									}
-
-								})
-								.catch(error => {
-									console.error('Error adding to wishlist:', error);
-								});
-
-						}
+						// Close dropdown when clicking outside
+						document.addEventListener('click', function (e) {
+							if (!filterToggleBtn.contains(e.target) && !filterOptions.contains(e.target)) {
+								filterOptions.classList.remove('active');
+							}
+						});
+					});
 
 
-
-
-					</script>
+				</script>
 </body>
 
 </html>

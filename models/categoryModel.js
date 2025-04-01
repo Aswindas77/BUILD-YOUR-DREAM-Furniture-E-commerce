@@ -1,3 +1,4 @@
+const { min } = require("moment")
 const mongoose=require("mongoose")
 
 
@@ -15,16 +16,26 @@ const categorySchema=new mongoose.Schema({
         type:String,
         default:true
     },
-    offerPrice:{
+    offerPercentage:{
         type:Number,
-        default:0
+        min:0
+    },
+    minimumPrice: {
+        type: Number,
+        min: 0,
+        required: true  
+    },
+    claimableAmount: {
+        type: Number,
+        min: 0,
+        required: true  
     },
     createdAt:{
         type:Date,
         defult:Date.now
     },
     isDeleted: {
-        type: Boolean,
+        type: Boolean, 
         default: false,
       },
       isListed:{

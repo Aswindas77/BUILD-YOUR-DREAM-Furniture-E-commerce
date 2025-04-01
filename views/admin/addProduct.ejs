@@ -12,7 +12,7 @@
 
 <body> 
     <div class="container">
-        <div class="form-container">
+        <div class="form-container"> 
             <h1>Add New Product</h1>
             <form id="addProductForm" method="post" action="addProduct" onsubmit="return productAdder(event)">
                 <!-- Product Name -->
@@ -58,7 +58,7 @@
                     <label for="productOffer" class="form-label">Product Offer (%)</label>
                     <input type="number" class="form-control" id="productOffer" name="productOffer"
                         placeholder="Enter product offer" step="1" min="0">
-                    <div class="error" id="productOfferError">Offer must be between 0 and 100.</div>
+                    <div class="error" id="productOfferError">Offer must be between 0 and 99.</div>
                 </div>
 
                 <!-- Stock -->
@@ -200,7 +200,7 @@
                 isValid = false;
             }
 
-            if (isNaN(productOffer) || productOffer < 0 || productOffer > 100) {
+            if (isNaN(productOffer) || productOffer < 0 || productOffer >= 99) {
                 document.getElementById("productOfferError").style.display = "block";
                 isValid = false;
             }

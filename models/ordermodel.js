@@ -58,6 +58,12 @@ const orderSchema = new mongoose.Schema({
 
     min: [0, 'Total amount cannot be negative'],
   },
+  subTotal: {
+    type: Number,
+
+
+    min: [0, 'Total amount cannot be negative'],
+  },
   cancelReason: {
     type: String,
     enum: [

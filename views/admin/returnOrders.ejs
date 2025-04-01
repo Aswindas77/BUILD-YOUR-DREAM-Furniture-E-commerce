@@ -6,107 +6,97 @@
         </div>
         <div class="header-actions">
 
-            <!-- <div class="filter-box">
-                <select id="statusFilter">
-                    <option value="all">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-            </div> -->
+           
         </div>
     </div>
 
     <div class="return-orders-list">
-        <% returnOrders.forEach(order=> { %>
-            <div class="return-order-card">
-                <div class="order-header">
-                    <div class="order-date">
-                        <i class="far fa-calendar-alt"></i>
-                        <span>
-                            <%= new Date(order.returnDate).toLocaleDateString('en-US', { year: 'numeric' ,
-                                month: 'short' , day: 'numeric' }) %>
-                        </span>
-                        <small>
-                            <%= new Date(order.returnDate).toLocaleTimeString() %>
-                        </small>
-                    </div>
-                    <div class="order-status <%= order.returnStatus.toLowerCase() %>">
-                        <%= order.returnStatus %>
-                    </div>
-                </div>
-
-                <div class="order-details">
-                    <div class="user-details">
-                        <div class="detail-label">Customer</div>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <%= order.userId.username.charAt(0).toUpperCase() %>
-                            </div>
-                            <div class="user-text">
-                                <div class="username">
-                                    <%= order.userId.username %>
-                                </div>
-                                <div class="user-contact">
-                                    <%= order.userId.email %>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="product-details">
-                        <div class="detail-label">Product</div>
-                        <div class="product-info">
-                            <div class="product-text">
-                                <div class="product-name">
-                                    <%= order.orderId?.items?.[0]?.productId?.name || 'Product Name Not Available' %>
-                                </div>
-                                <div class="product-price">₹<%= order.orderId?.items?.[0]?.price || '0' %>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="return-details">
-                        <div class="detail-label">Return Details</div>
-                        <div class="return-reason">
-                            <span class="reason-tag">
-                                <%= order.reason %>
-                            </span>
-                            <!-- <p class="reason-description">
-                                
-                            </p> -->
-                        </div>
-                    </div>
-
-                    <div class="payment-details">
-                        <div class="detail-label">Payment Method</div>
-                        <div class="payment-info">
-                            <i
-                                class="fas <%= order.orderId?.paymentMethod === 'Cash on Delivery' ? 'fa-money-bill-alt' : 'fa-credit-card' %>"></i>
+        <% if (!returnOrders || returnOrders.length === 0) { %>
+            <h1 style="margin: 25%; color: red;">no Return orders</h1>
+        <% } else { %>
+            <% returnOrders.forEach(order => { %>
+                <div class="return-order-card">
+                    <div class="order-header">
+                        <div class="order-date">
+                            <i class="far fa-calendar-alt"></i>
                             <span>
-                                <%= order.orderId?.paymentMethod || 'Not Available' %>
+                                <%= new Date(order.returnDate).toLocaleDateString('en-US', { year: 'numeric' , month: 'short' , day: 'numeric' }) %>
                             </span>
+                            <small>
+                                <%= new Date(order.returnDate).toLocaleTimeString() %>
+                            </small>
+                        </div>
+                        <div class="order-status <%= order.returnStatus.toLowerCase() %>">
+                            <%= order.returnStatus %>
                         </div>
                     </div>
-                </div>
-
-                <div class="order-actions">
-                    <% if (order.returnStatus==='Pending' ) { %>
-                        <button class="btn-approve" onclick="updateReturnStatus('<%= order._id %>', 'Approved')">
-                            <i class="fas fa-check"></i> Approve Return
-                        </button>
-                        <button class="btn-reject" onclick="updateReturnStatus('<%= order._id %>', 'Rejected')">
-                            <i class="fas fa-times"></i> Reject Return
-                        </button>
+    
+                    <div class="order-details">
+                        <div class="user-details">
+                            <div class="detail-label">Customer</div>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <%= order.userId.username.charAt(0).toUpperCase() %>
+                                </div>
+                                <div class="user-text">
+                                    <div class="username">
+                                        <%= order.userId.username %>
+                                    </div>
+                                    <div class="user-contact">
+                                        <%= order.userId.email %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="product-details">
+                            <div class="detail-label">Product</div>
+                            <div class="product-info">
+                                <div class="product-text">
+                                    <div class="product-name">
+                                        <%= order.orderId?.items?.[0]?.productId?.name || 'Product Name Not Available' %>
+                                    </div>
+                                    <div class="product-price">₹<%= order.orderId?.items?.[0]?.price || '0' %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="return-details">
+                            <div class="detail-label">Return Details</div>
+                            <div class="return-reason">
+                                <span class="reason-tag">
+                                    <%= order.reason %>
+                                </span>
+                            </div>
+                        </div>
+    
+                        <div class="payment-details">
+                            <div class="detail-label">Payment Method</div>
+                            <div class="payment-info">
+                                <i class="fas <%= order.orderId?.paymentMethod === 'Cash on Delivery' ? 'fa-money-bill-alt' : 'fa-credit-card' %>"></i>
+                                <span>
+                                    <%= order.orderId?.paymentMethod || 'Not Available' %>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="order-actions">
+                        <% if (order.returnStatus === 'Pending') { %>
+                            <button class="btn-approve" onclick="updateReturnStatus('<%= order._id %>', 'Approved')">
+                                <i class="fas fa-check"></i> Approve Return
+                            </button>
+                            <button class="btn-reject" onclick="updateReturnStatus('<%= order._id %>', 'Rejected')">
+                                <i class="fas fa-times"></i> Reject Return
+                            </button>
                         <% } %>
-                            <!-- <button class="btn-view" onclick="viewReturnDetails('<%= order._id %>')">
-                                <i class="fas fa-eye"></i> View Details
-                            </button> -->
+                    </div>
                 </div>
-            </div>
             <% }); %>
+        <% } %>
     </div>
+    
 </div>
 
 <style>
