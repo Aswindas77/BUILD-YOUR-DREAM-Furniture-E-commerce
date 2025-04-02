@@ -149,7 +149,7 @@
         <div class="price-summary">
             <div class="price-row">
                 <span>Subtotal</span>
-                <span>₹<%= subTotal.toFixed(2) %></span>
+                <span>₹<%= order.totalAmount.toFixed(2) %></span>
             </div>
             <% if (coupon && coupon !==null) { %>
                 <div class="price-row">
@@ -280,20 +280,20 @@
 
             const currentStatus = '<%= order.status %>';
 
-            // Define status order
+            
             const statusOrder = ['Pending', 'Processing', 'Shipped', 'Delivered'];
             const currentStatusIndex = statusOrder.indexOf(currentStatus);
 
-            // Calculate progress percentage
+            
             const progress = (currentStatusIndex + 1) * (100 / statusOrder.length);
 
-            // Animate progress line after a short delay
+            
             setTimeout(() => {
                 const progressLine = document.querySelector('.tracking-line-progress');
                 progressLine.style.width = `${progress}%`;
             }, 500);
 
-            // Add completed class to steps
+           
             const steps = document.querySelectorAll('.tracking-step');
             steps.forEach((step, index) => {
                 const stepIcon = step.querySelector('.step-icon');
@@ -304,28 +304,28 @@
                         stepIcon.classList.add('completed');
                         stepLabel.classList.add('completed');
 
-                        // Add animation for current step
+                        
                         if (index === currentStatusIndex) {
                             stepIcon.classList.add('current');
                         }
                     }
-                }, index * 600); // Stagger the animations
+                }, index * 600); 
             });
 
-            // Function to update status
+            
             window.updateOrderStatus = function (newStatus) {
                 const statusBadge = document.querySelector('.status-badge');
                 statusBadge.className = `status-badge status-${newStatus.toLowerCase()} status-update`;
                 statusBadge.textContent = newStatus;
 
-                // Update progress based on new status
+                
                 const newStatusIndex = statusOrder.indexOf(newStatus);
                 const newProgress = (newStatusIndex + 1) * (100 / statusOrder.length);
 
                 const progressLine = document.querySelector('.tracking-line-progress');
                 progressLine.style.width = `${newProgress}%`;
 
-                // Update step icons
+                
                 steps.forEach((step, index) => {
                     const stepIcon = step.querySelector('.step-icon');
                     const stepLabel = step.querySelector('span');
@@ -338,7 +338,7 @@
                         stepLabel.classList.remove('completed');
                     }
 
-                    // Update current step
+                    
                     if (index === newStatusIndex) {
                         stepIcon.classList.add('current');
                     } else {
@@ -348,7 +348,7 @@
             };
         });
 
-        // Add this if you want to test status updates
+        
         function simulateStatusUpdate() {
             const statusOrder = ['Pending', 'Processing', 'Shipped', 'Delivered'];
             let currentIndex = statusOrder.indexOf('<%= order.status %>');

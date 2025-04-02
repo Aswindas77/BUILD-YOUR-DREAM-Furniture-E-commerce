@@ -865,11 +865,19 @@ const buyNow = async (req, res) => {
         const { selectedAddressId, paymentMethod, cartId, peymentStatus, couponCode } = req.body;
         const userId = req.session.User._id;
 
+
+
+
+
+
         const coupon = await Coupon.findOne({ code: couponCode, isActive: true, isDeleted: false });
 
         let couponPercentage = coupon?.discountPercentage || null;
 
-        console.log(couponPercentage, "nooo")
+
+
+
+
 
         const user = await User.findById(userId);
         if (!user) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "User not found" });
@@ -901,8 +909,14 @@ const buyNow = async (req, res) => {
 
 
         if (paymentMethod.toLowerCase() === "wallet") {
+            const wallet = await walletModel.findOne({ userId });
 
-            const wallet = await walletModel.findOne({ userId })
+            if (!wallet || wallet.balance < totalAmount) {
+                return res.status(HttpStatus.BAD_REQUEST).json({
+                    success: false,
+                    message: "Insufficient Wallet Balance",
+                });
+            }
 
             for (let item of orderItems) {
                 const product = await Products.findById(item.productId);
@@ -920,45 +934,46 @@ const buyNow = async (req, res) => {
                         message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
                     });
                 }
+            }
 
-                // product.stock -= item.quantity;
 
+            wallet.balance -= totalAmount;
+            await wallet.save();
+
+            for (let item of orderItems) {
+                const product = await Products.findById(item.productId);
+                product.stock -= item.quantity;
                 await product.save();
             }
 
-            if (wallet.balance >= totalAmount) {
-                // wallet.balance -= totalAmount;
-                await wallet.save();
+            const newOrder = new ordermodel({
+                userId,
+                couponCode: couponCode || null,
+                items: orderItems,
+                addressId: selectedAddressId,
+                paymentMethod,
+                subTotal,
+                totalAmount,
+                paymentStatus: "Paid",
+                orderStatus: "Pending",
+            });
 
-                const newOrder = new ordermodel({
-                    userId,
-                    items: orderItems,
-                    addressId: selectedAddressId,
-                    paymentMethod,
-                    subTotal: subTotal,
-                    totalAmount,
-                    paymentStatus: peymentStatus,
-                    orderStatus: "Pending",
-                });
+            await newOrder.save();
 
-                await newOrder.save();
-                // coupon.usedBy.push(userId);
-                // await coupon.save()
-
-                await Cart.findByIdAndDelete(cartId);
-
-                return res.status(HttpStatus.OK).json({
-                    success: true,
-                    message: "Order placed successfully using Wallet",
-                    orderId: newOrder._id,
-                });
-            } else {
-                return res.status(HttpStatus.BAD_REQUEST).json({
-                    success: false,
-                    message: "Insufficient Wallet Balance",
-                });
+            if (coupon) {
+                coupon.usedBy.push(userId);
+                await coupon.save();
             }
+
+            await Cart.findByIdAndDelete(cartId);
+
+            return res.status(HttpStatus.OK).json({
+                success: true,
+                message: "Order placed successfully using Wallet",
+                orderId: newOrder._id,
+            });
         }
+
 
         if (paymentMethod.toLowerCase() === "paypal") {
             console.log('inside the paypal anpunt')
@@ -979,13 +994,13 @@ const buyNow = async (req, res) => {
 
 
 
-            // if (totalAmount > 10000) {
+            if (totalAmount > 10000) {
 
-            //     return res.status(HttpStatus.NOT_FOUND).json({
-            //         success: false,
-            //         message: "sorry user COD available only 10000rs"
-            //     })
-            // }
+                return res.status(HttpStatus.NOT_FOUND).json({
+                    success: false,
+                    message: "sorry user COD available only 10000rs"
+                })
+            }
 
             for (let item of orderItems) {
                 const product = await Products.findById(item.productId);
@@ -1004,13 +1019,14 @@ const buyNow = async (req, res) => {
                     });
                 }
 
-                // product.stock -= item.quantity;
+                product.stock -= item.quantity;
 
                 await product.save();
             }
 
             const newOrder = new ordermodel({
                 userId,
+                couponCode: couponCode || null,
                 items: orderItems,
                 addressId: selectedAddressId,
                 paymentMethod,
@@ -1411,6 +1427,7 @@ const razorpay = new Razorpay({
 
 const createOrder = async (req, res) => {
     try {
+        console.log("jdj")
         const { amount, currency, receipt, totalAmount, coupon } = req.body;
 
 
@@ -1510,7 +1527,7 @@ const verifyPayment = async (req, res) => {
                 });
             }
 
-            // product.stock -= item.quantity;
+            product.stock -= item.quantity;
 
             await product.save();
         }
@@ -1619,8 +1636,61 @@ const downloadInvoice = async (req, res) => {
     }
 }
 
+const addAddressAjax = async (req, res) => {
+    try {
+        const userId = req.session.User._id;
+        const addressData = req.body;
 
+        // Validate required fields
+        if (!addressData.addressType || !addressData.houseNumber || !addressData.street ||
+            !addressData.city || !addressData.country || !addressData.pincode || !addressData.phone) {
+            return res.status(400).json({
+                success: false,
+                message: "All required fields must be filled"
+            });
+        }
 
+        // Create new address
+        const newAddress = new Address({
+            userId,
+            addressType: addressData.addressType,
+            houseNumber: addressData.houseNumber,
+            street: addressData.street,
+            city: addressData.city,
+            landmark: addressData.landmark || '',
+            country: addressData.country,
+            pincode: addressData.pincode,
+            phone: addressData.phone,
+            isDefault: addressData.isDefault || false
+        });
+
+        // If this address is set as default, update other addresses
+        if (addressData.isDefault) {
+            await Address.updateMany(
+                { userId, isDefault: true },
+                { $set: { isDefault: false } }
+            );
+        }
+
+        // Save the new address
+        await newAddress.save();
+
+        // Send success response with the new address
+        res.status(201).json({
+            success: true,
+            message: "Address added successfully",
+            address: newAddress
+        });
+
+    } catch (error) {
+        console.error("Error in addAddressAjax:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to add address",
+            error: error.message
+        });
+    }
+};
 
 module.exports = {
 
@@ -1673,7 +1743,8 @@ module.exports = {
     filterProducts,
     deleteWhishlist,
 
-    downloadInvoice
+    downloadInvoice,
+    addAddressAjax
 
 
 

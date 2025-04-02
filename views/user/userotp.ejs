@@ -40,25 +40,25 @@
   </div>
 
   <script>
-    // Function to move focus to the next input
+    
     function moveToNext(current, nextFieldId) {
       if (current.value.length >= 1 && nextFieldId) {
         document.getElementById(nextFieldId).focus();
       }
     }
 
-    // Function to handle backspace and move to the previous input
+    
     function handleBackspace(current, event, previousFieldId) {
       if (event.key === 'Backspace') {
         if (current.value === '' && previousFieldId) {
           document.getElementById(previousFieldId).focus();
         } else {
-          current.value = ''; // Clear the current field
+          current.value = ''; 
         }
       }
     }
 
-    // Function to handle OTP verification
+    
     async function verifyOtp() {
       const otpInputs = document.querySelectorAll('.otp-inputs input');
       let otp = '';
@@ -96,28 +96,28 @@
       }
     }
 
-    // Wait for the page to load before executing
+    
     window.onload = function () {
       const resendLink = document.getElementById('resendOtpLink');
 
-      // Disable the link initially
-      resendLink.style.pointerEvents = "none"; // Prevent clicking
-      resendLink.style.color = "white";        // Change appearance to look disabled
+      
+      resendLink.style.pointerEvents = "none"; 
+      resendLink.style.color = "white";        
       resendLink.style.textDecoration = "none";
 
-      let countdown = 60; // Set the countdown time in seconds
+      let countdown = 60; 
 
       const timer = setInterval(() => {
         if (countdown > 0) {
-          resendLink.textContent = `Resend OTP in ${countdown--} seconds`; // Show countdown text
+          resendLink.textContent = `Resend OTP in ${countdown--} seconds`; 
         } else {
-          clearInterval(timer); // Stop the timer when it reaches 0
-          resendLink.textContent = "Resend OTP"; // Restore original text
-          resendLink.style.pointerEvents = "auto"; // Enable clicking
-          resendLink.style.color = "#feb47b"; // Restore link appearance
+          clearInterval(timer); 
+          resendLink.textContent = "Resend OTP"; 
+          resendLink.style.pointerEvents = "auto"; 
+          resendLink.style.color = "#feb47b"; 
           resendLink.style.textDecoration = "underline";
         }
-      }, 1000); // Execute every second
+      }, 1000); 
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

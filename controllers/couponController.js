@@ -211,6 +211,8 @@ const applyCoupon = async (req, res) => {
 
         console.log("joo", userId)
 
+        
+
 
         const coupon = await Coupon.findOne({
             code: couponCode,

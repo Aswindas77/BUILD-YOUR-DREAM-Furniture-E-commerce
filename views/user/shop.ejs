@@ -47,7 +47,7 @@
 
 
 
-
+ 
 
 	<link rel="stylesheet" href="/public/userAssets/css/shop.css">
 
@@ -82,13 +82,13 @@
 								</div>
 
 								<!-- Collapsible Filter Section -->
-								<div class="filter-container">
+								<div class="filter-container"> 
 									<button class="filter-toggle-btn" id="filterToggleBtn">
 										<i class="fas fa-filter"></i> Filters
 									</button>
 									<div class="filter-options" id="filterOptions">
 										<select class="sort-select" id="sortSelect">
-											<option value="">Sort By</option>
+											<option value="" disabled selected>Sort By</option>
 											<option value="nameAsc" <%=filters?.sort==='nameAsc' ? 'selected' : '' %>
 												>Name (A-Z)</option>
 											<option value="nameDesc" <%=filters?.sort==='nameDesc' ? 'selected' : '' %>
@@ -99,7 +99,7 @@
 												%>>Price: High to Low</option>
 										</select>
 										<select class="sort-select" id="categorySelect">
-											<option value="">All Categories</option>
+											<option value="" disabled selected>All Categories</option>
 											<% categories.forEach(category=> { %>
 												<option value="<%= category.name %>"
 													<%=filters?.category===category.name ? 'selected' : '' %>>
@@ -179,6 +179,7 @@
 																</span>
 														<% } %>
 											</div>
+
 											<% if(product.stock> 0) { %>
 												<button class="add-to-cart" onclick="addToCart('<%= product._id %>')">
 													<i class="fa fa-shopping-cart me-2"></i>ADD TO CART
@@ -308,6 +309,8 @@
 							});
 					}
 
+					
+
 					function showToast(message, type) {
 						Toastify({
 							text: message,
@@ -365,13 +368,14 @@
 				<script>
 
 					document.addEventListener('DOMContentLoaded', function () {
+
 						const searchInput = document.getElementById('searchInput');
 						const sortSelect = document.getElementById('sortSelect');
 						const categorySelect = document.getElementById('categorySelect');
 						const applyButton = document.getElementById('applyFilters');
 						const resetButton = document.getElementById('resetFilters');
 						const productGrid = document.querySelector('.product-grid');
-
+						attachPaginationListeners();
 						let currentFilters = {
 							search: searchInput.value || '',
 							sort: sortSelect.value || '',
@@ -379,12 +383,12 @@
 							page: 1
 						};
 
-						// Separate search function
+						
 						function handleSearch(searchValue) {
 							currentFilters.search = searchValue;
 							currentFilters.page = 1;
 
-							// Update URL and fetch products immediately
+							
 							const queryParams = new URLSearchParams(window.location.search);
 							queryParams.set('search', searchValue);
 							queryParams.set('page', '1');
@@ -392,12 +396,12 @@
 							updateProducts(currentFilters);
 						}
 
-						// Add debounced search listener
+						
 						searchInput.addEventListener('input', debounce(function (e) {
 							handleSearch(e.target.value);
 						}, 1000));
 
-						// Other filter changes (sort and category) will still use the apply button
+						
 						applyButton.addEventListener('click', function () {
 							currentFilters.sort = sortSelect.value;
 							currentFilters.category = categorySelect.value;
@@ -419,20 +423,20 @@
 						});
 
 						function updateProducts(filters) {
-							// Show loading state
+							
 							productGrid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
 
-							// Build query string
+							
 							const queryParams = new URLSearchParams();
 							if (filters.search) queryParams.append('search', filters.search);
 							if (filters.sort) queryParams.append('sort', filters.sort);
 							if (filters.category) queryParams.append('category', filters.category);
 							if (filters.page) queryParams.append('page', filters.page);
 
-							// Update URL immediately
+							
 							window.history.pushState({}, '', `/user/shop?${queryParams.toString()}`);
 
-							// Make the fetch request
+							
 							fetch(`/user/shop?${queryParams.toString()}`, {
 								method: 'GET',
 								headers: {
@@ -467,7 +471,7 @@
 								});
 						}
 
-						// Debounce function
+						
 						function debounce(func, wait) {
 							let timeout;
 							return function (...args) {
@@ -607,7 +611,7 @@
 						})
 							.then(response => response.json())
 							.then(data => {
-								if (data.success) {
+								if (data.success) { 
 
 									showToast(data.message);
 
@@ -637,7 +641,7 @@
 						const filterToggleBtn = document.getElementById('filterToggleBtn');
 						const filterOptions = document.getElementById('filterOptions');
 
-						// Scroll Event Listener
+						
 						window.addEventListener('scroll', function () {
 							if (window.scrollY > 50) { 
 								topBar.classList.add('scrolled');
@@ -647,12 +651,12 @@
 							}
 						});
 
-						// Toggle Filter Dropdown
+						
 						filterToggleBtn.addEventListener('click', function () {
 							filterOptions.classList.toggle('active');
 						});
 
-						// Close dropdown when clicking outside
+						
 						document.addEventListener('click', function (e) {
 							if (!filterToggleBtn.contains(e.target) && !filterOptions.contains(e.target)) {
 								filterOptions.classList.remove('active');
