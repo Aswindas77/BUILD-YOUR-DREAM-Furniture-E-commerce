@@ -1424,13 +1424,13 @@ const razorpay = new Razorpay({
     key_secret: "wehlBhfqQlWoouA0ZGxYB373"
 });
 
-
+ 
 const createOrder = async (req, res) => {
     try {
-        console.log("jdj")
+        
         const { amount, currency, receipt, totalAmount, coupon } = req.body;
 
-
+      console.log("kk",totalAmount)
 
 
 
@@ -1499,7 +1499,7 @@ const verifyPayment = async (req, res) => {
         if (coupon) {
             let discountAmount = (couponPercentage / 100) * totalAmount
             totalAmount = totalAmount - discountAmount
-
+ 
         }
 
 
@@ -1636,61 +1636,121 @@ const downloadInvoice = async (req, res) => {
     }
 }
 
-const addAddressAjax = async (req, res) => {
+const addAddressCheckout = async (req, res) => {
     try {
-        const userId = req.session.User._id;
         const addressData = req.body;
+        console.log("Request Body:", addressData);
 
-        // Validate required fields
-        if (!addressData.addressType || !addressData.houseNumber || !addressData.street ||
-            !addressData.city || !addressData.country || !addressData.pincode || !addressData.phone) {
-            return res.status(400).json({
+        // Check if user is authenticated
+        const user = req.session?.User; // Assuming session-based auth
+        if (!user) {
+            return res.status(HttpStatus.UNAUTHORIZED).json({
                 success: false,
-                message: "All required fields must be filled"
+                message: Messages.UNAUTHORIZED_ACCESS
+            });
+        }
+        console.log("Address User Data:", user);
+
+        // Destructure the incoming address data
+        const {  houseNumber, street, city, landmark, country, pincode, phone, isDefault } = addressData;
+
+        // console.log()
+        // console.log()
+        // console.log()
+        // console.log()
+        // console.log()
+        // console.log()
+
+        // Validate required fields (adjust based on your checkout form)
+        if (  !houseNumber || !street || !city || !country || !pincode || !phone) {
+            return res.status(HttpStatus.BAD_REQUEST).json({
+                success: false,
+                message: "All required fields must be provided."
             });
         }
 
-        // Create new address
-        const newAddress = new Address({
-            userId,
-            addressType: addressData.addressType,
-            houseNumber: addressData.houseNumber,
-            street: addressData.street,
-            city: addressData.city,
-            landmark: addressData.landmark || '',
-            country: addressData.country,
-            pincode: addressData.pincode,
-            phone: addressData.phone,
-            isDefault: addressData.isDefault || false
-        });
-
-        // If this address is set as default, update other addresses
-        if (addressData.isDefault) {
-            await Address.updateMany(
-                { userId, isDefault: true },
-                { $set: { isDefault: false } }
-            );
+        // Validate phone number (Indian format: starts with 6-9, 10 digits)
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+            return res.status(HttpStatus.BAD_REQUEST).json({
+                success: false,
+                message: "Invalid phone number format. Must be a 10-digit number starting with 6-9."
+            });
         }
 
-        // Save the new address
-        await newAddress.save();
+        // Validate pincode (6 digits)
+        const pincodeRegex = /^\d{6}$/;
+        if (!pincodeRegex.test(pincode)) {
+            return res.status(HttpStatus.BAD_REQUEST).json({
+                success: false,
+                message: "Invalid pincode format. Must be 6 digits."
+            });
+        }
 
-        // Send success response with the new address
-        res.status(201).json({
+        // Find the user's address document
+        let addressDoc = await Address.findOne({ userId: user._id });
+
+        // Create the new address object
+        const newAddress = {
+            houseNumber,
+            street,
+            city,
+            landmark: landmark || '', 
+            country,
+            pincode,
+            phone,
+            isDeleted: false,
+            isDefault: isDefault || false 
+        };
+
+        
+        if (!addressDoc) {
+            addressDoc = new Address({
+                userId: user._id,
+                address: [newAddress]
+            });
+        } else {
+           
+            if (isDefault) {
+                addressDoc.address.forEach(addr => (addr.isDefault = false));
+            }
+            
+            addressDoc.address.push(newAddress);
+        }
+
+        await addressDoc.save();
+        console.log("Address Saved:", addressDoc);
+
+        
+        const addedAddress = addressDoc.address[addressDoc.address.length - 1];
+
+        return res.status(HttpStatus.CREATED).json({
             success: true,
-            message: "Address added successfully",
-            address: newAddress
+            message: "Address added successfully!",
+            address: {
+                _id: addedAddress._id, 
+                houseNumber: addedAddress.houseNumber,
+                street: addedAddress.street,
+                city: addedAddress.city,
+                landmark: addedAddress.landmark,
+                country: addedAddress.country,
+                pincode: addedAddress.pincode,
+                phone: addedAddress.phone,
+                isDefault: addedAddress.isDefault
+            }
         });
-
     } catch (error) {
-        console.error("Error in addAddressAjax:", error);
-        res.status(500).json({
+        console.error("Error Adding Address:", error);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Failed to add address",
-            error: error.message
+            message: Messages.INTERNAL_ERROR
         });
     }
 };
+
+
+
+
 
 module.exports = {
 
@@ -1744,7 +1804,7 @@ module.exports = {
     deleteWhishlist,
 
     downloadInvoice,
-    addAddressAjax
+    addAddressCheckout
 
 
 

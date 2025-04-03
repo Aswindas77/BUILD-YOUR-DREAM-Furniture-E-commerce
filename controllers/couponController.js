@@ -209,7 +209,7 @@ const applyCoupon = async (req, res) => {
         const { couponCode, cartId, grandTotal } = req.body;
         const userId = req.session.User._id;
 
-        console.log("joo", userId)
+       
 
         
 

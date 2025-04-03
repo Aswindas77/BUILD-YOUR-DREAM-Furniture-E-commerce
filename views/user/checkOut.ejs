@@ -290,14 +290,6 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="addressType">Address Type</label>
-                                            <select class="form-control" id="addressType" name="addressType" required>
-                                                <option value="Home">Home</option>
-                                                <option value="Work">Work</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
                                             <label for="houseNumber">House Name/Number</label>
                                             <input type="text" class="form-control" id="houseNumber" name="houseNumber"
                                                 required>
@@ -401,12 +393,7 @@
                                                         <div class="custom-radio"></div>
 
                                                         <div class="address-details">
-                                                            <h3>
-                                                                <%= address.addressType %>
-                                                                    <% if (index===0) { %>
-                                                                        <span class="default-badge">Default</span>
-                                                                        <% } %>
-                                                            </h3>
+
                                                             <p>House Name: <%= address.houseNumber %>
                                                             </p>
                                                             <p>City: <%= address.city %>
@@ -620,12 +607,12 @@
 
 
             <script>
+
+
+
+
                 function addAddress() {
                     $('#addAddressModal').modal('show');
-                }
-
-                function editAddress(addressId) {
-                    window.location.href = `/user/editAddress?id=${addressId}`;
                 }
 
 
@@ -662,6 +649,92 @@
                     });
                 });
 
+
+                document.getElementById('saveAddressBtn').addEventListener('click', function () {
+                    const form = document.getElementById('addAddressForm');
+
+                    // Validate the form
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+
+                    // Collect form data
+                    const formData = new FormData(form);
+                    const addressData = {};
+
+                    formData.forEach((value, key) => {
+                        if (key === 'isDefault') {
+                            addressData[key] = formData.get('isDefault') === 'on'; // Convert checkbox to boolean
+                        } else {
+                            addressData[key] = value;
+                        }
+                    });
+
+                    // Show loading state
+                    const saveBtn = this;
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = 'Saving...';
+                    saveBtn.disabled = true;
+
+                    // Send data to the server
+                    fetch('/user/checkoutAddAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(addressData)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Close the modal
+                                $('#addAddressModal').modal('hide');
+
+                                // Show success message with an "OK" button
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'Address added successfully!',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.reload(); // Reload only when "OK" is clicked
+                                    }
+                                });
+
+                                // Reset the form
+                                form.reset();
+
+                                // Update selected address ID
+                                if (data.address.isDefault) {
+                                    document.getElementById('selectedAddressId').value = data.address._id;
+                                    document.querySelectorAll('.address-box').forEach(box => {
+                                        if (box.dataset.id !== data.address._id) box.classList.remove('selected');
+                                    });
+                                }
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to add address',
+                                    icon: 'error'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'An error occurred while adding the address',
+                                icon: 'error'
+                            });
+                        })
+                        .finally(() => {
+                            // Reset button state
+                            saveBtn.innerHTML = originalText;
+                            saveBtn.disabled = false;
+                        });
+                });
 
 
                 document.querySelector('#paymentForm').addEventListener('submit', function (e) {
@@ -1031,9 +1104,7 @@
                         const messageDiv = document.getElementById('couponMessage');
 
 
-                        if (!data.success) {
-                            alert("coupon price more than product price")
-                        }
+                        
 
                         if (data.success) {
                             document.getElementById('appliedCouponArea').style.display = 'block';
@@ -1129,6 +1200,9 @@
 `
                 }
 
+
+
+
                 function showToast(message, type) {
                     let bgColor;
 
@@ -1183,150 +1257,8 @@
 
             </script>
 
-            <!-- JavaScript for handling the address form submission -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Save Address Button Click Event
-                    document.getElementById('saveAddressBtn').addEventListener('click', function () {
-                        const form = document.getElementById('addAddressForm');
 
-                        // Basic form validation
-                        if (!form.checkValidity()) {
-                            form.reportValidity();
-                            return;
-                        }
 
-                        const formData = new FormData(form);
-                        const addressData = {};
-
-                        // Convert form data to JSON object
-                        formData.forEach((value, key) => {
-                            if (key === 'isDefault') {
-                                addressData[key] = true;
-                            } else {
-                                addressData[key] = value;
-                            }
-                        });
-
-                        // Add any missing fields with default values
-                        if (!formData.has('isDefault')) {
-                            addressData.isDefault = false;
-                        }
-
-                        // Show loading state
-                        const saveBtn = document.getElementById('saveAddressBtn');
-                        const originalBtnText = saveBtn.innerHTML;
-                        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-                        saveBtn.disabled = true;
-
-                        // Send address data to the server
-                        fetch('/user/addAddressAjax', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(addressData)
-                        })
-                            .then(response => {
-                                if (!response.ok) {
-                                    return response.json().then(data => {
-                                        throw new Error(data.message || 'Failed to add address');
-                                    });
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                if (data.success) {
-                                    // Close modal
-                                    $('#addAddressModal').modal('hide');
-
-                                    // Show success message
-                                    showToast("Address added successfully!", "success");
-
-                                    // Create new address card
-                                    const addressGrid = document.querySelector('.address-grid');
-                                    const newAddressBox = document.createElement('label');
-                                    newAddressBox.className = 'address-box';
-                                    if (data.address.isDefault) {
-                                        newAddressBox.classList.add('selected');
-                                    }
-                                    newAddressBox.setAttribute('data-id', data.address._id);
-
-                                    newAddressBox.innerHTML = `
-                                    <input type="radio" name="selectedAddress" class="radio-input" 
-                                        value="${data.address._id}" ${data.address.isDefault ? 'checked' : ''} />
-                                    <div class="custom-radio"></div>
-                                    <div class="address-details">
-                                        <h3>
-                                            ${data.address.addressType}
-                                            ${data.address.isDefault ? '<span class="default-badge">Default</span>' : ''}
-                                        </h3>
-                                        <p>House Name: ${data.address.houseNumber}</p>
-                                        <p>Street: ${data.address.street}</p>
-                                        <p>City: ${data.address.city}</p>
-                                        ${data.address.landmark ? `<p>Landmark: ${data.address.landmark}</p>` : ''}
-                                        <p>Country: ${data.address.country}</p>
-                                        <p>Pincode: ${data.address.pincode}</p>
-                                        <p>Phone: ${data.address.phone}</p>
-                                        <button style="border-radius: 2px; border: 1px solid;" class="edit-btn" 
-                                            onclick="editAddress('${data.address._id}')">Edit</button>
-                                    </div>
-                                `;
-
-                                    // Insert the new address before the "Add New Address" box
-                                    const addAddressBox = document.querySelector('.add-address-box');
-                                    addressGrid.insertBefore(newAddressBox, addAddressBox);
-
-                                    // Reset form
-                                    form.reset();
-
-                                    // Update the selected address in the form
-                                    if (data.address.isDefault) {
-                                        document.querySelectorAll('.address-box').forEach(box => {
-                                            if (box.dataset.id !== data.address._id) {
-                                                box.classList.remove('selected');
-                                                box.querySelector('input[name="selectedAddress"]').checked = false;
-                                            }
-                                        });
-                                        document.getElementById('selectedAddressId').value = data.address._id;
-                                    }
-
-                                    // Reattach click event listeners to address boxes
-                                    attachAddressBoxListeners();
-                                } else {
-                                    showToast(data.message || "Failed to add address", "error");
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                showToast(error.message || "An error occurred while adding address", "error");
-                            })
-                            .finally(() => {
-                                // Reset button state
-                                saveBtn.innerHTML = originalBtnText;
-                                saveBtn.disabled = false;
-                            });
-                    });
-                });
-
-                function attachAddressBoxListeners() {
-                    const addressBoxes = document.querySelectorAll(".address-box");
-                    const selectedAddressInput = document.getElementById("selectedAddressId");
-
-                    addressBoxes.forEach(box => {
-                        box.addEventListener("click", function () {
-                            addressBoxes.forEach(b => b.classList.remove("selected"));
-                            this.classList.add("selected");
-
-                            const radio = this.querySelector('input[name="selectedAddress"]');
-                            if (radio) {
-                                radio.checked = true;
-                                selectedAddressInput.value = radio.value;
-                            }
-                        });
-                    });
-                }
-            </script>
 
 </body>
 

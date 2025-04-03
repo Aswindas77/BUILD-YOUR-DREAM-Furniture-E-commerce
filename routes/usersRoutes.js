@@ -103,6 +103,9 @@ userRouter.post("/editAddress", isBan, profileController.updateAddress);
 //  delete address
 userRouter.delete("/deleteAddress", isBan, profileController.deleteAddress);
 
+// checkout side add address
+userRouter.post('/checkoutAddAddress', userController.addAddressCheckout); 
+
 // ==============================================================================================================================================================================================================================
 
 // wallet controller
@@ -181,11 +184,12 @@ userRouter.get("/contact", isBan, userController.loadContact);
 userRouter.get("/logout", userController.logOut);
 
 // product view
-userRouter.get('/product_view/:product_id', isBan, userController.loadProductView)
+userRouter.get('/product_view/:product_id', isBan, userController.loadProductView);
 
+userRouter.post("/checkout", isBan, userController.buyNow);
 
-userRouter.post("/checkout", isBan, userController.buyNow)
 userRouter.post("/createOrder", userController.createOrder);
+
 userRouter.post("/verifyPayment", userController.verifyPayment);
 
 userRouter.post("/placePendingOrder", userController.placePendingOrder)

@@ -1,1 +1,0 @@
-router.post('/addAddressAjax', auth.isUser, userController.addAddressAjax); 
