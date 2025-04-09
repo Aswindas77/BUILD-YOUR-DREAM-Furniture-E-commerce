@@ -36,7 +36,7 @@
                     <div class="error" id="descriptionError">Description must be at least 10 characters long.</div>
                 </div>
 
-                
+
                 <!-- Category -->
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
@@ -49,8 +49,8 @@
                             <% }); %>
                     </select>
                     <div class="error" id="categoryError">Please select a category.</div>
-                </div> 
- 
+                </div>
+
 
                 <!-- Sales Price -->
                 <div class="mb-3">
@@ -60,7 +60,7 @@
                     <div class="error" id="salesPriceError">Sales price must be greater than 0.</div>
                 </div>
 
-                <!-- Product Offer --> 
+                <!-- Product Offer -->
                 <div class="mb-3">
                     <label for="productOffer" class="form-label">Product Offer (%)</label>
                     <input type="number" class="form-control" id="productOffer" name="productOffer"
@@ -75,7 +75,7 @@
                     <div class="error" id="stockError">Stock must be a positive number.</div>
                 </div>
 
-                
+
 
                 <!-- Status -->
                 <div class="mb-3">
@@ -130,7 +130,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
 
-let croppers = {};
+        let croppers = {};
         function cropper(index) {
             const files = document.getElementById(`image${index}`);
             const preview = document.getElementById(`prev${index}`);
@@ -158,12 +158,12 @@ let croppers = {};
             }
         }
         document.addEventListener('DOMContentLoaded', function () {
-            
+
             function validateForm(formData) {
                 let isValid = true;
                 const errors = {};
 
-                
+
                 const name = document.getElementById("name");
                 const description = document.getElementById("description");
                 const category = document.getElementById("category");
@@ -172,35 +172,35 @@ let croppers = {};
                 const stock = document.getElementById("stock");
                 const status = document.getElementById("status");
                 const image1 = document.getElementById("image1").files.length > 0;
-            const image2 = document.getElementById("image2").files.length > 0;
-            const image3 = document.getElementById("image3").files.length > 0;
-                
+                const image2 = document.getElementById("image2").files.length > 0;
+                const image3 = document.getElementById("image3").files.length > 0;
+
                 document.querySelectorAll(".error").forEach(error => {
                     error.style.display = 'none';
                 });
 
-                
+
                 if (!name.value || name.value.trim().length < 3) {
                     errors.name = "Product name must be at least 3 characters";
                     document.getElementById("nameError").style.display = 'block';
                     isValid = false;
                 }
 
-                
+
                 if (!description.value || description.value.trim().length < 10) {
                     errors.description = "Description must be at least 10 characters";
                     document.getElementById("descriptionError").style.display = 'block';
                     isValid = false;
                 }
 
-                
+
                 if (!category.value) {
                     errors.category = "Please select a category";
                     document.getElementById("categoryError").style.display = 'block';
                     isValid = false;
                 }
 
-                
+
                 const salesPriceValue = parseFloat(salesPrice.value);
                 if (isNaN(salesPriceValue) || salesPriceValue <= 0) {
                     errors.salesPrice = "Sales price must be greater than 0";
@@ -208,7 +208,7 @@ let croppers = {};
                     isValid = false;
                 }
 
-                
+
                 const offerValue = parseFloat(productOffer.value);
                 if (isNaN(offerValue) || offerValue < 0 || offerValue >= 99) {
                     errors.productOffer = "Offer must be between 0 and 99";
@@ -216,7 +216,7 @@ let croppers = {};
                     isValid = false;
                 }
 
-                
+
                 const stockValue = parseInt(stock.value);
                 if (isNaN(stockValue) || stockValue < 0) {
                     errors.stock = "Stock must be a positive number";
@@ -227,46 +227,25 @@ let croppers = {};
                 return { isValid, errors };
             }
 
-            
+
             async function updateProduct(formData) {
                 try {
-                    // let images = [];
-                    // for (let i = 1; i <= 3; i++) {
-                    //     if (croppers[i]) {
-                    //         console.log(cropper[i])
-                    //         const canvas = croppers[i].getCroppedCanvas();
-                    //         const base64Image = canvas.toDataURL('image/png');
-                    //         images?.push(base64Image);
-
-                    //     } else {
-                            
-                    //         const prevImg = document.getElementById(`prev${i}`);
-                    //         images.push(prevImg.src);
-                    //     }
-                    // }
                     let newimages = [];
 
-for (let i = 1; i <= 3; i++) {
-    const fileInput = document.getElementById(`image${i}`);
-    
-// console.log(fileInput,'files')
-    if (croppers[i]) {
-        console.log(croppers[i],'hiaiiiiiiiiiii')
-        const canvas = croppers[i].getCroppedCanvas();
-        const base64Image = canvas.toDataURL('image/png');
-        // console.log(base64Image,'baseeurlimage')
-        newimages.push(base64Image);
-    } else {
-        console.log('124431232')
-        const prevImg = document.getElementById(`prev${i}`);
-        console.log(prevImg,'alskflksdfnlk')
-        newimages.push(prevImg.src);
-    }
-}
+                    for (let i = 1; i <= 3; i++) {
+                        const fileInput = document.getElementById(`image${i}`);
 
+                        if (croppers[i]) {
+                            const canvas = croppers[i].getCroppedCanvas();
+                            const base64Image = canvas.toDataURL('image/png');
+                            newimages.push(base64Image);
+                        } else {
+                            const prevImg = document.getElementById(`prev${i}`);
+                            newimages.push(prevImg.getAttribute('src'));
+                        }
+                    }
 
-
-                    console.log(newimages,'this is images')
+                    console.log(newimages, 'this is images')
                     const productData = {
                         id: formData.get('id'),
                         name: formData.get('name'),
@@ -288,7 +267,7 @@ for (let i = 1; i <= 3; i++) {
                     });
 
                     const data = await response.json();
-                    console.log(data,'fkasldkfaslkdfjlaksdjflkasjflaskd')
+                    console.log(data, 'fkasldkfaslkdfjlaksdjflkasjflaskd')
 
                     if (data.success) {
                         Swal.fire({
@@ -312,7 +291,7 @@ for (let i = 1; i <= 3; i++) {
                 }
             }
 
-            
+
             document.getElementById('add-product-form').addEventListener('submit', function (e) {
                 e.preventDefault();
 
@@ -330,8 +309,8 @@ for (let i = 1; i <= 3; i++) {
 
 
 
-        
-       
+
+
 
 
 
@@ -353,4 +332,4 @@ for (let i = 1; i <= 3; i++) {
     </script>
 </body>
 
-</html> 
+</html>

@@ -7,12 +7,12 @@ const { log } = require("console");
 const Category = require("../models/categoryModel");
 const { updateCategory } = require("./categoryController");
 const HttpStatus = require('../constants/httpStatus');
-const Messages =require('../constants/messages.json')
+const Messages = require('../constants/messages.json')
 
 
 
 
-  
+
 // load product page
 
 //====================================================================================================================================================
@@ -154,7 +154,7 @@ const loadEditProduct = async (req, res) => {
 
 
 // edit product 
- 
+
 //====================================================================================================================================================
 
 const editProduct = async (req, res) => {
@@ -186,13 +186,8 @@ const editProduct = async (req, res) => {
 //====================================================================================================================================================
 
 const updateProduct = async (req, res) => {
-
-
   try {
-
-    const { id, name, description, salesPrice, category, productOffer, stock, status, rating,images } = req.body;
-
-    console.log("hi", rating)
+    const { id, name, description, salesPrice, category, productOffer, stock, status, rating, images } = req.body;
 
     if (stock === undefined || stock === null || stock < 0) {
       console.log("Stock error");
@@ -201,57 +196,55 @@ const updateProduct = async (req, res) => {
         message: "Stock error",
       });
     }
-    const imagess = [images[0], images[1], images[2]];
-    console.log(imagess)
 
+    // Get the existing product to preserve unchanged images
+    const existingProduct = await Products.findById(id);
+    if (!existingProduct) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
 
     const dirPath = `./public/uploads/products/${id}`;
     fs.mkdirSync(dirPath, { recursive: true });
 
-    const imagep = [];
-    imagess.forEach((img, index) => {
-      if (img && img !== 'undefined') {
+    const updatedImages = [...existingProduct.images]; // Create a copy of existing images
 
-        const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
+    // Process only the new images that have been changed
+    for (let i = 0; i < images.length; i++) {
+      if (images[i] && !images[i].startsWith('/public/uploads/')) { // Check if it's a new base64 image
+        const base64Data = images[i].replace(/^data:image\/\w+;base64,/, "");
         const binary = Buffer.from(base64Data, "base64");
-        const filePath = `${dirPath}/image${index}.png`;
+        const filePath = `${dirPath}/image${i}.png`;
 
-
-        fs.writeFile(filePath, binary, (er) => {
-          if (er) console.log('Error writing image:', er);
-        });
-
-        imagep[index] = `/public/uploads/products/${id}/image${index}.png`;
-      } else {
-        imagep[index] = null;
-      }
-    });
-
-    for (let i = 0; i < imagess.length; i++) {
-      if (imagep[i] !== null) {
-        await Products.updateOne(
-          { _id: id },
-          { $set: { [`images.${i}`]: imagep[i] } }
-        );
+        fs.writeFileSync(filePath, binary);
+        updatedImages[i] = `/public/uploads/products/${id}/image${i}.png`;
       }
     }
 
-
-    
     const updatedProduct = await Products.findByIdAndUpdate(
       id,
-      { name, description, salesPrice, category, productOffer, stock, ratings: rating, status, updatedAt: new Date() },
+      {
+        name,
+        description,
+        salesPrice,
+        category,
+        productOffer,
+        stock,
+        ratings: rating,
+        status,
+        images: updatedImages,
+        updatedAt: new Date()
+      },
       { new: true, runValidators: true }
     );
-
-    // console.log('Product updated successfully:', updatedProduct);
 
     return res.json({
       success: true,
       message: "Product updated successfully",
       product: updatedProduct,
     });
-
   } catch (error) {
     console.error('Error updating product:', error);
     res.redirect("/admin/productManagement");
@@ -267,7 +260,7 @@ const deleteProduct = async (req, res) => {
 
     const productId = req.params.productId
     console.log(productId)
- 
+
     const softdelete = await Products.findByIdAndUpdate(
       productId,
       { isDeleted: true },
