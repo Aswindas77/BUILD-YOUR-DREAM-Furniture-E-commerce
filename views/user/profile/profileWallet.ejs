@@ -4,42 +4,42 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
+    <link rel="shortcut icon" href="/public/userAssets/images/favicon.png">
 
-	<meta name="author" content="CodePixar">
+    <meta name="author" content="CodePixar">
 
-	<meta name="description" content="">
+    <meta name="description" content="">
 
-	<meta name="keywords" content="">
+    <meta name="keywords" content="">
 
-	<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-	<title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
+    <title>BUILD YOUR DREAM | Buy Modern Furniture Online</title>
 
 
-	
-	
 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 
-	<link rel="stylesheet" href="/public/userAssets/css/custom.css">
+    <link rel="stylesheet" href="/public/userAssets/css/custom.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        * { 
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
- 
+
         :root {
-            --primary-color: #ffc107; 
+            --primary-color: #ffc107;
             /* Vibrant Orange */
             --hover-color: #FF8F00;
             /* Lighter Orange for hover */
@@ -421,21 +421,33 @@
         }
 
         .pagination {
-        margin-top: 20px;
-        text-align: center;
-    }
-    .pagination a {
-        margin: 5px;
-        padding: 8px 12px;
-        text-decoration: none;
-        color: #ffc107;
-        border: 1px solid  #FF8F00;
-        border-radius: 5px;
-    }
-    .pagination a.active {
-        background-color:  #FF8F00;
-        color: white;
-    }
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination a {
+            margin: 5px;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #ffc107;
+            border: 1px solid #FF8F00;
+            border-radius: 5px;
+        }
+
+        .pagination a.active {
+            background-color: #FF8F00;
+            color: white;
+        }
+
+        .no-transactions {
+            text-align: center;
+            font-size: 16px;
+            color: #434141;
+            padding: 20px;
+
+            border-radius: 8px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -447,10 +459,7 @@
                 <h2><i class=""></i>Profile</h2>
             </div>
             <nav class="nav-menu">
-                <!-- <a href="#" class="nav-item ">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Dashboard</span>
-                </a> -->
+
                 <a href="/user/myProfile" class="nav-item ">
                     <i class="fas fa-shopping-bag"></i>
                     <span>Orders</span>
@@ -472,7 +481,7 @@
                     <span>home</span>
                 </a>
             </nav>
-        </div> 
+        </div>
         <main class="main-content">
             <div class="wallet-container">
                 <div class="wallet-header-card">
@@ -485,55 +494,66 @@
                                 <i class="fas fa-plus"></i>
                                 Add Money
                             </button>
-                            
+
                         </div>
                     </div>
                 </div>
 
                 <div class="transactions-card">
                     <div class="transactions-header">
-                        <h3>Recent Transactions</h3> 
+                        <h3>Recent Transactions</h3>
                     </div>
                     <div class="transaction-list">
-                        <% walletHistory.forEach(transaction=> { %>
-                            <div class="transaction-item <%= transaction.type %>">
-                                <div class="transaction-info">
-                                    <div class="transaction-icon">
-                                        <i
-                                            class="fas <%= transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
-                                    </div>
-                                    <div class="transaction-details">
-                                        <div class="transaction-title">
-                                            <%= transaction.description || (transaction.type==='credit' ? 'Money Added'
-                                                : 'Purchase' ) %>
-                                        </div>
-                                        <div class="transaction-date">
-                                            <%= new Date(transaction.date).toLocaleDateString('en-US', { year: 'numeric'
-                                                , month: 'short' , day: 'numeric' , hour: '2-digit' , minute: '2-digit'
-                                                }) %>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="transaction-amount">
-                                    <%= transaction.type==='credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
-                                </div>
+                        <% if (walletHistory.length===0) { %>
+                            <div class="no-transactions">
+                                <p>No transactions yet.</p>
                             </div>
-                            <% }) %>
+                            <% } else { %>
+                                <% walletHistory.forEach(transaction=> { %>
+                                    <div class="transaction-item <%= transaction.type %>">
+                                        <div class="transaction-info">
+                                            <div class="transaction-icon">
+                                                <i
+                                                    class="fas <%= transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up' %>"></i>
+                                            </div>
+                                            <div class="transaction-details">
+                                                <div class="transaction-title">
+                                                    <%= transaction.description || (transaction.type==='credit'
+                                                        ? 'Money Added' : 'Purchase' ) %>
+                                                </div>
+                                                <div class="transaction-date">
+                                                    <%= new Date(transaction.date).toLocaleDateString('en-US', {
+                                                        year: 'numeric' , month: 'short' , day: 'numeric' ,
+                                                        hour: '2-digit' , minute: '2-digit' }) %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="transaction-amount">
+                                            <%= transaction.type==='credit' ? '+' : '-' %>₹<%=
+                                                    transaction.amount.toFixed(2) %>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } %>
                     </div>
 
-                    <div class="pagination">
-                        <% if (currentPage > 1) { %>
-                            <a href="?page=<%= currentPage - 1 %>">Previous</a>
+                    <% if (walletHistory.length> 0) { %>
+                        <div class="pagination">
+                            <% if (currentPage> 1) { %>
+                                <a href="?page=<%= currentPage - 1 %>">Previous</a>
+                                <% } %>
+
+                                    <% for (let i=1; i <=totalPages; i++) { %>
+                                        <a href="?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>">
+                                            <%= i %>
+                                        </a>
+                                        <% } %>
+
+                                            <% if (currentPage < totalPages) { %>
+                                                <a href="?page=<%= currentPage + 1 %>">Next</a>
+                                                <% } %>
+                        </div>
                         <% } %>
-                    
-                        <% for (let i = 1; i <= totalPages; i++) { %>
-                            <a href="?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
-                        <% } %>
-                    
-                        <% if (currentPage < totalPages) { %>
-                            <a href="?page=<%= currentPage + 1 %>">Next</a>
-                        <% } %>
-                    </div>  
 
                 </div>
             </div>
@@ -583,6 +603,7 @@
 
         function handleAddMoney() {
             const amount = document.getElementById('amount').value;
+
             razorpay(amount)
             fetch('/user/add-money-wallet', {
                 method: 'POST',
@@ -591,6 +612,7 @@
                 },
                 body: JSON.stringify({ amount })
             })
+        
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -620,6 +642,8 @@
                     console.error('Error:', error);
                 });
         }
+
+
         function razorpay(amount) {
             var options = {
                 "key": "rzp_test_av7bn0QCiETOX0",

@@ -897,13 +897,14 @@ const getOrdersByPeriod = async (req, res) => {
         $lte: now
       }
     })
-      .populate('userId', 'name')
+      .populate('userId', 'name email')
       .populate('items.productId', 'name price')
       .sort({ createdAt: -1 });
 
     const formattedOrders = orders.map(order => ({
       _id: order._id,
-      userId: order.userId._id,
+      dummyOrderId:order.dummyOrderId,
+      userId: order.userId.email,
       items: order.items,
       totalAmount: order.totalAmount,
       paymentStatus: order.paymentStatus,

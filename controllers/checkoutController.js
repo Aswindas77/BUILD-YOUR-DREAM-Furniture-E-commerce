@@ -278,6 +278,7 @@ const processWalletPayment = async (req, res, userId, totalAmount, orderItems, s
         // Create new order
         const newOrder = new Order({
             userId,
+            dummyOrderId:dummyId,
             couponCode: couponCode || null,
             items: orderItems,
             addressId: selectedAddressId,
@@ -348,6 +349,7 @@ const processCodPayment = async (req, res, totalAmount, orderItems, selectedAddr
         // Create new order
         const newOrder = new Order({
             userId,
+            dummyOrderId:dummyId,
             couponCode: couponCode || null,
             items: orderItems,
             addressId: selectedAddressId,

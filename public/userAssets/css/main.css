@@ -4217,7 +4217,7 @@ label {
         height: 40px;
         width: 1px;
         position: absolute;
-        left: -3px;
+        left: -2px;
         top: 0px;
         background: #eeeeee; }
       .cart_inner .table tbody tr td .product_count .increase:after {
@@ -4229,7 +4229,7 @@ label {
         top: 22px;
         background: #eeeeee; }
     .cart_inner .table tbody tr td .product_count .reduced {
-      bottom: -6px; }
+      bottom: 0px; }
 .cart_inner .table tbody tr.bottom_button .gray_btn {
   line-height: 38px;
   background: #e8f0f2;

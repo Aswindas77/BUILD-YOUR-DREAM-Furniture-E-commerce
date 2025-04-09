@@ -31,7 +31,7 @@ const Messages = require('../constants/messages.json');
 
 // default loadHome page
 
-// ==================================================================================================================================================== 
+// =================================================================================== 
 
 const loadHome = async (req, res) => {
 
@@ -94,41 +94,8 @@ const loadLogin = async (req, res) => {
 
 const verifyUser = async (req, res) => {
     try {
-        const { email, password, 'g-recaptcha-response': captchaResponse } = req.body;
 
-
-
-        const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
-        const secretKey = '6LfVW8MqAAAAAI2w-b4uB11B24m0BtDABGV9Q-8H';
-
-        // try {
-        //     const verificationResponse = await axios.post(verifyUrl, null, {
-        //         params: {
-        //             secret: secretKey
-        //             ,
-        //             response: captchaResponse
-        //         }
-        //     });
-
-        //     console.log("verifiationresponseeee===", verificationResponse.data)
-
-        //     if (!captchaResponse) {
-        //         return res.status(HttpStatus.BAD_REQUEST).json({
-        //             success: false,
-        //             emailError: 'reCAPTCHA response is missing'
-        //         });
-        //     }
-
-        //     if (!verificationResponse.data.success) {
-        //         return res.status(HttpStatus.BAD_REQUEST).json({
-        //             success: false,
-        //             emailError: 'reCAPTCHA verification failed'
-        //         });
-        //     }
-        // } catch (captchaError) {
-        //     console.error('reCAPTCHA verification error:', captchaError);
-        //    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
-        // }
+        const { email, password } = req.body;
 
         const user = await User.findOne({ email: email });
 
@@ -191,8 +158,8 @@ const genOtpForgotPass = async (req, res) => {
         const emailName = await User.findOne({ email })
         req.session.checkPass = "forgot"
         if (!emailName) {
-            req.flash("message", "user not fount")
-            return res.send('shuiijnk')
+           return res.status(HttpStatus.BAD_REQUEST).json({success:false,message:'User not found'});
+            
         }
 
         const otp = generateOtp()
@@ -208,7 +175,8 @@ const genOtpForgotPass = async (req, res) => {
             otp
         )
 
-        res.status(HttpStatus.OK).render("userotp");
+        res.status(HttpStatus.OK).json({success:true,message:'OTP send'});
+        return res.render('userotp')
     } catch (err) {
         console.log(err.message);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
@@ -298,7 +266,7 @@ const registration = async (req, res) => {
         req.session.checkPass = "singUp"
         const existingUser = await User.findOne({ email });
         console.log("Existing User:", existingUser);
-
+ 
         if (existingUser) {
             return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
@@ -332,7 +300,7 @@ const registration = async (req, res) => {
 };
 
 
-// google auth
+// google auth 
 
 const googleAuth = async (req, res) => {
     try {
@@ -343,6 +311,9 @@ const googleAuth = async (req, res) => {
 
         const { displayName, emails } = req.user;
         const email = emails[0].value;
+
+        console.log("displayName",displayName)
+        
 
         req.session.data = {
             username: displayName,
@@ -818,13 +789,11 @@ const googleLogin = async (req, res) => {
         }
 
 
-        req.session.User = {
-            username: user.username,
-            email: user.email
-        };
+        req.session.User = user;
+        req.session.logged = true;
 
 
-        res.redirect('/user');
+        res.redirect('/user'); 
 
     } catch (error) {
         console.log(error.message);
@@ -856,7 +825,7 @@ const loadBanProduct = async (req, res) => {
 
 //====================================================================================================================================================
 
-
+ 
 
 //  buynow  controller
 
@@ -874,6 +843,8 @@ const buyNow = async (req, res) => {
 
         let couponPercentage = coupon?.discountPercentage || null;
 
+
+        const dummyId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
 
 
 
@@ -916,7 +887,7 @@ const buyNow = async (req, res) => {
                     success: false,
                     message: "Insufficient Wallet Balance",
                 });
-            }
+            } 
 
             for (let item of orderItems) {
                 const product = await Products.findById(item.productId);
@@ -931,14 +902,27 @@ const buyNow = async (req, res) => {
                 if (product.stock < item.quantity) {
                     return res.status(HttpStatus.BAD_REQUEST).json({
                         success: false,
-                        message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+                        message: `Not enough stock for ${product.name}. Available stock: ${product.stock}`,
                     });
                 }
             }
 
+            const dummyId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+
 
             wallet.balance -= totalAmount;
+
+            wallet.transactions.push({
+                type: 'debit',
+                amount: totalAmount,
+                description: 'Order placed using wallet',
+                date: new Date()
+            });
+
             await wallet.save();
+
+
 
             for (let item of orderItems) {
                 const product = await Products.findById(item.productId);
@@ -948,6 +932,7 @@ const buyNow = async (req, res) => {
 
             const newOrder = new ordermodel({
                 userId,
+                dummyOrderId:dummyId,
                 couponCode: couponCode || null,
                 items: orderItems,
                 addressId: selectedAddressId,
@@ -1019,6 +1004,7 @@ const buyNow = async (req, res) => {
                     });
                 }
 
+                
                 product.stock -= item.quantity;
 
                 await product.save();
@@ -1026,6 +1012,7 @@ const buyNow = async (req, res) => {
 
             const newOrder = new ordermodel({
                 userId,
+                dummyOrderId:dummyId,
                 couponCode: couponCode || null,
                 items: orderItems,
                 addressId: selectedAddressId,
@@ -1075,7 +1062,8 @@ const buyNow = async (req, res) => {
 
             const newOrder = new ordermodel({
                 userId,
-                items: orderItems,
+                dummyOrderId:dummyId,
+                items: orderItems, 
                 addressId: selectedAddressId,
                 paymentMethod,
                 subTotal: subTotal,
@@ -1428,10 +1416,36 @@ const razorpay = new Razorpay({
 const createOrder = async (req, res) => {
     try {
         
-        const { amount, currency, receipt, totalAmount, coupon } = req.body;
+        const { amount, currency, receipt, totalAmount, coupon ,cartId } = req.body;
 
-      console.log("kk",totalAmount)
+      
+        const cart = await Cart.findById(cartId).populate("products.productId");
+        if (!cart) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Cart not found" });
 
+        const orderItems = cart.products.map(item => ({
+            productId: item.productId._id,
+            quantity: item.quantity,
+            price: item.salesPrice,
+        }));
+
+        for (let item of orderItems) {
+            const product = await Products.findById(item.productId);
+
+            if (!product) {
+                return res.status(HttpStatus.NOT_FOUND).json({
+                    success: false,
+                    message: `Product with ID ${item.productId} not found`,
+                });
+            }
+
+            if (product.stock < item.quantity) {
+                return res.status(HttpStatus.BAD_REQUEST).json({
+                    success: false,
+                    message: `Not enough stock for ${product.name}.currently Available: ${product.stock}`,
+                });
+            }
+        }
+ 
 
 
         const couponCode = await Coupon.findOne({ code: coupon })
@@ -1459,6 +1473,9 @@ const createOrder = async (req, res) => {
 
         });
 
+       
+
+
         res.status(HttpStatus.OK).json({ success: true, order });
     } catch (error) {
         console.error("Error creating order:", error);
@@ -1485,6 +1502,7 @@ const verifyPayment = async (req, res) => {
 
         let couponPercentage = coupon?.discountPercentage || null;
 
+        const dummyId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
 
 
 
@@ -1501,7 +1519,6 @@ const verifyPayment = async (req, res) => {
             totalAmount = totalAmount - discountAmount
  
         }
-
 
         const orderItems = cart.products.map(item => ({
             productId: item.productId._id,
@@ -1523,7 +1540,7 @@ const verifyPayment = async (req, res) => {
             if (product.stock < item.quantity) {
                 return res.status(HttpStatus.BAD_REQUEST).json({
                     success: false,
-                    message: `Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`,
+                    message: `Not enough stock for ${product.name}. Available: ${product.stock}`,
                 });
             }
 
@@ -1534,6 +1551,7 @@ const verifyPayment = async (req, res) => {
 
         const newOrder = new ordermodel({
             userId: userId,
+            dummyOrderId:dummyId,
             addressId: requestData.selectedAddressId,
             items: orderItems,
             cartId: requestData.cartId,
@@ -1571,6 +1589,8 @@ const placePendingOrder = async (req, res) => {
         console.log("req.body;", req.body)
         const userId = req.session?.User?._id
 
+        const dummyId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
         const coupon = requestData.couponCode
 
         const totalAmount = requestData.grandTotal
@@ -1594,6 +1614,7 @@ const placePendingOrder = async (req, res) => {
 
         const newOrder = new ordermodel({
             userId: userId,
+            dummyOrderId:dummyId,
             addressId: requestData.selectedAddressId,
             cartId: requestData.cartId,
             paymentMethod: requestData.paymentMethod,
@@ -1604,7 +1625,7 @@ const placePendingOrder = async (req, res) => {
             razorpayOrderId: orderId,
             razorpayPaymentId: paymentId || ""
         });
-
+ 
         await newOrder.save();
         await Cart.findByIdAndDelete(requestData.cartId);
 
@@ -1654,13 +1675,6 @@ const addAddressCheckout = async (req, res) => {
         // Destructure the incoming address data
         const {  houseNumber, street, city, landmark, country, pincode, phone, isDefault } = addressData;
 
-        // console.log()
-        // console.log()
-        // console.log()
-        // console.log()
-        // console.log()
-        // console.log()
-
         // Validate required fields (adjust based on your checkout form)
         if (  !houseNumber || !street || !city || !country || !pincode || !phone) {
             return res.status(HttpStatus.BAD_REQUEST).json({
@@ -1687,10 +1701,10 @@ const addAddressCheckout = async (req, res) => {
             });
         }
 
-        // Find the user's address document
+        
         let addressDoc = await Address.findOne({ userId: user._id });
 
-        // Create the new address object
+       
         const newAddress = {
             houseNumber,
             street,
@@ -1749,7 +1763,7 @@ const addAddressCheckout = async (req, res) => {
 };
 
 
-
+ 
 
 
 module.exports = {

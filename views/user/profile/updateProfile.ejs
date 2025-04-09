@@ -26,7 +26,7 @@
 <body>
     <div class="container">
         <div class="sidebar">
-            <div class="dashboard-header">
+            <div class="dashboard-header"> 
                 <h2><i class=""></i>Profile</h2>
             </div>
             <nav class="nav-menu">
@@ -455,6 +455,14 @@
                     console.error('Error:', error);
                 });
         }
+
+        function showError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

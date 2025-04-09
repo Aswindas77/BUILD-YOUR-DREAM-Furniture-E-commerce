@@ -8,7 +8,11 @@ const profileController = require("../controllers/profileController.js");
 const userRouter = express.Router();
 const multer = require('../config/multer.js');
 const googleAuth = require('../middlewares/googleAuth.js');
+
 const passport = require('../middlewares/googleAuth.js');
+
+const {productStock} =require("../middlewares/products");
+
 const orderController = require('../controllers/ordersController.js');
 const productController = require("../controllers/productController.js");
 const couponController = require("../controllers/couponController.js")
@@ -18,7 +22,7 @@ const walletController = require("../controllers/walletController.js");
 
 userRouter.use(
     session({
-        secret: "jdakxlhjk",
+        secret: "jdakxlhjk", 
         saveUninitialized: false,
         resave: false,
     })
@@ -42,7 +46,7 @@ userRouter.get("/forgot", isLogin, userController.ForgotPassword);
 // generate for forgot password 
 userRouter.post("/forgot", isLogin, userController.genOtpForgotPass);
 
-
+ 
 
 // change password 
 userRouter.get("/changePassword", isLogin, userController.changePassword)
@@ -121,14 +125,18 @@ userRouter.get('/cart', isBan, cartController.loadCart);
 // add cart route
 userRouter.post('/cart', isBan, cartController.addcart);
 
+userRouter.post('/proceedCheckout',isBan,cartController.proceedCheckout)
+
+userRouter.get('/checkout-page', isBan,cartController.renderCheckoutPage)
+
 // update cart route
 userRouter.post('/update', isBan, cartController.updateCart)
-
+ 
 // cart delete
 userRouter.delete('/cartDelete', isBan, cartController.deleteCart)
 
 // load checkout
-userRouter.get('/checkout', isBan, cartController.loadCheckout)
+userRouter.post('/loadcheckout', isBan,cartController.loadCheckout)
 
 
 userRouter.post("/checkout", userController.buyNow)
@@ -202,7 +210,7 @@ userRouter.get("/shop/filter", userController.filterProducts);
 // Order details route
 userRouter.get('/orderdetails/:orderId', profileController.getOrderDetails);
 
-userRouter.post('/createRetryPayment/:orderId', isBan, orderController.retryPayment)
+userRouter.post('/createRetryPayment/:orderId', isBan, orderController.createRetryPayment)
 
 // order retry payment 
 userRouter.post("/updateRetryPayment", isBan, orderController.retryPayment)

@@ -10,7 +10,7 @@ const loadWallet = async (req, res) => {
     try {
         const userId = req.session?.User?._id;
 
-
+      
 
         if (!userId) {
             console.log("No User ID, redirecting...");
@@ -67,12 +67,18 @@ const loadWallet = async (req, res) => {
 }
 
 
-// add money
 
+
+// add money
+ 
 const addMoneyWallet = async (req, res) => {
     try {
         const { amount } = req.body;
         const userId = req.session?.User?._id;
+
+        if(amount>550000){
+            res.status(HttpStatus.BAD_REQUEST).json({success:false , message:"Max add limit: ₹5,00,000 per transaction."})
+        }
 
         const wallet = await Wallet.findOneAndUpdate(
             { userId },

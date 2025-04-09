@@ -6,8 +6,15 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
 
   },
+
   couponCode: {
     type: String,
+  },
+
+  dummyOrderId: {
+    type: String,
+    unique: true,
+    required: true
   },
   addressId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -73,7 +80,7 @@ const orderSchema = new mongoose.Schema({
       "Wrong product ordered",
       "Other"
     ],
-    default: null, 
+    default: null,
   },
   paymentStatus: {
     type: String,
@@ -96,10 +103,10 @@ const orderSchema = new mongoose.Schema({
     status: { type: String, enum: ['Pending', 'Shipped', 'Cancelled', 'Processing', 'Delivered'], default: 'Pending' },
   },
   razorpayOrderId: {
-     type: String 
-    },
-  razorpayPaymentId: { 
-    type: String 
+    type: String
+  },
+  razorpayPaymentId: {
+    type: String
   }
 }, {
   timestamps: true,

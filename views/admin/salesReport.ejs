@@ -6,110 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="/public/adminAssets/css/adminDashboard.css">
-
-</head>
-
-<body>
-
-
-
-
-    <!-- Orders Table Section --> 
-     <h1>sales-report</h1>
-    <div class="sales-section">
-        <div class="sales-header">
-            <h2 class="sales-title">Sales Revenue - <span id="period-text">Daily</span></h2>
-            <div class="period-buttons">
-                <button class="period-button active" data-period="daily">Daily</button>
-                <button class="period-button" data-period="weekly">Weekly</button>
-                <button class="period-button" data-period="monthly">Monthly</button>
-                <button class="period-button" data-period="yearly">Yearly</button>
-                <button class="period-button" data-period="custom">Custom</button>
-            </div>
-            <div class="export-buttons">
-                <!-- <button class="export-button excel-button">
-                    Export to Excel
-                </button> -->
-                <button class="export-button pdf-button">
-                    Export to PDF
-                </button>
-            </div>
-        </div>
-
-        <!-- Add pagination controls -->
-        <div class="table-container">
-            <table class="sales-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>User ID</th>
-                        <th>Items</th>
-                        <th>Total Amount</th>
-                        <th>Payment Status</th>
-                        <th>Payment Method</th>
-                        <th>Order Status</th>
-                        <th>Order Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Dummy data for now -->
-                    <tr>
-                        <td>#ORD001</td>
-                        <td>USR123</td>
-                        <td>3 items</td>
-                        <td>₹110,557</td>
-                        <td>Pending</td>
-                        <td>Cash on Delivery</td>
-                        <td>Delivered</td>
-                        <td>03 Mar, 2024</td>
-                    </tr>
-                    <tr>
-                        <td>#ORD002</td>
-                        <td>USR456</td>
-                        <td>2 items</td>
-                        <td>₹85,999</td>
-                        <td>Paid</td>
-                        <td>UPI</td>
-                        <td>Processing</td>
-                        <td>02 Mar, 2024</td>
-                    </tr>
-                    <!-- Add more dummy rows as needed -->
-                </tbody>
-            </table>
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Showing <span id="showing-start">0</span> to <span id="showing-end">0</span> of <span
-                        id="total-items">0</span> entries
-                </div>
-                <div class="pagination-controls">
-                    <button id="prev-page" class="pagination-button">&laquo; Previous</button>
-                    <div id="page-numbers" class="page-numbers"></div>
-                    <button id="next-page" class="pagination-button">Next &raquo;</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add this HTML for custom date range modal -->
-    <div id="customDateModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Select Date Range</h2>
-            <div class="date-inputs">
-                <div class="input-group">
-                    <label for="startDate">Start Date:</label>
-                    <input type="date" id="startDate" required>
-                </div>
-                <div class="input-group">
-                    <label for="endDate">End Date:</label>
-                    <input type="date" id="endDate" required>
-                </div>
-            </div>
-            <button id="applyDateRange" class="apply-btn">Apply</button>
-        </div>
-    </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
     <style>
         /* Add these styles */
         .pagination-container {
@@ -133,14 +31,14 @@
         .pagination-button {
             padding: 8px 15px;
             border: 1px solid #ddd;
-            background: #fff;
+            background: #007bff;
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.3s;
         }
 
         .pagination-button:hover {
-            background: #f0f0f0;
+            background: #007bff;
         }
 
         .pagination-button:disabled {
@@ -156,14 +54,18 @@
 
         .page-number {
             padding: 8px 12px;
+            background-color: white;
+            color: black;
             border: 1px solid #ddd;
             cursor: pointer;
             border-radius: 4px;
         }
 
+        
+
         .page-number.active {
             background: #007bff;
-            color: white;
+            color: rgb(255, 255, 255);
             border-color: #007bff;
         }
 
@@ -219,8 +121,8 @@
         }
 
         .apply-btn {
-            background-color: #007bff;
-            color: white;
+            background-color: #f3f4f5;
+            color: rgb(0, 0, 0);
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
@@ -229,12 +131,118 @@
         }
 
         .apply-btn:hover {
-            background-color: #0056b3;
+            background-color: #f8af31;
         }
     </style>
+</head>
+
+<body>
+
+
+
+
+    <!-- Orders Table Section -->
+    <h1>sales-report</h1>
+    <div class="sales-section">
+        <div class="sales-header">
+            <h2 class="sales-title">Sales Revenue - <span id="period-text">Daily</span></h2>
+            <div class="period-buttons">
+                <button class="period-button active" data-period="daily">Daily</button>
+                <button class="period-button" data-period="weekly">Weekly</button>
+                <button class="period-button" data-period="monthly">Monthly</button>
+                <button class="period-button" data-period="yearly">Yearly</button>
+                <button class="period-button" data-period="custom">Custom</button>
+            </div>
+            <div class="export-buttons">
+                <button class="export-button pdf-button">
+                    Export to PDF
+                </button>
+
+                <button class="export-button excel-button">
+                    Export to Excel
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Add pagination controls -->
+        <div class="table-container">
+            <table class="sales-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Clinet email</th>
+                        <th>Items</th>
+                        <th>Total Amount</th>
+                        <th>Payment Status</th>
+                        <th>Payment Method</th>
+                        <th>Order Status</th>
+                        <th>Order Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dummy data for now -->
+                    <tr>
+                        <td>#ORD001</td>
+                        <td>USR123</td>
+                        <td>3 items</td>
+                        <td>₹110,557</td>
+                        <td>Pending</td>
+                        <td>Cash on Delivery</td>
+                        <td>Delivered</td>
+                        <td>03 Mar, 2024</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD002</td>
+                        <td>USR456</td>
+                        <td>2 items</td>
+                        <td>₹85,999</td>
+                        <td>Paid</td>
+                        <td>UPI</td>
+                        <td>Processing</td>
+                        <td>02 Mar, 2024</td>
+                    </tr>
+                    <!-- Add more dummy rows as needed -->
+                </tbody>
+            </table>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing <span id="showing-start">0</span> to <span id="showing-end">0</span> of <span
+                        id="total-items">0</span> entries
+                </div>
+                <div class="pagination-controls">
+                    <button id="prev-page" class="pagination-button">&laquo; Previous</button>
+                    <div id="page-numbers" class="page-numbers"></div>
+                    <button id="next-page" class="pagination-button">Next &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <!-- Add this HTML for custom date range modal -->
+    <div id="customDateModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Select Date Range</h2>
+            <div class="date-inputs">
+                <div class="input-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" required>
+                </div>
+            </div>
+            <button id="applyDateRange" class="apply-btn">Apply</button>
+        </div>
+    </div>
+
+    
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             const periodButtons = document.querySelectorAll('.period-button');
             const tableBody = document.querySelector('.sales-table tbody');
             const periodText = document.getElementById('period-text');
@@ -306,7 +314,7 @@
 
                 tableBody.innerHTML = pageData.map(order => `
                 <tr>
-                    <td>#${order._id}</td>
+                    <td>#${order.dummyOrderId}</td>
                     <td>${order.userId}</td>
                     <td>${order.items.length} items</td>
                     <td>${formatCurrency(order.totalAmount)}</td>
@@ -334,13 +342,13 @@
                         const data = await response.json();
                         currentData = data;
                         totalItems = data.length;
-                        currentPage = 1; // Reset to first page
+                        currentPage = 1;
 
                         renderTable();
                         renderPagination(totalItems);
                     } catch (error) {
                         console.error('Error fetching orders:', error);
-                    }
+                    } 
                 });
             });
 
@@ -364,7 +372,7 @@
             // Initial load
             document.querySelector('.period-button').click();
 
-            // Custom Date Range Modal
+            
             const modal = document.getElementById('customDateModal');
             const customButton = document.querySelector('[data-period="custom"]');
             const closeBtn = document.querySelector('.close');
@@ -372,24 +380,24 @@
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
 
-            // Open modal when clicking custom button
+            
             customButton.addEventListener('click', function () {
                 modal.style.display = "block";
             });
 
-            // Close modal
+            
             closeBtn.addEventListener('click', function () {
                 modal.style.display = "none";
             });
 
-            // Close modal when clicking outside
+            
             window.addEventListener('click', function (event) {
                 if (event.target == modal) {
                     modal.style.display = "none";
                 }
             });
 
-            // Apply custom date range
+            
             applyBtn.addEventListener('click', async function () {
                 if (!startDate.value || !endDate.value) {
                     alert('Please select both start and end dates');
@@ -405,11 +413,11 @@
                 }
 
                 try {
-                    const response = await fetch('/admin/orders/custom', {
+                    const response = await fetch('/admin/ordersCustom', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
-                        },
+                        }, 
                         body: JSON.stringify({
                             startDate: startDate.value,
                             endDate: endDate.value
@@ -419,11 +427,13 @@
                     if (!response.ok) throw new Error('Network response was not ok');
 
                     const data = await response.json();
+
+                    console.log("dataaaa",data)
                     currentData = data;
                     totalItems = data.length;
                     currentPage = 1;
 
-                    // Update heading with date range
+                    
                     const formattedStart = new Date(startDate.value).toLocaleDateString();
                     const formattedEnd = new Date(endDate.value).toLocaleDateString();
                     periodText.textContent = `Custom (${formattedStart} - ${formattedEnd})`;
@@ -433,11 +443,11 @@
                     modal.style.display = "none";
                 } catch (error) {
                     console.error('Error fetching custom date range:', error);
-                    alert('Error fetching data for custom date range');
+                    alert('kooiii');
                 }
             });
 
-            // Updated PDF Export Function
+
             function generatePDF() {
                 const element = document.createElement('div');
                 element.innerHTML = `
@@ -466,23 +476,27 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Order ID</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; background: #f4f4f4;">Client Email</th>
                                     <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">User ID</th>
                                     <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Items</th>
                                     <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Total Amount</th>
                                     <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Payment Status</th>
                                     <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Order Status</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Payment Method</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">order date</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${currentData.map(order => `
                                     <tr>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">#${order._id}</td>
+                                        <td style="border: 1px solid #ddd; padding: 10px;">#${order.dummyOrderId}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${order.userId}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${order.items.length}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">₹${order.totalAmount}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${order.paymentStatus}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${order.status}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.paymentMethod}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${formatDate(order.createdAt)}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -501,16 +515,71 @@
                 html2pdf().set(opt).from(element).save();
             }
 
-            // Helper function to calculate total revenue
+
+            
+            function generateExcel() {
+                const wb = XLSX.utils.book_new(); 
+
+                
+                const wsData = [
+                    ["Build Your Dream"],  
+                    ["Sales Report"],      
+                    [`Generated on: ${new Date().toLocaleDateString()}`],  
+                    [], 
+                    ["Order ID", "User ID", "Items", "Total Amount", "Payment Status", "Order Status", "Payment Method", "Order Date"], 
+                    ...currentData.map(order => [
+                        order.dummyOrderId || `ORD-${order._id.slice(-6).toUpperCase()}`, 
+                        order.userId,
+                        order.items.length,
+                        `₹${order.totalAmount}`,
+                        order.paymentStatus,
+                        order.status,
+                        order.paymentMethod,
+                        formatDate(order.createdAt),
+                    ])
+                ];
+
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                
+                ws['!cols'] = [
+                    { width: 20 }, 
+                    { width: 20 }, 
+                    { width: 10 },
+                    { width: 15 }, 
+                    { width: 15 }, 
+                    { width: 15 }, 
+                    { width: 20 }  
+                ];
+
+                
+                ws['!merges'] = [
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, 
+                    { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }, 
+                    { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } } 
+                ];
+
+                
+                XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+
+                
+                XLSX.writeFile(wb, `BYD-SalesReport-${new Date().toISOString().slice(0, 10)}.xlsx`);
+            }
+
             function calculateTotalRevenue() {
                 return currentData.reduce((total, order) => total + order.totalAmount, 0)
                     .toLocaleString('en-IN');
             }
 
-            // Add click event to PDF button
+            
             document.querySelector('.pdf-button').addEventListener('click', generatePDF);
+
+            document.querySelector('.excel-button').addEventListener('click', generateExcel);
+
+
         });
-    </script>
+   
+   </script>
 </body>
 
 </html>

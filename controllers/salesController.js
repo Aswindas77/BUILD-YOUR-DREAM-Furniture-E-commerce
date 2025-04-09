@@ -23,7 +23,7 @@ const loadSalesReport = async (req, res) => {
     let startDate = null;
     let endDate = null;
 
-    if (req.query.startDate && req.query.endDate) {
+    if (req.query.startDate && req.query.endDate) { 
       startDate = new Date(req.query.startDate);
       startDate.setHours(0, 0, 0, 0);
 
@@ -126,7 +126,7 @@ const loadSalesReport = async (req, res) => {
         monthly: page,
         yearly: page
 
-      },
+      }, 
       totalPages: {
         daily: dailySalesData.length,
         weekly: weeklySalesData.totalPages,
@@ -371,7 +371,7 @@ const getYearlySales = async (page = 1, limit = 0, startDate = null, endDate = n
     return {
       data: [],
       totalPages: 0
-    };
+    }; 
   }
 
   for (let year = startYear; year <= endYear; year++) {
@@ -427,4 +427,5 @@ const getYearlySales = async (page = 1, limit = 0, startDate = null, endDate = n
 
 module.exports = {
   loadSalesReport,
+  
 }

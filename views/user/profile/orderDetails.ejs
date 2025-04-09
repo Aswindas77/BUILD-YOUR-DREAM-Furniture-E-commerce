@@ -50,9 +50,7 @@
             <div>
                 <h2>Order id: #<%= order._id.toString().slice(-8) %>
                 </h2>
-                <p>Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric' , month: 'long'
-                        , year: 'numeric' }) %>
-                </p>
+                
             </div>
             <span class="status-badge status-<%= order.status.toLowerCase() %>">
                 <%= order.status %>

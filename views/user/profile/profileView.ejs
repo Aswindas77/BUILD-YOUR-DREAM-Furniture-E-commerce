@@ -637,7 +637,7 @@
                                 <div class="order-header">
                                     <div class="order-id">
                                         <span class="label">Order ID:</span>
-                                        <span class="value">#<%= order._id.toString().slice(-8) %></span>
+                                        <span class="value">#<%= order.dummyOrderId.toString().slice(-8) %></span>
                                     </div>
                                     <div class="order-date">
                                         <i class="far fa-calendar-alt"></i>
@@ -702,22 +702,23 @@
                                                 onclick="showOrderDetails('<%= order._id %>')">
                                                 View Details
                                             </button>
-                                            <% if (order.status !=='Delivered' && order.status !=='Cancelled' ) { %>
+                                            <% if (order.status !=='Delivered' && order.status !=='Cancelled' &&
+                                                order.paymentStatus !=="Refunded" ) { %>
                                                 <button class="cancel-order-btn"
                                                     onclick="cancelOrder('<%= order._id %>')">
                                                     Cancel Order
                                                 </button>
                                                 <% } %>
 
-                                                    <% if(order.paymentMethod=="razorpay"){ %>
+                                                    <% if(order.paymentMethod=="razorpay" ){ %>
                                                         <% if (order.paymentStatus==='Failed' ||
-                                                        order.paymentStatus==='Pending' ) { %>
-                                                        <button class="retry-payment-btn"
-                                                            onclick="retryPayment('<%= order._id %>', '<%= order.totalAmount %>')">
-                                                            Retry Payment
-                                                        </button>
-                                                        <% } %>
-                                                 <% } %>
+                                                            order.paymentStatus==='Pending' ) { %>
+                                                            <button class="retry-payment-btn"
+                                                                onclick="retryPayment('<%= order._id %>', '<%= order.totalAmount %>')">
+                                                                Retry Payment
+                                                            </button>
+                                                            <% } %>
+                                                                <% } %>
                                         </div>
                                     </div>
                                 </div>
@@ -726,24 +727,33 @@
                     </div>
 
                     <!-- pagianation links -->
-                    <div class="pagination" style="margin-top: 57px; margin-left: 44%;">
-                        <% if (currentPage> 1) { %>
+                    <div class="pagination" style="margin-top: 57px; display: flex; justify-content: center; gap: 5px;">
+                        <% if (currentPage > 1) { %>
                             <a href="?page=<%= currentPage - 1 %>"
-                                style="text-decoration: none; padding: 5px 10px;width: 85px; border: 1px solid #ccc; margin-right: 5px;">Previous</a>
-                            <% } %>
-
-                                <% for (let i=1; i <=totalPages; i++) { %>
-                                    <a href="?page=<%= i %>"
-                                        style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; background-color: '<%= currentPage === i ? '#ddd' : '#fff' %>';">
-                                        <%= i %>
-                                    </a>
-                                    <% } %>
-
-                                        <% if (currentPage < totalPages) { %>
-                                            <a href="?page=<%= currentPage + 1 %>"
-                                                style="text-decoration: none; padding: 5px 10px; width: 80px; border: 1px solid #ccc; margin-left: 5px;">Next</a>
-                                            <% } %>
+                                style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px;">
+                                Previous
+                            </a>
+                        <% } %>
+                    
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <a href="?page=<%= i %>"
+                                style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px;
+                                       background-color: <%= currentPage === i ? '#ff9800' : '#fff' %>;
+                                       color: <%= currentPage === i ? '#fff' : '#000' %>;
+                                       font-weight: <%= currentPage === i ? 'bold' : 'normal' %>;">
+                                <%= i %>
+                            </a>
+                        <% } %>
+                    
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>"
+                                style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px;">
+                                Next
+                            </a>
+                        <% } %>
                     </div>
+                    
+
                     <% } else { %>
                         <div class="empty-orders">
                             <i class="fas fa-shopping-bag"></i>
@@ -866,11 +876,12 @@
         }
 
 
+
  
 
-
         function retryPayment(orderId, totalAmount) {
-            console.log("totalAmount",totalAmount)
+            console.log("totalAmount", totalAmount)
+            console.log("orderId",orderId);
             Swal.fire({
                 title: "Retry Payment?",
                 text: `Your order total is ₹${totalAmount}. Do you want to proceed?`,
@@ -879,24 +890,25 @@
                 confirmButtonText: "Yes, retry!",
                 cancelButtonText: "No, cancel",
             }).then((result) => {
+
                 if (result.isConfirmed) {
-                    console.log("kkk")
-                    return fetch(`/user/createRetryPayment/${orderId}`, { 
+                    
+                    return fetch(`/user/createRetryPayment/${orderId}`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            amount: totalAmount*100 , 
+                            amount: Math.round(totalAmount * 100),
                             currency: "INR",
                             receipt: "receipt_" + Date.now()
                         })
                     })
-                        .then(response => response.json()) 
+                        .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                console.log("order",data.order)
-                                retryRazorpay(data.order, data.amount,orderId);
+                                console.log("order", data.orderId)
+                                retryRazorpay(data.order, data.amount, orderId);
                             } else {
-                                console.log("kiiii")
+                               
                                 Swal.fire({
                                     icon: "error",
                                     title: "Retry Failed",
@@ -921,7 +933,12 @@
 
 
 
-        function retryRazorpay(order, totalAmount,orderId) {
+        function retryRazorpay(order, totalAmount, orderId) {
+
+            console.log("totalAmount",totalAmount)
+            console.log("order",order)
+            console.log("orderId",orderId)
+
 
             var options = {
                 "key": "rzp_test_av7bn0QCiETOX0",
@@ -931,9 +948,9 @@
                 "description": "Test Transaction",
                 "order_id": order,
                 "handler": function (response) {
-                    console.log("order.id",order.id)
+                   
 
-                    updatePayment(response,order.id,orderId)
+                    updatePayment(response, orderId)
                 },
                 "prefill": {
                     "name": "John Doe",
@@ -950,58 +967,59 @@
             rzp.on('payment.failed', function (response) {
                 console.log("Payment Failed:", response.error);
 
-            });
+                    });
 
             rzp.open();
         }
 
 
 
-        function updatePayment(response,orderid,orderId) {
-            console.log("orderId",orderId)
-            
-    fetch(`/user/updateRetryPayment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            orderId: orderId,
-            razorpayPaymentId: response.razorpay_payment_id
-        })
-    })
-    .then(response => {
-        if (!response.ok) { 
-            throw new Error(`HTTP error! Status: ${response.status}`); 
+
+        function updatePayment(response, orderId) {
+            console.log("orderId", orderId)
+
+            fetch(`/user/updateRetryPayment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    razorpayPaymentId: response.razorpay_payment_id
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Payment Successful!",
+                            text: "Your payment has been successfully updated.",
+                            timer: 2000,
+                            showConfirmButton: false,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Update Failed",
+                            text: data.message || "Something went wrong. Please try again.",
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error updating payment:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Server Error",
+                        text: "Failed to update payment. Please try again later.",
+                    });
+                });
         }
-        return response.json(); 
-    })
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                icon: "success",
-                title: "Payment Successful!",
-                text: "Your payment has been successfully updated.",
-                timer: 2000,
-                showConfirmButton: false,
-            }).then(() => {
-                window.location.reload(); 
-            });
-        } else {
-            Swal.fire({
-                icon: "error",
-                title: "Update Failed",
-                text: data.message || "Something went wrong. Please try again.",
-            });
-        }
-    })
-    .catch(error => {
-        console.error("Error updating payment:", error);
-        Swal.fire({
-            icon: "error",
-            title: "Server Error",
-            text: "Failed to update payment. Please try again later.",
-        });
-    });
-}
 
 
     </script>

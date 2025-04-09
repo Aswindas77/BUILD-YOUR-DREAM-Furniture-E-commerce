@@ -1,5 +1,4 @@
 <!-- Sidebar -->
- 
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="logo-container">
@@ -18,11 +17,6 @@
 
         <div class="nav-section">
             <div class="nav-section-title">MANAGEMENT</div>
-            <a href="/admin/salesReport" class="nav-item">
-                <i class="fas fa-chart-bar"></i>
-                <span>sales report</span>
-            </a>
-            
             <a href="/admin/user-managment" class="nav-item">
                 <i class="fas fa-user-shield"></i>
                 <span>Users</span>
@@ -45,8 +39,11 @@
             </a>
             <a href="/admin/returnOrders" class="nav-item">
                 <i class="fas fa-clipboard-list"></i>
-                <span>return orders</span>
-               
+                <span>Return Orders</span>
+            </a>
+            <a href="/admin/salesReport" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Sales Report</span>
             </a>
         </div>
 
@@ -60,8 +57,14 @@
     </nav>
 </aside>
 
+<!-- Menu Toggle Button (Add this outside the sidebar, typically in a header) -->
+<div class="menu-toggle" id="menu-toggle">
+    <i class="fas fa-bars"></i>
+</div>
+
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
     .sidebar {
@@ -75,6 +78,7 @@
         padding-top: 1rem;
         transition: all 0.3s ease;
         box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000; /* Ensure sidebar is above content */
     }
 
     .sidebar-header {
@@ -143,28 +147,42 @@
         font-weight: 500;
     }
 
-    /* Active state */
     .nav-item.active {
         background: rgba(52, 152, 219, 0.2);
         border-left: 3px solid #3498db;
         color: white;
     }
 
-    /* Hover effects */
     .nav-item:hover i {
         transform: scale(1.1);
         transition: transform 0.3s ease;
     }
 
+    /* Menu Toggle Button */
+    .menu-toggle {
+        display: none; /* Hidden by default on large screens */
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        font-size: 1.5rem;
+        color: #2c3e50;
+        cursor: pointer;
+        z-index: 1100; /* Above sidebar */
+        background: #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
     /* Media Query */
     @media (max-width: 768px) {
         .sidebar {
-            width: 220px;
-            transform: translateX(-220px);
+            width: 260px; /* Keep width consistent */
+            transform: translateX(-260px); /* Hide by default */
         }
 
         .sidebar.active {
-            transform: translateX(0);
+            transform: translateX(0); /* Show when active */
         }
 
         .logo-container h2 {
@@ -174,19 +192,47 @@
         .nav-item {
             padding: 0.6rem 1rem;
         }
+
+        .menu-toggle {
+            display: block; /* Show toggle button on small screens */
+        }
+
+        /* Adjust main content when sidebar is hidden */
+        main {
+            margin-left: 0 !important; /* Ensure content takes full width */
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Adjust main content when sidebar is visible */
+        .sidebar.active + main {
+            margin-left: 260px;
+        }
     }
-    
 </style>
 
 <script>
-    // Add active class to current page
     document.addEventListener('DOMContentLoaded', function () {
         const currentPath = window.location.pathname;
         const navItems = document.querySelectorAll('.nav-item');
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
 
+        // Add active class to current page
         navItems.forEach(item => {
             if (item.getAttribute('href') === currentPath) {
                 item.classList.add('active');
+            }
+        });
+
+        // Toggle sidebar on menu icon click
+        menuToggle.addEventListener('click', function () {
+            sidebar.classList.toggle('active');
+        });
+
+        // Optional: Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function (event) {
+            if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
             }
         });
     });

@@ -4,6 +4,7 @@ const Product = require("../models/productModel");
 const Orders = require("../models/ordermodel");
 const Cart = require('../models/cartModel')
 const User = require("../models/userModel");
+const Wallet = require("../models/walletModel");
 const paypal = require("@paypal/checkout-server-sdk");
 const paypalClient = require("../config/paypal");
 const Return = require('../models/returnModel');
@@ -13,10 +14,10 @@ const path = require("path");
 const fs = require("fs");
 const Razorpay = require('razorpay');
 const HttpStatus = require('../constants/httpStatus');
-const Messages =require('../constants/messages.json')
+const Messages = require('../constants/messages.json')
 
 
- 
+
 // load order page
 
 //====================================================================================================================================================
@@ -191,14 +192,15 @@ const getOrderDetails = async (req, res) => {
 
 const orderCancel = async (req, res) => {
     try {
-       
+
         const orderId = req.params.orderId;
         const { reason } = req.body;
-        
+        const user = req.session?.User
 
-       console.log("orderId",orderId)
-       console.log("reason",reason);
- 
+
+        console.log("orderId", orderId)
+        console.log("reason", reason);
+
 
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return res.status(HttpStatus.BAD_REQUEST).json({
@@ -208,6 +210,10 @@ const orderCancel = async (req, res) => {
         }
 
         const order = await Orders.findById(orderId);
+
+        const wallet = await Wallet.findOne({ userId: user._id });
+
+        console.log(wallet.balance)
 
 
         if (!order) {
@@ -244,7 +250,32 @@ const orderCancel = async (req, res) => {
         if (order.paymentStatus === 'Paid') {
 
             order.paymentStatus = 'Refunded';
+
+            const refundAmount = order.totalAmount;
+            const refundDescription = `Refunded amount credited`;
+            const refundDate = new Date();
+
+            wallet.balance += order.totalAmount
+
+            wallet.transactions.push({
+                type: 'credit',
+                amount: refundAmount,
+                description: refundDescription,
+                date: refundDate
+            });
+
+            await wallet.save();
+
+            req.session.walletRefund = {
+                amount: refundAmount,
+                description: refundDescription,
+                date: refundDate.toLocaleDateString()
+            };
+
+
         }
+
+
 
 
         order.status = 'Cancelled';
@@ -318,7 +349,7 @@ const requestReturn = async (req, res) => {
     } catch (error) {
         console.error('Return Request Error:', error);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
-};
+    };
 
 }
 
@@ -406,7 +437,7 @@ const updateReturnStatus = async (req, res) => {
             wallet.transactions.unshift({
                 type: 'credit',
                 amount: refundAmount,
-                description: `Refund for Return #${returnRequest._id}`,
+                description: "Refund processed for returned item",
                 date: new Date()
             });
 
@@ -614,15 +645,14 @@ const generateInvoice = async (req, res) => {
 
 const retryPayment = async (req, res) => {
     try {
-        const {  razorpayPaymentId,amount } = req.body
 
-        
+        const { razorpayPaymentId, orderId } = req.body
 
-        const {orderId} =req.params;
-
-        
+        console.log("jannana",orderId)
 
         const order = await Orders.findById(orderId);
+        console.log("abiii",order)
+
         if (!order) {
             return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Order not found" });
         }
@@ -640,36 +670,32 @@ const retryPayment = async (req, res) => {
     }
 
 }
- 
 
 
 
-const razorpay = new Razorpay({ 
+
+const razorpay = new Razorpay({
     key_id: "rzp_test_av7bn0QCiETOX0",
     key_secret: "wehlBhfqQlWoouA0ZGxYB373",
 });
- 
+
 const createRetryPayment = async (req, res) => {
     try {
-        const { receipt, currency, amount ,requestData } = req.body;
+        const { receipt, currency, amount } = req.body;
 
-        
-
-
-        
+        const {orderId} =req.params;
 
         const newOrder = await razorpay.orders.create({
-            subtotal:amount,
+             amount,
             currency,
-            receipt, 
+            receipt,
 
         });
 
         res.json({
             success: true,
             razorpayOrderId: newOrder.id,
-            subtotal,
-
+            amount,
             orderId: orderId
         });
 
@@ -682,7 +708,7 @@ const createRetryPayment = async (req, res) => {
 
 
 
- 
+
 
 
 module.exports = {

@@ -190,7 +190,7 @@ const updateProduct = async (req, res) => {
 
   try {
 
-    const { id, name, description, salesPrice, category, productOffer, stock, status, rating } = req.body;
+    const { id, name, description, salesPrice, category, productOffer, stock, status, rating,images } = req.body;
 
     console.log("hi", rating)
 
@@ -201,14 +201,15 @@ const updateProduct = async (req, res) => {
         message: "Stock error",
       });
     }
-    const images = [req.body?.image0, req.body?.image1, req.body?.image2];
+    const imagess = [images[0], images[1], images[2]];
+    console.log(imagess)
 
 
     const dirPath = `./public/uploads/products/${id}`;
     fs.mkdirSync(dirPath, { recursive: true });
 
     const imagep = [];
-    images.forEach((img, index) => {
+    imagess.forEach((img, index) => {
       if (img && img !== 'undefined') {
 
         const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
@@ -226,7 +227,7 @@ const updateProduct = async (req, res) => {
       }
     });
 
-    for (let i = 0; i < images.length; i++) {
+    for (let i = 0; i < imagess.length; i++) {
       if (imagep[i] !== null) {
         await Products.updateOne(
           { _id: id },
@@ -243,7 +244,7 @@ const updateProduct = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    console.log('Product updated successfully:', updatedProduct);
+    // console.log('Product updated successfully:', updatedProduct);
 
     return res.json({
       success: true,

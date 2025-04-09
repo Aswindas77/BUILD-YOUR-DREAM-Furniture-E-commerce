@@ -6,7 +6,7 @@ const Cart = require('../models/cartModel')
 const Coupon = require('../models/couponModel');
 const User = require('../models/userModel.js');
 const HttpStatus = require('../constants/httpStatus.js');
-const Messages =require('../constants/messages.json')
+const Messages = require('../constants/messages.json')
 
 
 
@@ -38,6 +38,7 @@ const loadCart = async (req, res) => {
             .populate({
                 path: "products.productId",
                 select: "name salesPrice images stock",
+                match: { isDeleted: false, isListed: false }
             });
 
 
@@ -126,6 +127,19 @@ const addcart = async (req, res) => {
 
 //====================================================================================================================================================
 
+
+// proceed to checkout
+
+const proceedCheckout = async (req, res) => {
+    try {
+        const { cartId } = req.body;
+
+        const products = await Cart.findById(cartId).populate("products.productId")
+    } catch (error) {
+
+    }
+}
+
 // updaate cart
 
 //====================================================================================================================================================
@@ -134,6 +148,7 @@ const updateCart = async (req, res) => {
     try {
         const { cart } = req.body;
         const userId = req.session?.User;
+        console.log("jimamam", cart)
 
         if (!cart || !userId) {
             return res.status().json({ success: false, message: 'Invalid request' });
@@ -236,20 +251,24 @@ const deleteCart = async (req, res) => {
 
 const loadCheckout = async (req, res) => {
     try {
-        const Id = req.query.id;
-        const Total = req.query.total
-        const cartId = new mongoose.Types.ObjectId(Id);
+        const { cartId, grandtotal } = req.body
+
         const userId = req.session?.User?._id;
+
+        console.log("cartid", cartId)
 
 
         const user = await User.findById(userId)
 
-        console.log("Total",Total)
-        
+        console.log("Total", grandtotal)
 
-        const grandTotal=Number(Total).toFixed(2)
 
-        console.log("grandTotal",grandTotal);
+        const grandTotal = parseFloat(grandtotal);
+        if (isNaN(grandTotal)) {
+            return res.status(400).json({ success: false, message: "Invalid total amount" });
+        }
+
+        console.log("grandTotal", grandTotal);
 
         if (!userId) {
             return res.redirect('/user/login');
@@ -267,10 +286,10 @@ const loadCheckout = async (req, res) => {
 
         const products = await Product.find({ isDeleted: false, isListed: false });
 
-        if(!products){
+        if (!products) {
             return res.redirect('/user/login');
         }
-        
+
         const categories = await Category.find({ isDeleted: false, isListed: false });
         const userAddresses = await Address.findOne({ userId: userId }).populate("userId");
 
@@ -286,6 +305,34 @@ const loadCheckout = async (req, res) => {
             })
             .exec();
 
+        if (!cart) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Cart not found" });
+
+        const orderItems = cart.products.map(item => ({
+            productId: item.productId._id,
+            quantity: item.quantity,
+            price: item.salesPrice,
+        }));
+
+
+        for (let item of orderItems) {
+            const product = await Product.findById(item.productId);
+
+            if (!product) {
+                return res.status(HttpStatus.NOT_FOUND).json({
+                    success: false,
+                    message: `Product with ID ${item.productId} not found`,
+                });
+            }
+
+            if (product.stock < item.quantity) {
+                return res.status(HttpStatus.BAD_REQUEST).json({
+                    success: false,
+                    message: `Not enough stock for ${product.name}.  currently available stock: ${product.stock}`,
+                });
+            }
+        }
+
+
         cart.products = cart.products.filter(p => p.productId && p.productId.stock > 0)
 
 
@@ -293,19 +340,11 @@ const loadCheckout = async (req, res) => {
         if (userAddresses) {
             userAddresses.address = userAddresses.address.filter(addr => !addr.isDeleted);
 
-           
+
 
         }
 
-        res.render("checkOut", {
-            user,
-            products,
-            categories,
-            addresses: userAddresses ? userAddresses.address : [],
-            cart,
-            coupons: validCoupons,
-            grandTotal
-        });
+        return res.status(200).json({ success: true });
 
     } catch (error) {
         console.error("Error in loadCheckout:", error);
@@ -359,11 +398,53 @@ const validateCoupon = async (req, res) => {
     }
 };
 
+
+const renderCheckoutPage = async (req, res) => {
+    try {
+        const userId = req.session?.User?._id;
+        const { id: cartId, total: grandtotal } = req.query;
+
+        const [
+            user,
+            cart,
+            categories,
+            userAddresses
+        ] = await Promise.all([
+            User.findById(userId),
+            Cart.findById(cartId).populate({
+                path: 'products.productId',
+                select: 'name salesPrice quantity stock'
+            }),
+            Category.find({ isDeleted: false, isListed: false }),
+            Address.findOne({ userId }).populate("userId")
+        ]);
+
+        const addresses = userAddresses?.address?.filter(a => !a.isDeleted) || [];
+
+        res.render("checkOut", {
+            user,
+            cart,
+            products: cart.products, 
+            categories,
+            addresses,
+            grandTotal: parseFloat(grandtotal)
+        });
+
+    } catch (err) {
+        console.error("Checkout page render error:", err);
+        res.redirect('/user/cart');
+    }
+};
+
+
+
 module.exports = {
     loadCart,
     addcart,
     updateCart,
     loadCheckout,
     deleteCart,
-    validateCoupon
+    validateCoupon,
+    proceedCheckout,
+    renderCheckoutPage
 }; 

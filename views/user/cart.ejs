@@ -31,6 +31,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="/public/userAssets/css/custom.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 </head>
 
@@ -105,13 +106,13 @@
                                                                     onclick="updateQuantity('<%= item.productId._id %>', 1, `<%= item.productId.salesPrice %>`, 5,`<%= item.productId.stock %>`)"
                                                                     class="btn btn-sm btn-outline-secondary increase items-count"
                                                                     type="button">
-                                                                    <i class="lnr lnr-chevron-up"></i>
+                                                                    <i class="bi bi-plus-lg"></i>
                                                                 </button>
                                                                 <button
                                                                     onclick="updateQuantity('<%= item.productId._id %>', -1, `<%= item.productId.salesPrice %>`,`<%= item.productId.stock %>`)"
                                                                     class="btn btn-sm btn-outline-secondary reduced items-count ml-1"
                                                                     type="button">
-                                                                    <i class="lnr lnr-chevron-down"></i>
+                                                                    <i class="bi bi-dash-lg"></i>
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -119,9 +120,10 @@
                                                     <td>
                                                         <% grandTotal +=item.salesPrice * item.quantity%>
                                                             <h5 id="price-<%= item.productId._id %>">₹<%=
-                                                                    item.salesPrice * item.quantity %>
+                                                                    (item.salesPrice * item.quantity).toFixed(2) %>
                                                             </h5>
                                                     </td>
+
                                                     <td>
                                                         <button class="btn  btn-sm"
                                                             onclick="deleteCartItem('<%= item.productId._id %>')">
@@ -143,7 +145,7 @@
                                                                     <h5>total</h5>
                                                                 </td>
                                                                 <td>
-                                                                    <h5 id="grand-total">₹<%=grandTotal %>
+                                                                    <h5 id="grand-total">₹<%=grandTotal.toFixed(2) %>
                                                                     </h5>
                                                                 </td>
                                                             </tr>
@@ -200,8 +202,7 @@
                     <script src="/public/userAssets/js/gmaps.min.js"></script>
                     <script src="/public/userAssets/js/main.js"></script>
                     <script>
-
-
+                        // Function to update the grand total dynamically
                         function updateGrandTotal() {
                             let grandTotal = 0;
                             document.querySelectorAll('[id^="price-"]').forEach(element => {
@@ -209,17 +210,14 @@
                                 const price = parseFloat(priceText) || 0;
                                 grandTotal += price;
                             });
-
                             document.getElementById('grand-total').textContent = `₹${grandTotal.toFixed(2)}`;
                         }
-                        function updateQuantity(productId, quantity, price, maxQuantity = 5, stockAvailable) {
-                            console.log("Updating quantity for product:", productId, quantity, price, stockAvailable);
-                            console.log("jiiii", stockAvailable);
 
+                        // Function to update quantity
+                        function updateQuantity(productId, quantity, price, maxQuantity = 5, stockAvailable) {
                             const qtyInput = document.getElementById('sst-' + productId);
                             const priceElement = document.getElementById('price-' + productId);
                             const incrementButton = document.getElementById(`increment-${productId}`);
-                            const originalQty = parseInt(qtyInput.value, 10);
 
                             if (!qtyInput) {
                                 console.error("Quantity input not found for product:", productId);
@@ -229,10 +227,7 @@
                             let currentQty = parseInt(qtyInput.value, 10) || 1;
                             let itemPrice = parseFloat(price) || 0;
 
-
-
                             currentQty += quantity;
-
 
                             if (currentQty > stockAvailable) {
                                 showToast("Not enough stock available!", "error");
@@ -241,35 +236,32 @@
 
                             currentQty = Math.max(1, Math.min(currentQty, maxQuantity));
 
-                            // Check if max quantity limit reached
-                            if (currentQty === maxQuantity && quantity === 1 && originalQty !== maxQuantity) {
+                            
+                            if (currentQty === maxQuantity && quantity === 1) {
                                 Swal.fire({
                                     title: "Maximum Quantity Reached",
-                                    text: `You can't add more than 4 items`,
+                                    text: `You can't add more than ${maxQuantity} items`,
                                     icon: "warning"
-                                }).then(() => {
-                                    window.location.reload();
                                 });
                                 return;
                             }
 
-                            // Only update if quantity actually changed
-                            if (currentQty !== originalQty) {
-                                qtyInput.value = currentQty;
-                                incrementButton.disabled = (currentQty === maxQuantity || currentQty >= stockAvailable);
+                            // Update UI immediately
+                            qtyInput.value = currentQty;
+                            incrementButton.disabled = (currentQty === maxQuantity || currentQty >= stockAvailable);
+                            const totalPrice = currentQty * itemPrice;
+                            priceElement.textContent = `₹${totalPrice.toFixed(2)}`;
 
-                                // Update price display
-                                const totalPrice = currentQty * itemPrice;
-                                priceElement.textContent = `₹${totalPrice.toFixed(2)}`;
+                            // Update grand total
+                            updateGrandTotal();
 
-                                // Update cart
-                                updateCart(productId, currentQty);
-                            }
+                            // Send update to server
+                            updateCart(productId, currentQty);
                         }
 
-
-
+                        // Function to update cart on the server
                         function updateCart(productId, currentQty) {
+
                             fetch('/user/update', {
                                 method: 'POST',
                                 headers: {
@@ -282,23 +274,16 @@
                                 .then(data => {
                                     if (!data.success) {
                                         showToast(data.message || "Failed to update cart", "error");
+
                                     }
                                 })
-                                .then(() => {
-                                    window.location.reload();
-                                })
-
                                 .catch(error => {
+                                    console.error("Error:", error);
                                     Swal.fire("Error!", "Something went wrong.", "error");
                                 });
                         }
 
-
-
-
-
-
-
+                        // Function to delete cart item
                         function deleteCartItem(productId) {
                             Swal.fire({
                                 title: "Are you sure?",
@@ -316,8 +301,24 @@
                                     })
                                         .then(response => response.json())
                                         .then(data => {
-                                            if (data.success == true) {
-                                                window.location.reload()
+                                            if (data.success) {
+                                                // Remove the row from the table dynamically
+                                                const row = document.querySelector(`tr:has(#sst-${productId})`);
+                                                if (row) {
+                                                    row.remove();
+                                                }
+
+                                                // Update grand total
+                                                updateGrandTotal();
+
+                                                // Check if cart is empty
+                                                const tbody = document.querySelector('tbody');
+                                                if (tbody.children.length === 2) { // Only total and button rows remain
+                                                    tbody.innerHTML = `<tr><td colspan="5" style="color: red;" class="text-center">No products in the cart</td></tr>`;
+                                                    document.querySelector('.checkout_btn_inner').innerHTML = '<a class="btn btn-secondary gray_btn mr-2" href="/user/shop">Continue Shopping</a>';
+                                                }
+
+                                                showToast("Item removed successfully!", "success");
                                             } else {
                                                 showToast("Failed to remove item", "error");
                                             }
@@ -330,28 +331,22 @@
                             });
                         }
 
-
+                        // Toast notification function (unchanged)
                         function showToast(message, type) {
                             let bgColor, icon;
 
                             if (type === "success") {
                                 bgColor = "#28a745";
-
                             } else if (type === "error") {
                                 bgColor = "#dc3545";
-
                             } else if (type === "warning") {
                                 bgColor = "#ffc107";
-
                             } else {
                                 bgColor = "#17a2b8";
-
                             }
 
                             let toast = document.createElement("div");
-                            toast.innerHTML = `<strong>${icon} ${message}</strong>`;
-
-                            // Styling for attractive design
+                            toast.innerHTML = `<strong>${message}</strong>`;
                             toast.style.position = "fixed";
                             toast.style.top = "122px";
                             toast.style.left = "50%";
@@ -373,26 +368,40 @@
 
                             document.body.appendChild(toast);
 
-                            // Fade in effect
                             setTimeout(() => {
                                 toast.style.opacity = "1";
                                 toast.style.transform = "translateX(-50%) translateY(10px)";
                             }, 100);
 
-                            // Remove toast after 3 seconds with fade-out effect
                             setTimeout(() => {
                                 toast.style.opacity = "0";
                                 toast.style.transform = "translateX(-50%) translateY(0px)";
-                                setTimeout(() => toast.remove(), 500); // Remove after fade-out
+                                setTimeout(() => toast.remove(), 500);
                             }, 3000);
                         }
 
 
-                        function proceedCheckout(cartId, grandTotal) {
-                            console.log("Cart ID:", cartId);
 
-                            // Redirect the user to the checkout page
-                            window.location.href = `/user/checkout?id=${cartId}&total=${grandTotal}`;
+                        function proceedCheckout(cartId, grandtotal) {
+                            fetch('/user/loadcheckout', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ cartId, grandtotal })
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        window.location.href = `/user/checkout-page?id=${cartId}&total=${grandtotal}`;
+                                    } else {
+                                        showToast(data.message || "Something went wrong");
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error("Fetch error:", err);
+                                    showToast("Server error, please try again.");
+                                });
                         }
 
 

@@ -799,7 +799,7 @@
                             .catch(error => {
                                 console.error("Error:", error);
                                 Swal.fire("An error occurred during checkout");
-                            });
+                            }); 
 
                     } else if (requestData.paymentMethod === "paypal") {
                         fetch("/user/checkout", {
@@ -829,22 +829,23 @@
 
                     }
 
-                });
+                }); 
 
 
                 function initiateRazorpayPayment(requestData, grandTotal, couponCode) {
                     fetch('/user/createOrder', {
                         method: 'POST',
                         headers: {
-                            'Content-Typree': 'application/json'
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
+                            cartId:requestData.cartId,
                             amount: requestData.grandTotal * 100,
                             currency: "INR",
                             receipt: "receipt_" + Date.now(),
                             totalAmount: grandTotal,
                             coupon: couponCode
-                        })
+                        }) 
                     })
                         .then(response => response.json())
                         .then(data => {
@@ -852,8 +853,8 @@
                                 console.log("orderAmount", data.order.totalamount)
                                 openRazorpay(data.order, requestData);
                             } else {
-                                console.error("Error creating Razorpay order:", data.message);
-                                showToast("Razorpay transactions are limited. Please choose a different payment method ", "error");
+                                
+                                showToast(data.message ||"Razorpay transactions are limited. Please choose a different payment method ", "error");
                             }
                         })
                         .catch(error => {
@@ -1125,7 +1126,9 @@
                         Coupon applied successfully! You saved ₹${data.discount}
                     </div>
                 `;
-                        } else {
+                        }
+                        
+                         else {
                             messageDiv.innerHTML = `
                     <div class="alert alert-danger">
                         ${data.message}
@@ -1146,7 +1149,7 @@
 
                 async function removeCoupon() {
                     const cartId = '<%= cart?._id %>';
-                    const grandTotal = ' <%= grandTotal %>';
+                    const grandTotal = '<%= grandTotal %>';
 
                     try {
                         const response = await fetch('/user/remove-coupon', {
@@ -1167,10 +1170,11 @@
                             document.getElementById('appliedCouponArea').style.display = 'none';
 
                             const finalAmount = Number(data.finalAmount).toFixed(2)
+                            const originalAmount = Number(data.originalAmount);
 
                             console.log("original", finalAmount)
 
-                            updateOrderSummary(data.originalAmount, 0, finalAmount);
+                            updateOrderSummary(originalAmount, 0, originalAmount);
 
                             document.getElementById('couponMessage').innerHTML = `
                     <div class="alert alert-success">
@@ -1219,7 +1223,7 @@
                     let toast = document.createElement("div");
                     toast.innerHTML = `<strong>${message}</strong>`;
 
-                    // Styling for attractive design
+                    
                     toast.style.position = "fixed";
                     toast.style.top = "122px";
                     toast.style.left = "50%";
@@ -1241,17 +1245,17 @@
 
                     document.body.appendChild(toast);
 
-                    // Fade in effect
-                    setTimeout(() => {
+                    
+                    setTimeout(() => { 
                         toast.style.opacity = "1";
                         toast.style.transform = "translateX(-50%) translateY(10px)";
                     }, 100);
 
-                    // Remove toast after 3 seconds with fade-out effect
+                    
                     setTimeout(() => {
                         toast.style.opacity = "0";
                         toast.style.transform = "translateX(-50%) translateY(0px)";
-                        setTimeout(() => toast.remove(), 500); // Remove after fade-out
+                        setTimeout(() => toast.remove(), 500); 
                     }, 3000);
                 }
 

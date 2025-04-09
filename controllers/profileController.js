@@ -599,7 +599,7 @@ const getOrderDetails = async (req, res) => {
             discountAmount:discountAmount,
             coupon :coupon,
             returnOrder: returnRequest,
-            user: req.session.User,
+            user: req.session?.User,
             selectedAddress
 
         });

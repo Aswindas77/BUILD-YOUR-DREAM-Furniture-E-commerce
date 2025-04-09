@@ -129,6 +129,34 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
+
+let croppers = {};
+        function cropper(index) {
+            const files = document.getElementById(`image${index}`);
+            const preview = document.getElementById(`prev${index}`);
+            const file = files.files[0];
+
+            if (file) {
+                const objectURL = URL.createObjectURL(file);
+                preview.src = objectURL;
+                preview.style.display = 'block';
+
+                if (croppers[index]) {
+                    croppers[index].destroy();
+                }
+
+                croppers[index] = new Cropper(preview, {
+                    aspectRatio: NaN,
+                    cropBoxMovable: true,
+                    ready: function () {
+                        this.cropper.setCropBoxData({
+                            width: 100,
+                            height: 100,
+                        });
+                    },
+                });
+            }
+        }
         document.addEventListener('DOMContentLoaded', function () {
             
             function validateForm(formData) {
@@ -143,7 +171,9 @@
                 const productOffer = document.getElementById("productOffer");
                 const stock = document.getElementById("stock");
                 const status = document.getElementById("status");
-
+                const image1 = document.getElementById("image1").files.length > 0;
+            const image2 = document.getElementById("image2").files.length > 0;
+            const image3 = document.getElementById("image3").files.length > 0;
                 
                 document.querySelectorAll(".error").forEach(error => {
                     error.style.display = 'none';
@@ -200,19 +230,43 @@
             
             async function updateProduct(formData) {
                 try {
-                    let images = [];
-                    for (let i = 1; i <= 3; i++) {
-                        if (croppers[i]) {
-                            const canvas = croppers[i].getCroppedCanvas();
-                            const base64Image = canvas.toDataURL('image/png');
-                            images.push(base64Image);
-                        } else {
-                            
-                            const prevImg = document.getElementById(`prev${i}`);
-                            images.push(prevImg.src);
-                        }
-                    }
+                    // let images = [];
+                    // for (let i = 1; i <= 3; i++) {
+                    //     if (croppers[i]) {
+                    //         console.log(cropper[i])
+                    //         const canvas = croppers[i].getCroppedCanvas();
+                    //         const base64Image = canvas.toDataURL('image/png');
+                    //         images?.push(base64Image);
 
+                    //     } else {
+                            
+                    //         const prevImg = document.getElementById(`prev${i}`);
+                    //         images.push(prevImg.src);
+                    //     }
+                    // }
+                    let newimages = [];
+
+for (let i = 1; i <= 3; i++) {
+    const fileInput = document.getElementById(`image${i}`);
+    
+// console.log(fileInput,'files')
+    if (croppers[i]) {
+        console.log(croppers[i],'hiaiiiiiiiiiii')
+        const canvas = croppers[i].getCroppedCanvas();
+        const base64Image = canvas.toDataURL('image/png');
+        // console.log(base64Image,'baseeurlimage')
+        newimages.push(base64Image);
+    } else {
+        console.log('124431232')
+        const prevImg = document.getElementById(`prev${i}`);
+        console.log(prevImg,'alskflksdfnlk')
+        newimages.push(prevImg.src);
+    }
+}
+
+
+
+                    console.log(newimages,'this is images')
                     const productData = {
                         id: formData.get('id'),
                         name: formData.get('name'),
@@ -222,7 +276,7 @@
                         productOffer: formData.get('productOffer'),
                         stock: formData.get('stock'),
                         status: formData.get('status'),
-                        images: images
+                        images: newimages
                     };
 
                     const response = await fetch('/admin/updateProduct', {
@@ -234,6 +288,7 @@
                     });
 
                     const data = await response.json();
+                    console.log(data,'fkasldkfaslkdfjlaksdjflkasjflaskd')
 
                     if (data.success) {
                         Swal.fire({
@@ -276,33 +331,7 @@
 
 
         
-        let croppers = {};
-        function cropper(index) {
-            const files = document.getElementById(`image${index}`);
-            const preview = document.getElementById(`prev${index}`);
-            const file = files.files[0];
-
-            if (file) {
-                const objectURL = URL.createObjectURL(file);
-                preview.src = objectURL;
-                preview.style.display = 'block';
-
-                if (croppers[index]) {
-                    croppers[index].destroy();
-                }
-
-                croppers[index] = new Cropper(preview, {
-                    aspectRatio: NaN,
-                    cropBoxMovable: true,
-                    ready: function () {
-                        this.cropper.setCropBoxData({
-                            width: 100,
-                            height: 100,
-                        });
-                    },
-                });
-            }
-        }
+       
 
 
 
