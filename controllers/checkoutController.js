@@ -173,7 +173,7 @@ const processCheckout = async (req, res) => {
         const { selectedAddressId, paymentMethod, cartId, couponCode } = req.body;
         const userId = req.session.User._id;
 
-        // Validate input
+        
         if (!selectedAddressId || !paymentMethod || !cartId) {
             return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
@@ -214,7 +214,7 @@ const processCheckout = async (req, res) => {
             price: item.salesPrice,
         }));
 
-        // Process based on payment method
+        
         if (paymentMethod.toLowerCase() === "wallet") {
             return processWalletPayment(req, res, userId, totalAmount, orderItems, selectedAddressId, paymentMethod, subTotal, couponCode, cart, cartId, coupon);
         } else if (paymentMethod.toLowerCase() === "cash on delivery") {
@@ -231,9 +231,7 @@ const processCheckout = async (req, res) => {
     }
 };
 
-/**
- * Process wallet payment
- */
+
 const processWalletPayment = async (req, res, userId, totalAmount, orderItems, selectedAddressId, paymentMethod, subTotal, couponCode, cart, cartId, coupon) => {
     try {
         const wallet = await Wallet.findOne({ userId });

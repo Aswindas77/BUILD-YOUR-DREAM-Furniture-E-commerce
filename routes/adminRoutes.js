@@ -25,12 +25,12 @@ adminRouter.post("/login", adminController.loadDash);
 adminRouter.get("/dashboard", adminAuth.isLogin, adminAuth.verifyAdmin, adminController.loadDashboard);
 
 // load user management
-adminRouter.get('/user-managment', adminController.loadusermanagment)
+adminRouter.get('/user-managment',adminAuth.isLogin, adminController.loadusermanagment)
 
 
 
 // block ||unblock  route
-adminRouter.patch("/admin/toggle/:userId/:action", adminController.toggleBlockAccess);
+adminRouter.patch("/admin/toggle/:userId/:action", adminAuth.isLogin,adminController.toggleBlockAccess);
 
 
 
@@ -39,29 +39,25 @@ adminRouter.patch("/admin/toggle/:userId/:action", adminController.toggleBlockAc
 
 
 // load category admin management
-adminRouter.get('/categoryManagement', adminAuth.isLogin, categoryController.loadCategory)
+adminRouter.get('/categoryManagement',adminAuth.isLogin, adminAuth.isLogin, categoryController.loadCategory)
 
 // load add category 
-adminRouter.get("/addcategory", adminAuth.isLogin, categoryController.loadAddCategory)
+adminRouter.get("/addcategory", adminAuth.isLogin,adminAuth.isLogin, categoryController.loadAddCategory)
 
 // add category
-adminRouter.post("/addcategory", adminAuth.isLogin, categoryController.addCategory)
+adminRouter.post("/addcategory", adminAuth.isLogin,adminAuth.isLogin, categoryController.addCategory)
 
 // edit category
-adminRouter.post("/editcategory", adminAuth.isLogin, categoryController.EditCategory)
+adminRouter.post("/editcategory", adminAuth.isLogin,adminAuth.isLogin, categoryController.EditCategory)
 
 // updated category
-adminRouter.post("/updatecategory", adminAuth.isLogin, categoryController.updateCategory)
+adminRouter.post("/updatecategory", adminAuth.isLogin,adminAuth.isLogin, categoryController.updateCategory)
 
 // soft delete categories
-adminRouter.patch("/deletecategory/:categoryid", adminAuth.isLogin, categoryController.deleteCategory)
+adminRouter.patch("/deletecategory/:categoryid", adminAuth.isLogin,adminAuth.isLogin, categoryController.deleteCategory)
 
 // list || unlist route
-adminRouter.patch("/admin/list/:categoryId/:action", categoryController.toggleListCategory);
-
-
-// adminRouter.get("/export-sales-report", adminAuth, adminController.generateSalesReportPDF);
-
+adminRouter.patch("/admin/list/:categoryId/:action", adminAuth.isLogin,categoryController.toggleListCategory);
 
 // sales report 
 
@@ -80,11 +76,11 @@ adminRouter.get('/productManagement', adminAuth.isLogin, productController.loadP
 adminRouter.get("/addProduct", adminAuth.isLogin, productController.loadAddProducts)
 
 // add product
-adminRouter.post("/addproduct", productController.addProducts)
+adminRouter.post("/addproduct", adminAuth.isLogin, productController.addProducts)
 
 
 // load overview product 
-adminRouter.get("/productView/:productid", adminAuth.isLogin, productController.loadProductView)
+adminRouter.get("/productView/:productid", adminAuth.isLogin, adminAuth.isLogin, productController.loadProductView)
 
 // load edit product
 adminRouter.get("/editProduct", adminAuth.isLogin, productController.loadEditProduct)
@@ -99,7 +95,7 @@ adminRouter.patch('/deleteProduct/:productId', adminAuth.isLogin, productControl
 
 // product list || unlist route
 
-adminRouter.patch("/admin/product/:productId/:action", productController.toggleListProduct);
+adminRouter.patch("/admin/product/:productId/:action", adminAuth.isLogin,productController.toggleListProduct);
 
 
 
@@ -120,16 +116,16 @@ adminRouter.post('/update-order-status', orderController.updateOrderStatus);
 
 // load coupon management
 
-adminRouter.get('/coupon', couponController.loadCoupon);
+adminRouter.get('/coupon', adminAuth.isLogin,couponController.loadCoupon);
 
 //add coupon 
-adminRouter.post('/addCoupon', couponController.addCoupon);
+adminRouter.post('/addCoupon', adminAuth.isLogin,couponController.addCoupon);
 
 // edit coupon
-adminRouter.get('/editCoupon/:id', couponController.editCoupon);
+adminRouter.get('/editCoupon/:id', adminAuth.isLogin,couponController.editCoupon);
 
 // update coupon
-adminRouter.put('/updateCoupon/:id', couponController.updateCoupon);
+adminRouter.put('/updateCoupon/:id', adminAuth.isLogin,couponController.updateCoupon);
 
 // delete coupon
 adminRouter.delete('/deleteCoupon/:id', couponController.deleteCoupon);
@@ -137,16 +133,16 @@ adminRouter.delete('/deleteCoupon/:id', couponController.deleteCoupon);
 
 
 // return order management
-adminRouter.get('/returnOrders', orderController.loadReturnOrder)
+adminRouter.get('/returnOrders', adminAuth.isLogin,orderController.loadReturnOrder)
 
 // update return status
-adminRouter.put('/updateReturnStatus/:returnId', orderController.updateReturnStatus);
+adminRouter.put('/updateReturnStatus/:returnId', adminAuth.isLogin,orderController.updateReturnStatus);
 
 
 
 
 // logout route
-adminRouter.get("/logout", adminAuth.isLogin, adminController.logout);
+adminRouter.get("/logout",  adminController.logout);
 
 
 adminRouter.get('/orders/:period', adminController.getOrdersByPeriod);

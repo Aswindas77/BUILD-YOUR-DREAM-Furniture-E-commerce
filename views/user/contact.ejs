@@ -172,12 +172,12 @@
         form.addEventListener('submit', (event) => {
             event.preventDefault();
 
-            // Get form values
+            
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const message = document.getElementById('message').value;
 
-            // Send data to server (replace with your actual server-side code)
+            
             fetch('/contact', {
                 method: 'POST',
                 headers: {

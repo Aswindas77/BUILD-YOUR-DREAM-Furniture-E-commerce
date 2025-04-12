@@ -51,6 +51,8 @@ userRouter.post("/forgot", isLogin, userController.genOtpForgotPass);
 // change password 
 userRouter.get("/changePassword", isLogin, userController.changePassword)
 
+userRouter.post("/changePassword", isLogin, userController.verifyChangePassword)
+
 // register route
 userRouter.get("/register", isLogin, userController.loadSingUp);
 

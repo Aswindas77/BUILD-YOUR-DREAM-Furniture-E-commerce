@@ -15,12 +15,23 @@ const loadCategory = async (req, res) => {
     const searchQuery = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
     const limit = 4;
-    const skip = (page - 1) * limit;
+    
 
 
     const totalCategories = await Categories.countDocuments({
       name: { $regex: searchQuery, $options: "i" },
+      isDeleted: false
     });
+
+   
+
+    const totalPages = Math.ceil(totalCategories / limit);
+
+    if (page < 1) page = 1;
+    if (page > totalPages && totalPages > 0) page = totalPages;
+
+    const skip = (page - 1) * limit;
+
 
     const categories = await Categories.find({
       isDeleted: false,
@@ -28,8 +39,6 @@ const loadCategory = async (req, res) => {
     })
       .skip(skip)
       .limit(limit);
-
-    const totalPages = Math.ceil(totalCategories / limit);
 
 
     res.render("categoryManagement", {
@@ -44,7 +53,7 @@ const loadCategory = async (req, res) => {
       categories: [],
       searchQuery: "",
       currentPage: 1,
-      totalPages: 1,
+      totalPages:1,
     });
   }
 };

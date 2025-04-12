@@ -75,6 +75,9 @@
               document.getElementById('ok').innerHTML = "Account created successfully"
               window.location = '/user'
 
+            }else if(response.status ===201){
+                document.getElementById('ok').innerHTML = "changePassword otp verified successfully"
+                window.location ='/user/changePassword'
             }
             else {
               if (response.status === 404) {

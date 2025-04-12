@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="/public/adminAssets/css/addProduct.css">
 </head>
 
-<body> 
-    <div class="container"> 
-        <div class="form-container"> 
+<body>
+    <div class="container">
+        <div class="form-container">
             <h1>Add New Product</h1>
             <form id="addProductForm" method="post" action="addProduct" onsubmit="return productAdder(event)">
                 <!-- Product Name -->
@@ -35,12 +35,12 @@
                     <label for="category" class="form-label">Category</label>
                     <select class="form-select" id="category" name="category">
                         <option value="" disabled selected>Select a Category</option>
-                        <% categories.forEach(category => { %>
-                            <option value="<%= category._id %>" 
-                                <%= category.toString() === category._id.toString() ? 'selected' : '' %>>
+                        <% categories.forEach(category=> { %>
+                            <option value="<%= category._id %>" <%=category.toString()===category._id.toString()
+                                ? 'selected' : '' %>>
                                 <%= category.name %>
                             </option>
-                        <% }); %>
+                            <% }); %>
                     </select>
                     <div class="error" id="categoryError">Please select a category.</div>
                 </div>
@@ -70,7 +70,7 @@
                 </div>
 
                 <!-- Rating -->
-               
+
 
                 <!-- Status -->
                 <div class="mb-3">
@@ -115,7 +115,7 @@
                         <img id="prev2" class="cropper-preview" style="display: none; max-width: 100%;" />
                     </div>
                     <div class="error" id="image2Error" style="display: none;">Please upload Image 2.</div>
- 
+
                     <label for="image3" class="text-center mt-3">Image 3</label>
                     <input onchange="cropper(3)" id="image3" type="file" accept="image/*"
                         class="form-control form-control-sm w-50">
@@ -124,7 +124,7 @@
                     </div>
                     <div class="error" id="image3Error" style="display: none;">Please upload Image 3.</div>
                 </div>
- 
+
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary w-100">Add Product</button>
             </form>
@@ -147,21 +147,21 @@
                     croppers[index].destroy();
                 }
                 croppers[index] = new Cropper(preview, {
-                    aspectRatio: 1, 
-                    viewMode: 1, 
+                    aspectRatio: 1,
+                    viewMode: 1,
                     dragMode: 'move',
                     cropBoxMovable: true,
-                    cropBoxResizable: true, 
-                    zoomable: true, 
+                    cropBoxResizable: true,
+                    zoomable: true,
                     scalable: true,
                 });
             }
         }
 
         function productAdder(e) {
-            e.preventDefault(); 
+            e.preventDefault();
 
-            
+
             let isValid = true;
 
             const name = document.getElementById("name").value.trim();
@@ -174,12 +174,12 @@
             const image2 = document.getElementById("image2").files.length > 0;
             const image3 = document.getElementById("image3").files.length > 0;
 
-           
+
             document.querySelectorAll(".error").forEach((error) => {
                 error.style.display = "none";
             });
 
-            
+
             if (name.length < 3) {
                 document.getElementById("nameError").style.display = "block";
                 isValid = false;
@@ -225,22 +225,22 @@
                 isValid = false;
             }
 
-            
+
             if (!isValid) {
                 return;
             }
 
             let images = [];
             for (let i = 1; i < 4; i++) {
-                const canvas = croppers[i]?.getCroppedCanvas(); 
-                const base64Image = canvas?.toDataURL("image/png"); 
+                const canvas = croppers[i]?.getCroppedCanvas();
+                const base64Image = canvas?.toDataURL("image/png");
                 images.push(base64Image);
             }
 
-            const formdata = new FormData(e.target); 
+            const formdata = new FormData(e.target);
 
             images.forEach((image, index) => {
-                formdata.append(`image${index}`, image); 
+                formdata.append(`image${index}`, image);
             });
 
             const formObject = {};
@@ -250,15 +250,23 @@
 
             fetch("/admin/addproduct", {
                 method: "post",
-                body: JSON.stringify(formObject), 
-                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify(formObject),
+                headers: { "Content-Type": "application/json" },
             })
                 .then((r) => r.text())
                 .then((html) => {
-                    window.location.href = '/admin/productManagement'
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Product added successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                    }).then(() => {
+                        
+                        window.location.href = '/admin/productManagement';
+                    });
                 })
                 .catch((error) => {
-                    console.error("Error during fetch:", error); 
+                    console.error("Error during fetch:", error);
                 });
         }
 

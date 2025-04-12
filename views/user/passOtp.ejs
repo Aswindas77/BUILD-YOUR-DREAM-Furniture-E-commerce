@@ -99,7 +99,7 @@
 <body>
   <div class="otp-container">
     <h3>B U I L D Y O U R D R E A M</h3>
-    <h2 >Verify Your OTP</h2>
+    <h2>Verify Your OTP</h2>
     <p>Enter the 6-digit OTP sent to your email </p>
     <div class="otp-inputs">
       <input type="text" id="otp1" maxlength="1" oninput="moveToNext(this, 'otp2')"
@@ -121,25 +121,25 @@
   </div>
 
   <script>
-    // Function to move focus to the next input
+    
     function moveToNext(current, nextFieldId) {
       if (current.value.length >= 1 && nextFieldId) {
         document.getElementById(nextFieldId).focus();
       }
     }
 
-    // Function to handle backspace and move to the previous input
+   
     function handleBackspace(current, event, previousFieldId) {
       if (event.key === 'Backspace') {
         if (current.value === '' && previousFieldId) {
           document.getElementById(previousFieldId).focus();
         } else {
-          current.value = ''; // Clear the current field
+          current.value = ''; 
         }
       }
     }
 
-    // Function to handle OTP verification
+    
     function verifyOtp() {
       const otpInputs = document.querySelectorAll('.otp-inputs input');
       let otp = '';

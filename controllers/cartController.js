@@ -25,7 +25,7 @@ const loadCart = async (req, res) => {
         const user = req.session?.User;
         const products = await Product.find({
             isDeleted: false, isListed: false,
-            stock: { $gt: 0 }
+            
         });
 
         const categories = await Category.find({ isDeleted: false, isListed: false });
@@ -52,7 +52,7 @@ const loadCart = async (req, res) => {
         }
 
         if (cart.products && cart.products.length > 0) {
-            cart.products = cart.products.filter(p => p.productId && p.productId.stock > 0)
+            cart.products = cart.products.filter(p => p.productId )
         }
 
         res.render("cart", { user, products, categories, cart });
@@ -181,7 +181,7 @@ const updateCart = async (req, res) => {
         if (cart.currentQty > 5) {
             return res.status(HttpStatus.NOT_FOUND).json({
                 success: false,
-                message: "Maximum purchase quantity is 5 products"
+                message: "Maximum purchase quantity is 4 products"
             });
         }
 
@@ -327,7 +327,7 @@ const loadCheckout = async (req, res) => {
             if (product.stock < item.quantity) {
                 return res.status(HttpStatus.BAD_REQUEST).json({
                     success: false,
-                    message: `Not enough stock for ${product.name}.  currently available stock: ${product.stock}`,
+                    message: `Not enough stock for ${product.name}.  currently available stock: ${product.stock} please remove product`,
                 });
             }
         }

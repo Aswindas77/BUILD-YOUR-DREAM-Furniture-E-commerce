@@ -275,7 +275,7 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
-            // Add Coupon
+           
             document.getElementById('addCouponForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const form = e.target;
@@ -284,7 +284,7 @@
 
                 let isValid = true;
 
-                // Get input elements
+                
                 let code = document.getElementsByName("code")[0];
                 let description = document.getElementsByName("description")[0];
                 let discountPercentage = document.getElementsByName("discountPercentage")[0];
@@ -292,11 +292,11 @@
                 let startDate = document.getElementsByName("startDate")[0];
                 let expiryDate = document.getElementsByName("expiryDate")[0];
 
-                // Clear previous error messages
+                
                 document.querySelectorAll(".invalid-feedback").forEach(el => el.style.display = "none");
                 document.querySelectorAll(".form-control").forEach(input => input.classList.remove("is-invalid"));
 
-                // Function to show error messages
+                
                 function showError(input, message) {
                     input.classList.add("is-invalid");
                     const error = input.nextElementSibling;
@@ -307,13 +307,13 @@
                     isValid = false;
                 }
 
-                // Convert dates
+                
                 let today = new Date();
                 today.setHours(0, 0, 0, 0);
                 let start = startDate ? new Date(startDate.value) : null;
                 let expiry = new Date(expiryDate.value);
 
-                // Validation checks
+                
                 if (!code.value || code.value.length < 5) {
                     showError(code, "Coupon code must be at least 5 characters long.");
                 }
@@ -435,7 +435,7 @@
 
             async function editCoupon(couponId) {
                 try {
-                    // Fetch coupon data
+                   
                     const response = await fetch(`/admin/editCoupon/${couponId}`);
                     if (!response.ok) {
                         throw new Error(`Failed to fetch coupon data: ${response.statusText}`);
@@ -447,7 +447,7 @@
         
         const coupon = data.coupon;
 
-                    // Populate the edit form fields
+                    
                     const editForm = document.getElementById('editCouponForm');
                     editForm.querySelector('input[name="id"]').value = coupon._id;
                     editForm.querySelector('input[name="code"]').value = coupon.code;
@@ -455,13 +455,13 @@
                     editForm.querySelector('input[name="discountPercentage"]').value = coupon.discountPercentage;
                     editForm.querySelector('input[name="minPurchase"]').value = coupon.minPurchase;
 
-                    // Format dates for the date inputs (YYYY-MM-DD format)
+                    
                     const startDate = new Date(coupon.startDate).toISOString().split('T')[0];
                     const expiryDate = new Date(coupon.expiryDate).toISOString().split('T')[0];
                     editForm.querySelector('input[name="startDate"]').value = startDate;
                     editForm.querySelector('input[name="expiryDate"]').value = expiryDate;
 
-                    // Show the edit modal
+                    
                     const editModal = new bootstrap.Modal(document.getElementById('editCouponModal'));
                     editModal.show();
 
@@ -475,7 +475,7 @@
                 }
             }
 
-            // Add event listener for edit form submission
+            
             document.getElementById('editCouponForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const form = e.target;

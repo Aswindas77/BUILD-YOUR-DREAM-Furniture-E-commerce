@@ -45,19 +45,19 @@
   
       .action-buttons {
           display: flex;
-          gap: 8px; /* Reduced from 10px for tighter spacing */
+          gap: 8px; 
           align-items: center;
-          flex-wrap: nowrap; /* Prevent wrapping unless necessary */
+          flex-wrap: nowrap; 
       }
   
       .btn {
-          padding: 8px 16px; /* Consistent padding for all buttons */
+          padding: 8px 16px; 
           border: none;
           border-radius: 4px;
           cursor: pointer;
           transition: background-color 0.3s ease;
-          font-size: 14px; /* Consistent font size */
-          min-width: 80px; /* Minimum width for consistency */
+          font-size: 14px;
+          min-width: 80px; 
           text-align: center;
       }
   
@@ -80,7 +80,7 @@
       }
   
       .btn-status {
-          background-color: #28a745; /* Default for success */
+          background-color: #28a745;
           color: white;
       }
   
@@ -115,8 +115,8 @@
           }
   
           .btn {
-              width: 100%; /* Full width on mobile */
-              min-width: unset; /* Remove min-width constraint */
+              width: 100%; 
+              min-width: unset; 
               padding: 6px 12px;
           }
   
@@ -204,7 +204,7 @@
 
     <script>
 
-      // ======list and unlist function====== //
+      
       
      document.addEventListener('DOMContentLoaded', function () {
             const accessButtons = document.querySelectorAll('.access-btn');
@@ -218,12 +218,12 @@
                         const buttonText = this.querySelector('.button-text');
                         const spinner = this.querySelector('.spinner-border');
     
-                        // Disable button and show spinner
+                        
                         this.disabled = true;
                         buttonText.classList.add('d-none');
                         spinner.classList.remove('d-none');
     
-                        // Make API call
+                       
                         const response = await fetch(`admin/list/${userId}/${action}`, {
                             method: 'PATCH',
                             headers: {
@@ -232,21 +232,21 @@
                             }
                         });
     
-                        // Check response content-type
+                        
                         const contentType = response.headers.get('Content-Type');
                         if (!contentType.includes('application/json')) {
                             throw new Error('Unexpected response from the server. Please try again.');
                         }
     
-                        // Parse JSON response
+                        
                         const data = await response.json();
     
                         if (response.ok) {
-                            // Update button state
+                            
                             const newStatus = currentStatus === 'active' ? 'unlisted' : 'active';
                             this.dataset.status = newStatus;
     
-                            // Update button appearance
+                            
                             if (newStatus === 'unlisted') {
                                 this.classList.remove('btn-success');
                                 this.classList.add('btn-danger');
@@ -257,7 +257,7 @@
                                 buttonText.textContent = 'Block';
                             }
     
-                            // Show success message using SweetAlert
+                            
                             Swal.fire({
                                 title: 'Success!',
                                 text: data.message,
@@ -272,7 +272,7 @@
                     } catch (error) {
                         console.error('Error:', error);
     
-                        // Show error message using SweetAlert
+                        
                         Swal.fire({
                             title: 'Error!',
                             text: error.message || 'Failed to update Category status.',
@@ -280,7 +280,7 @@
                             confirmButtonText: 'OK'
                         });
                     } finally {
-                        // Re-enable button and hide spinner
+                        
                         this.disabled = false;
                         buttonText.classList.remove('d-none');
                         spinner.classList.add('d-none');
@@ -290,9 +290,9 @@
         });
       
 
-      // delete button function
+      
         async function deleteCategory(categoryId) {
-            // Show confirmation dialog
+            
             const result = await Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -321,7 +321,7 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        // Show success message
+                        
                         await Swal.fire({ 
                             icon: 'success',
                             title: 'Deleted!',
@@ -330,7 +330,7 @@
                         });
                         window.location.href = '/admin/categoryManagement';
                     } else {
-                        // Show error message
+                        
                         await Swal.fire({
                             icon: 'error',
                             title: 'Oops...',
@@ -340,7 +340,7 @@
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    // Show error message
+                    
                     await Swal.fire({
                         icon: 'error',
                         title: 'Error!',

@@ -105,7 +105,7 @@ const verifyUser = async (req, res) => {
         }
 
 
-        // Check if the user is blocked
+        
         if (user.isBlocked) {
             return res.status(HttpStatus.BAD_REQUEST).json({ emailError: "sorry you have been blocked!" });
 
@@ -133,11 +133,14 @@ const verifyUser = async (req, res) => {
 
 
 const ForgotPassword = async (req, res) => {
+
     try {
         const user = req.session?.User
 
         const products = await Products.find({ isDeleted: false, isListed: false })
+
         const categories = await Category.find({ isDeleted: false, isListed: false })
+
         const message = req.flash("message")
         res.render("forgotPassword", { message, products, categories, user })
     } catch (err) {
@@ -155,34 +158,39 @@ const genOtpForgotPass = async (req, res) => {
     try {
         const { email } = req.body;
 
-        const emailName = await User.findOne({ email })
-        req.session.checkPass = "forgot"
-        if (!emailName) {
-           return res.status(HttpStatus.BAD_REQUEST).json({success:false,message:'User not found'});
-            
+        const user = await User.findOne({ email });
+        req.session.checkPass = "forgot";
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: 'User not found'
+            });
         }
 
-        const otp = generateOtp()
+        const otp = generateOtp();
+        sendotp(otp, email);
 
-        sendotp(otp, email)
+        req.session.data = { email };
+        req.session.otp = otp;
+        req.session.time = Date.now();
 
-        req.session.data = {
-            email,
+        console.log("Forgot password OTP:", otp);
 
-        }
-        req.session.otp = otp
-        console.log(
-            otp
-        )
+        return res.status(HttpStatus.OK).json({
+            success: true,
+            message: 'OTP sent successfully'
+        });
 
-        res.status(HttpStatus.OK).json({success:true,message:'OTP send'});
-        return res.render('userotp')
     } catch (err) {
-        console.log(err.message);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
-
+        console.error(err.message);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };
+
 
 
 // load otp verify for forgot password page 
@@ -266,7 +274,7 @@ const registration = async (req, res) => {
         req.session.checkPass = "singUp"
         const existingUser = await User.findOne({ email });
         console.log("Existing User:", existingUser);
- 
+
         if (existingUser) {
             return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
@@ -275,7 +283,7 @@ const registration = async (req, res) => {
         }
 
         else {
-            const otp = generateOtp()
+            const otp = generateOtp();
 
             sendotp(otp, email)
 
@@ -283,7 +291,7 @@ const registration = async (req, res) => {
             req.session.data = { username, email, password }
             req.session.otp = otp
             req.session.time = Date.now()
-            console.log(`requset time=============${req.session.time}`)
+            console.log(`requset time=============${req.session.time}`) 
 
             console.log(`your email is:${otp}`)
 
@@ -312,8 +320,8 @@ const googleAuth = async (req, res) => {
         const { displayName, emails } = req.user;
         const email = emails[0].value;
 
-        console.log("displayName",displayName)
-        
+        console.log("displayName", displayName)
+
 
         req.session.data = {
             username: displayName,
@@ -401,86 +409,67 @@ const generateOtp = () => {
 
 const verifyOtp = async (req, res) => {
     try {
+        const checkData = req.session.checkPass;
+        const { otp } = req.body;
+        const sessionOtp = req.session.otp;
+        const currentTime = Date.now();
+        const otpSentTime = req.session.time || 0;
 
-        const checkData = req.session.checkPass
+        console.log("checkData", checkData)
 
-        if (checkData == "singUp") {
-            if (!req.body.otp) {
-                return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
-            }
-            console.log(`session: ${req.session.otp} ,,,
-                body: ${req.body.otp}`)
+        console.log("type otp",typeof(otp));
+        console.log("type session",typeof(sessionOtp));
 
-            const currentTime = Date.now()
-
-
-
-            if (req.session.otp === req.body.otp) {
-
-                if (currentTime - req.session.time > 60000) {
-
-                    return res.status(HttpStatus.NOT_FOUND).send("your OTP time expired ")
-                }
-
-                const { username, email, password } = req.session.data;
-
-
-
-                const hashedpassword = await bcrypt.hash(password, saltRounds);
-
-                const newUser = await User.create({
-                    username,
-                    email,
-                    password: hashedpassword,
-
-                });
-                console.log(" user blocked=====", User)
-
-
-
-                req.session.User = newUser;
-                req.session.logged = true;
-                req.session.otp = null;
-                return res.status(HttpStatus.OK).send('account created successfully ')
-
-
-
-
-            }
-
-            else {
-                res.status(HttpStatus.BAD_REQUEST).send('invalid OTP')
-            }
-
-
+        if (!otp) {
+            return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
         }
 
-        if (checkData == "forgot") {
-
-
-            if (!req.body.otp) {
-                return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
-            }
-
-
-
-            else {
-                if (req.session.otp === req.body.otp) {
-
-
-                    return res.render('changePassword')
-                }
-            }
-            const currentTime = Date.now()
-
+        if (String(otp) !== String(sessionOtp)) {
+            return res.status(HttpStatus.BAD_REQUEST).send('Invalid OTP');
         }
 
+        if (currentTime - otpSentTime > 60000) {
+            return res.status(HttpStatus.NOT_FOUND).send('Your OTP has expired');
+        }
+
+        if (checkData.trim() === "signUp") {
+            console.log("lllll")
+            const { username, email, password } = req.session.data;
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+            const newUser = await User.create({
+                username,
+                email,
+                password: hashedPassword
+            });
+
+            req.session.User = newUser;
+            req.session.logged = true;
+            req.session.otp = null;
+            req.session.checkPass = null;
+            return res.status(HttpStatus.OK).send('Account created successfully');
+        }
+        else if (checkData.trim() === "forgot") {
+            console.log("hhhh");
+            const {email} =req.session.data
+            req.session.forgotPasswordEmail = email;
+            req.session.checkPass = null;
+            req.session.otp = null;
+            req.session.time = null;
+            req.session.data = null;
+
+            return res.status(HttpStatus.CREATED).send("forgot password otp verified successfully");
+        }
+
+        // Just in case checkPass is undefined or invalid
+        return res.status(HttpStatus.BAD_REQUEST).send('Invalid session state');
 
     } catch (err) {
         console.error(err);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
-}
+};
+
 
 
 // resend otp
@@ -579,7 +568,7 @@ const loadShop = async (req, res) => {
         const limit = 12;
         const skip = (page - 1) * limit;
 
-        // Build query
+       
         let query = {
             isDeleted: false,
             isListed: false
@@ -793,7 +782,7 @@ const googleLogin = async (req, res) => {
         req.session.logged = true;
 
 
-        res.redirect('/user'); 
+        res.redirect('/user');
 
     } catch (error) {
         console.log(error.message);
@@ -825,7 +814,7 @@ const loadBanProduct = async (req, res) => {
 
 //====================================================================================================================================================
 
- 
+
 
 //  buynow  controller
 
@@ -887,7 +876,7 @@ const buyNow = async (req, res) => {
                     success: false,
                     message: "Insufficient Wallet Balance",
                 });
-            } 
+            }
 
             for (let item of orderItems) {
                 const product = await Products.findById(item.productId);
@@ -932,7 +921,7 @@ const buyNow = async (req, res) => {
 
             const newOrder = new ordermodel({
                 userId,
-                dummyOrderId:dummyId,
+                dummyOrderId: dummyId,
                 couponCode: couponCode || null,
                 items: orderItems,
                 addressId: selectedAddressId,
@@ -1004,7 +993,7 @@ const buyNow = async (req, res) => {
                     });
                 }
 
-                
+
                 product.stock -= item.quantity;
 
                 await product.save();
@@ -1012,7 +1001,7 @@ const buyNow = async (req, res) => {
 
             const newOrder = new ordermodel({
                 userId,
-                dummyOrderId:dummyId,
+                dummyOrderId: dummyId,
                 couponCode: couponCode || null,
                 items: orderItems,
                 addressId: selectedAddressId,
@@ -1062,8 +1051,8 @@ const buyNow = async (req, res) => {
 
             const newOrder = new ordermodel({
                 userId,
-                dummyOrderId:dummyId,
-                items: orderItems, 
+                dummyOrderId: dummyId,
+                items: orderItems,
                 addressId: selectedAddressId,
                 paymentMethod,
                 subTotal: subTotal,
@@ -1412,13 +1401,13 @@ const razorpay = new Razorpay({
     key_secret: "wehlBhfqQlWoouA0ZGxYB373"
 });
 
- 
+
 const createOrder = async (req, res) => {
     try {
-        
-        const { amount, currency, receipt, totalAmount, coupon ,cartId } = req.body;
 
-      
+        const { amount, currency, receipt, totalAmount, coupon, cartId } = req.body;
+
+
         const cart = await Cart.findById(cartId).populate("products.productId");
         if (!cart) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: "Cart not found" });
 
@@ -1445,7 +1434,7 @@ const createOrder = async (req, res) => {
                 });
             }
         }
- 
+
 
 
         const couponCode = await Coupon.findOne({ code: coupon })
@@ -1473,7 +1462,7 @@ const createOrder = async (req, res) => {
 
         });
 
-       
+
 
 
         res.status(HttpStatus.OK).json({ success: true, order });
@@ -1517,7 +1506,7 @@ const verifyPayment = async (req, res) => {
         if (coupon) {
             let discountAmount = (couponPercentage / 100) * totalAmount
             totalAmount = totalAmount - discountAmount
- 
+
         }
 
         const orderItems = cart.products.map(item => ({
@@ -1551,7 +1540,7 @@ const verifyPayment = async (req, res) => {
 
         const newOrder = new ordermodel({
             userId: userId,
-            dummyOrderId:dummyId,
+            dummyOrderId: dummyId,
             addressId: requestData.selectedAddressId,
             items: orderItems,
             cartId: requestData.cartId,
@@ -1567,6 +1556,11 @@ const verifyPayment = async (req, res) => {
 
 
         await newOrder.save();
+        
+        if (coupon) {
+            coupon.usedBy.push(userId);
+            await coupon.save();
+        }
         await Cart.findByIdAndDelete(requestData.cartId);
 
 
@@ -1614,7 +1608,7 @@ const placePendingOrder = async (req, res) => {
 
         const newOrder = new ordermodel({
             userId: userId,
-            dummyOrderId:dummyId,
+            dummyOrderId: dummyId,
             addressId: requestData.selectedAddressId,
             cartId: requestData.cartId,
             paymentMethod: requestData.paymentMethod,
@@ -1625,7 +1619,7 @@ const placePendingOrder = async (req, res) => {
             razorpayOrderId: orderId,
             razorpayPaymentId: paymentId || ""
         });
- 
+
         await newOrder.save();
         await Cart.findByIdAndDelete(requestData.cartId);
 
@@ -1662,8 +1656,8 @@ const addAddressCheckout = async (req, res) => {
         const addressData = req.body;
         console.log("Request Body:", addressData);
 
-        // Check if user is authenticated
-        const user = req.session?.User; // Assuming session-based auth
+        
+        const user = req.session?.User; 
         if (!user) {
             return res.status(HttpStatus.UNAUTHORIZED).json({
                 success: false,
@@ -1672,18 +1666,18 @@ const addAddressCheckout = async (req, res) => {
         }
         console.log("Address User Data:", user);
 
-        // Destructure the incoming address data
-        const {  houseNumber, street, city, landmark, country, pincode, phone, isDefault } = addressData;
+        
+        const { houseNumber, street, city, landmark, country, pincode, phone, isDefault } = addressData;
 
-        // Validate required fields (adjust based on your checkout form)
-        if (  !houseNumber || !street || !city || !country || !pincode || !phone) {
+        
+        if (!houseNumber || !street || !city || !country || !pincode || !phone) {
             return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
                 message: "All required fields must be provided."
             });
         }
 
-        // Validate phone number (Indian format: starts with 6-9, 10 digits)
+        
         const phoneRegex = /^[6-9]\d{9}$/;
         if (!phoneRegex.test(phone)) {
             return res.status(HttpStatus.BAD_REQUEST).json({
@@ -1701,48 +1695,48 @@ const addAddressCheckout = async (req, res) => {
             });
         }
 
-        
+
         let addressDoc = await Address.findOne({ userId: user._id });
 
-       
+
         const newAddress = {
             houseNumber,
             street,
             city,
-            landmark: landmark || '', 
+            landmark: landmark || '',
             country,
             pincode,
             phone,
             isDeleted: false,
-            isDefault: isDefault || false 
+            isDefault: isDefault || false
         };
 
-        
+
         if (!addressDoc) {
             addressDoc = new Address({
                 userId: user._id,
                 address: [newAddress]
             });
         } else {
-           
+
             if (isDefault) {
                 addressDoc.address.forEach(addr => (addr.isDefault = false));
             }
-            
+
             addressDoc.address.push(newAddress);
         }
 
         await addressDoc.save();
         console.log("Address Saved:", addressDoc);
 
-        
+
         const addedAddress = addressDoc.address[addressDoc.address.length - 1];
 
         return res.status(HttpStatus.CREATED).json({
             success: true,
             message: "Address added successfully!",
             address: {
-                _id: addedAddress._id, 
+                _id: addedAddress._id,
                 houseNumber: addedAddress.houseNumber,
                 street: addedAddress.street,
                 city: addedAddress.city,
@@ -1763,7 +1757,54 @@ const addAddressCheckout = async (req, res) => {
 };
 
 
- 
+
+
+const verifyChangePassword = async (req, res) => {
+
+    try {
+        const { newPassword } = req.body;
+
+        console.log("newPassword",newPassword)
+        
+
+    const email = req.session.forgotPasswordEmail;
+    console.log(req.session.forgotPasswordEmail)
+
+    
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Password must be at least 8 characters long and contain at least one letter, one number, and one special character'
+        });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    
+    user.password = hashedPassword;
+    await user.save();
+
+    
+    req.session.forgotPasswordEmail = null;
+    console.log("hello")
+    return res.status(200).json({ success: true });
+    } catch (error) {
+        
+        console.log(error.message);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+
+
+}
+
 
 
 module.exports = {
@@ -1783,6 +1824,7 @@ module.exports = {
     loadOtpForgetPass,
     otpVerifyForgotPassword,
     changePassword,
+    verifyChangePassword,
 
 
 

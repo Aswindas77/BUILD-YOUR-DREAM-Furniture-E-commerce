@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
     <style>
-        /* Add these styles */
+        
         .pagination-container {
             margin-top: 20px;
             display: flex;
@@ -69,7 +69,7 @@
             border-color: #007bff;
         }
 
-        /* Modal Styles */
+        
         .modal {
             display: none;
             position: fixed;
@@ -141,7 +141,7 @@
 
 
 
-    <!-- Orders Table Section -->
+    
     <h1>sales-report</h1>
     <div class="sales-section">
         <div class="sales-header">
@@ -165,7 +165,7 @@
             </div>
         </div>
 
-        <!-- Add pagination controls -->
+        
         <div class="table-container">
             <table class="sales-table">
                 <thead>
@@ -181,7 +181,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Dummy data for now -->
+                  
                     <tr>
                         <td>#ORD001</td>
                         <td>USR123</td>
@@ -202,7 +202,7 @@
                         <td>Processing</td>
                         <td>02 Mar, 2024</td>
                     </tr>
-                    <!-- Add more dummy rows as needed -->
+                    
                 </tbody>
             </table>
             <div class="pagination-container">
@@ -219,7 +219,7 @@
         </div>
     </div> 
 
-    <!-- Add this HTML for custom date range modal -->
+    
     <div id="customDateModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -247,13 +247,13 @@
             const tableBody = document.querySelector('.sales-table tbody');
             const periodText = document.getElementById('period-text');
 
-            // Pagination variables
+            
             let currentPage = 1;
             let itemsPerPage = 10;
             let totalItems = 0;
             let currentData = [];
 
-            // Function to format date
+            
             function formatDate(dateString) {
                 const date = new Date(dateString);
                 return date.toLocaleDateString('en-IN', {
@@ -263,31 +263,31 @@
                 });
             }
 
-            // Function to format currency
+            
             function formatCurrency(amount) {
                 return '₹' + Number(amount).toLocaleString('en-IN');
             }
 
-            // Function to update heading
+            
             function updateHeading(period) {
                 periodText.textContent = period.charAt(0).toUpperCase() + period.slice(1);
             }
 
-            // Function to render pagination
+            
             function renderPagination(total) {
                 const totalPages = Math.ceil(total / itemsPerPage);
                 const pageNumbers = document.getElementById('page-numbers');
                 const prevButton = document.getElementById('prev-page');
                 const nextButton = document.getElementById('next-page');
 
-                // Update info text
+               
                 const start = (currentPage - 1) * itemsPerPage + 1;
                 const end = Math.min(start + itemsPerPage - 1, total);
                 document.getElementById('showing-start').textContent = start;
                 document.getElementById('showing-end').textContent = end;
                 document.getElementById('total-items').textContent = total;
 
-                // Generate page numbers
+                
                 pageNumbers.innerHTML = '';
                 for (let i = 1; i <= totalPages; i++) {
                     const pageButton = document.createElement('button');
@@ -301,12 +301,12 @@
                     pageNumbers.appendChild(pageButton);
                 }
 
-                // Update prev/next buttons
+                
                 prevButton.disabled = currentPage === 1;
                 nextButton.disabled = currentPage === totalPages;
             }
 
-            // Function to render table with current page data
+            
             function renderTable() {
                 const start = (currentPage - 1) * itemsPerPage;
                 const end = start + itemsPerPage;
@@ -326,7 +326,7 @@
             `).join('');
             }
 
-            // Update click event for period buttons
+            
             periodButtons.forEach(button => {
                 button.addEventListener('click', async function () {
                     periodButtons.forEach(btn => btn.classList.remove('active'));
@@ -352,7 +352,7 @@
                 });
             });
 
-            // Add pagination button listeners
+            
             document.getElementById('prev-page').addEventListener('click', () => {
                 if (currentPage > 1) {
                     currentPage--;
@@ -369,7 +369,7 @@
                 }
             });
 
-            // Initial load
+            
             document.querySelector('.period-button').click();
 
             

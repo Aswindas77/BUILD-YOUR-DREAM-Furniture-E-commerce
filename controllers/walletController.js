@@ -66,9 +66,6 @@ const loadWallet = async (req, res) => {
     }
 }
 
-
-
-
 // add money
  
 const addMoneyWallet = async (req, res) => {
@@ -105,6 +102,7 @@ const addMoneyWallet = async (req, res) => {
 };
 
 
+// deduct from wallet
 
 const deductFromWallet = async (userId, amount, description = 'Purchase') => {
     try {
@@ -140,7 +138,7 @@ const deductFromWallet = async (userId, amount, description = 'Purchase') => {
 
 
 
-
+// check wallet balance
 
 const checkWalletBalance = async (userId) => {
     try {
@@ -151,6 +149,11 @@ const checkWalletBalance = async (userId) => {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
+
+
+
+
+
 
 module.exports = {
     loadWallet,

@@ -616,15 +616,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Close the modal
+                       
                         document.getElementById('addMoneyModal').style.display = 'none';
 
-                        // Update wallet balance display
+                        
                         const currentBalance = parseFloat(document.querySelector('.wallet-balance').textContent);
                         const newBalance = currentBalance + parseFloat(amount);
                         document.querySelector('.wallet-balance').textContent = newBalance;
 
-                        // Add new transaction to history
+                        
                         const transactionsList = document.querySelector('.transactions-list');
                         const newTransaction = document.createElement('div');
                         newTransaction.className = 'transaction-item';

@@ -12,7 +12,9 @@ const Messages =require('../constants/messages.json');
 
 
 
+// load sales report
 
+// ===========================================================================================================
 
 
 const loadSalesReport = async (req, res) => {

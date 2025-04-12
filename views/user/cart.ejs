@@ -63,7 +63,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% if (cart && cart.products && cart.products.length> 0) { %>
+                                        <% if (cart && cart.products && cart.products.length>0) { %>
                                             <% cart.products.forEach(item=> { %>
                                                 <tr>
                                                     <td>
@@ -202,7 +202,7 @@
                     <script src="/public/userAssets/js/gmaps.min.js"></script>
                     <script src="/public/userAssets/js/main.js"></script>
                     <script>
-                        // Function to update the grand total dynamically
+                        
                         function updateGrandTotal() {
                             let grandTotal = 0;
                             document.querySelectorAll('[id^="price-"]').forEach(element => {
@@ -213,7 +213,7 @@
                             document.getElementById('grand-total').textContent = `₹${grandTotal.toFixed(2)}`;
                         }
 
-                        // Function to update quantity
+                       
                         function updateQuantity(productId, quantity, price, maxQuantity = 5, stockAvailable) {
                             const qtyInput = document.getElementById('sst-' + productId);
                             const priceElement = document.getElementById('price-' + productId);
@@ -240,26 +240,26 @@
                             if (currentQty === maxQuantity && quantity === 1) {
                                 Swal.fire({
                                     title: "Maximum Quantity Reached",
-                                    text: `You can't add more than ${maxQuantity} items`,
+                                    text: `You can't add more than 4 items`,
                                     icon: "warning"
                                 });
                                 return;
                             }
 
-                            // Update UI immediately
+                            
                             qtyInput.value = currentQty;
                             incrementButton.disabled = (currentQty === maxQuantity || currentQty >= stockAvailable);
                             const totalPrice = currentQty * itemPrice;
                             priceElement.textContent = `₹${totalPrice.toFixed(2)}`;
 
-                            // Update grand total
+                            
                             updateGrandTotal();
 
-                            // Send update to server
+                            
                             updateCart(productId, currentQty);
                         }
 
-                        // Function to update cart on the server
+                        
                         function updateCart(productId, currentQty) {
 
                             fetch('/user/update', {
@@ -283,7 +283,7 @@
                                 });
                         }
 
-                        // Function to delete cart item
+                        
                         function deleteCartItem(productId) {
                             Swal.fire({
                                 title: "Are you sure?",
@@ -302,18 +302,18 @@
                                         .then(response => response.json())
                                         .then(data => {
                                             if (data.success) {
-                                                // Remove the row from the table dynamically
+                                                
                                                 const row = document.querySelector(`tr:has(#sst-${productId})`);
                                                 if (row) {
                                                     row.remove();
                                                 }
 
-                                                // Update grand total
+                                               
                                                 updateGrandTotal();
 
-                                                // Check if cart is empty
+                                                
                                                 const tbody = document.querySelector('tbody');
-                                                if (tbody.children.length === 2) { // Only total and button rows remain
+                                                if (tbody.children.length === 2) { 
                                                     tbody.innerHTML = `<tr><td colspan="5" style="color: red;" class="text-center">No products in the cart</td></tr>`;
                                                     document.querySelector('.checkout_btn_inner').innerHTML = '<a class="btn btn-secondary gray_btn mr-2" href="/user/shop">Continue Shopping</a>';
                                                 }
@@ -331,7 +331,7 @@
                             });
                         }
 
-                        // Toast notification function (unchanged)
+                        
                         function showToast(message, type) {
                             let bgColor, icon;
 

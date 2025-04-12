@@ -1,12 +1,12 @@
 <h1>Product Management</h1>
 
-<!-- Add Product Form -->
+
 
 <a href="/admin/addProduct"><button type="submit">Add Product</button></a>
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
 
-<!-- Product Table -->
+
 <table style="margin-top: 10px;" id="productTable" class="table table-striped table-bordered">
   <thead>
     <tr>
@@ -32,7 +32,7 @@
           <tr>
             <td>
               <%= index + 1 + (currentPage - 1) * 4 %>
-            </td> <!-- Adjust index for pagination -->
+            </td> 
             <td><a style="text-decoration: none;" href="/admin/productView/<%= product._id %>">
                 <%= product.name %>
               </a></td>
@@ -79,9 +79,9 @@
 
 </table>
 
-<!-- Pagination Controls -->
+
 <div class="pagination" style="margin-top: 20px; text-align: center;">
-  <!-- Previous Button -->
+  
   <% if (currentPage> 1) { %>
     <a href="?page=<%= currentPage - 1 %>"
       style="text-decoration: none; margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc;">Previous</a>
@@ -89,14 +89,14 @@
       <span style="margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc; color: #ccc;">Previous</span>
       <% } %>
 
-        <!-- Page Numbers -->
+        
         <% for (let i = 1; i <= totalPages; i++) { %>
           <a href="?page=<%= i %>"
             style="text-decoration: none; margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc; background-color: <%= currentPage === i ? '#ddd' : '#fff' %>">
             <%= i %>
           </a>
         <% } %>
-            <!-- Next Button -->
+            
             <% if (currentPage < totalPages) { %>
               <a href="?page=<%= currentPage + 1 %>"
                 style="text-decoration: none; margin: 0 5px; padding: 5px 10px; border: 1px solid #ccc;">Next</a>
@@ -107,7 +107,7 @@
 
 <script>
 
-  //======== Product list || unlist function======//
+ 
   document.addEventListener('DOMContentLoaded', function () {
     const accessButtons = document.querySelectorAll('.access-btn');
 
@@ -120,12 +120,12 @@
           const buttonText = this.querySelector('.button-text');
           const spinner = this.querySelector('.spinner-border');
 
-          // Disable button and show spinner
+          
           this.disabled = true;
           buttonText.classList.add('d-none');
           spinner.classList.remove('d-none');
 
-          // Make API call
+          
           const response = await fetch(`admin/product/${userId}/${action}`, {
             method: 'PATCH',
             headers: {
@@ -134,21 +134,21 @@
             }
           });
 
-          // Check response content-type
+          
           const contentType = response.headers.get('Content-Type');
           if (!contentType.includes('application/json')) {
             throw new Error('Unexpected response from the server. Please try again.');
           }
 
-          // Parse JSON response
+          
           const data = await response.json();
 
           if (response.ok) {
-            // Update button state
+            
             const newStatus = currentStatus === 'active' ? 'unlisted' : 'active';
             this.dataset.status = newStatus;
 
-            // Update button appearance
+            
             if (newStatus === 'unlisted') {
               this.classList.remove('btn-success');
               this.classList.add('btn-danger');
@@ -159,7 +159,7 @@
               buttonText.textContent = 'Block';
             }
 
-            // Show success message using SweetAlert
+            
             Swal.fire({
               title: 'Success!',
               text: data.message,
@@ -174,7 +174,7 @@
         } catch (error) {
           console.error('Error:', error);
 
-          // Show error message using SweetAlert
+          
           Swal.fire({
             title: 'Error!',
             text: error.message || 'Failed to update Category status.',
@@ -182,7 +182,7 @@
             confirmButtonText: 'OK'
           });
         } finally {
-          // Re-enable button and hide spinner
+          
           this.disabled = false;
           buttonText.classList.remove('d-none');
           spinner.classList.add('d-none');
@@ -195,7 +195,7 @@
 
 
 
-  //  product delete function
+  
 
   function deleteProduct(productId) {
     Swal.fire({

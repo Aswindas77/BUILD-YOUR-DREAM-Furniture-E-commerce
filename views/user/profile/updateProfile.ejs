@@ -296,11 +296,11 @@
                 return false;
             }
 
-            // Clear previous errors
+            
             clearError(emailInput);
             clearError(phoneInput);
 
-            // Email validation
+            
             if (!emailInput.value.trim()) {
                 showError(emailInput, "Email address is required.");
                 isValid = false;
@@ -309,7 +309,7 @@
                 isValid = false;
             }
 
-            // Phone validation
+            
             if (!phoneInput.value.trim()) {
                 showError(phoneInput, "Phone number is required.");
                 isValid = false;
@@ -321,7 +321,7 @@
             return isValid;
         }
 
-        // Add this to check if elements exist when the page loads
+        
         document.addEventListener('DOMContentLoaded', function () {
             const requiredElements = ['email', 'phone', 'emailError', 'phoneError'];
             requiredElements.forEach(id => {
@@ -332,12 +332,12 @@
             });
         });
 
-        // Modal functions
+       
         function showModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.style.display = 'block';
-                // Clear previous inputs and errors
+                
                 modal.querySelectorAll('input').forEach(input => input.value = '');
                 modal.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
             } else {
@@ -352,7 +352,7 @@
             }
         }
 
-        // Verify password and save changes
+        
         function verifyAndSaveChanges() {
             if (!validateForm()) {
                 return;
@@ -361,7 +361,7 @@
             const password = document.getElementById('confirmSavePassword').value;
             const errorElement = document.getElementById('savePasswordError');
 
-            // Get updated profile data
+            
             const updatedData = {
                 username: document.querySelector('input[type="text"]').value.trim(),
                 email: document.querySelector('input[type="email"]').value.trim(),
@@ -402,16 +402,16 @@
                 });
         }
 
-        // Change password functionality
+        
         function changePassword() {
             const currentPassword = document.getElementById('currentPassword').value;
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmNewPassword').value;
 
-            // Reset error messages
+            
             document.querySelectorAll('.error-message').forEach(error => error.style.display = 'none');
 
-            // Validate passwords
+            
             if (!currentPassword || !newPassword || !confirmPassword) {
                 showError('currentPasswordError', 'All fields are required');
                 return;
@@ -422,7 +422,7 @@
                 return;
             }
 
-            // Send password change request
+            
             fetch('/user/updatePassword', {
                 method: 'POST',
                 headers: {

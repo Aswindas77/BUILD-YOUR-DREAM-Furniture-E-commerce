@@ -516,7 +516,7 @@
                     const response = await fetch(`/admin/dashboard/analytics/${period}`);
                     if (!response.ok) throw new Error('Failed to fetch data');
                     const data = await response.json();
-                    console.log('API Response:', data); // Debug data
+                    console.log('API Response:', data); 
 
                     if (salesRevenueChart) {
                         salesRevenueChart.destroy();
@@ -544,7 +544,7 @@
                                     data: data.revenue,
                                     borderColor: '#2ecc71',
                                     backgroundColor: 'rgba(46, 204, 113, 0.2)',
-                                    fill: false, // Changed to false
+                                    fill: false,
                                     tension: 0.4,
                                     pointRadius: 4,
                                     pointBackgroundColor: '#2ecc71',
