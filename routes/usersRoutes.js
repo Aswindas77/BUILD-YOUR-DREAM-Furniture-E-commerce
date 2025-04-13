@@ -29,7 +29,7 @@ userRouter.use(
 );
 
  
-
+ 
 // default route
 userRouter.get("/", isBan, userController.loadHome);
 
@@ -63,12 +63,16 @@ userRouter.post("/register", isLogin, userController.registration);
 // load otp
 userRouter.get('/otp', isLogin, userController.loadOtp);
 
+
+
 // resend otp
 userRouter.get('/resendOtp', isLogin, userController.resendOtp)
 
-// verify otp
+// verify otp for signUp
 userRouter.post("/otp", isLogin, userController.verifyOtp)
 
+// verify Otp for password
+userRouter.post('/passOtp',isLogin,userController.verifyOtpPassword)
 
 
 // ==============================================================================================================================================================================================================================

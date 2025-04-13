@@ -31,7 +31,11 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="/public/userAssets/css/custom.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"  rel="stylesheet"> 
+
+    
 
 </head>
 
@@ -48,135 +52,128 @@
 
                 <!--================Cart Area =================-->
                 <section class="cart_area" style="margin-top:50px;">
-                    <div class="container">
-                        <div class="cart_inner">
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th scope="col">Images</th>
-                                            <th scope="col">Product</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Quantity</th>
-                                            <th scope="col">Total</th>
-                                            <th scope="col">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% if (cart && cart.products && cart.products.length>0) { %>
-                                            <% cart.products.forEach(item=> { %>
-                                                <tr>
-                                                    <td>
-                                                        <div class="media">
-                                                            <div class="col-md-6 text-center">
-                                                                <div class="cart-image-container">
-                                                                    <% if (item.productId && item.productId.images &&
-                                                                        item.productId.images.length> 0) { %>
-                                                                        <img class="cart-thumbnail img-fluid"
-                                                                            src="<%= item.productId.images[0] %>"
-                                                                            alt="Product Image"
-                                                                            style="max-width: 120px; height: auto; border-radius: 8px;">
-                                                                        <% } else { %>
-                                                                            <p class="no-image">No image available</p>
-                                                                            <% } %>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="media-body">
-                                                            <p>
-                                                                <%= item.productId.name %>
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <h5>₹<%= item.productId.salesPrice %>
-                                                        </h5>
-                                                    </td>
-                                                    <td>
-                                                        <div class="product_count">
-                                                            <input type="text" name="qty"
-                                                                id="sst-<%= item.productId._id %>" maxlength="12"
-                                                                value="<%= item.quantity %>"
-                                                                class="input-text qty form-control" readonly>
-                                                            <div class="d-flex mt-2">
-                                                                <button id="increment-<%= item.productId._id %>"
-                                                                    onclick="updateQuantity('<%= item.productId._id %>', 1, `<%= item.productId.salesPrice %>`, 5,`<%= item.productId.stock %>`)"
-                                                                    class="btn btn-sm btn-outline-secondary increase items-count"
-                                                                    type="button">
-                                                                    <i class="bi bi-plus-lg"></i>
-                                                                </button>
-                                                                <button
-                                                                    onclick="updateQuantity('<%= item.productId._id %>', -1, `<%= item.productId.salesPrice %>`,`<%= item.productId.stock %>`)"
-                                                                    class="btn btn-sm btn-outline-secondary reduced items-count ml-1"
-                                                                    type="button">
-                                                                    <i class="bi bi-dash-lg"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <% grandTotal +=item.salesPrice * item.quantity%>
-                                                            <h5 id="price-<%= item.productId._id %>">₹<%=
-                                                                    (item.salesPrice * item.quantity).toFixed(2) %>
-                                                            </h5>
-                                                    </td>
-
-                                                    <td>
-                                                        <button class="btn  btn-sm"
-                                                            onclick="deleteCartItem('<%= item.productId._id %>')">
-                                                            <i class="lnr lnr-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <% }); %>
-                                                    <% } else { %>
-                                                        <tr>
-                                                            <td colspan="5" style="color: red;" class="text-center">No
-                                                                products in the cart</td>
-                                                        </tr>
-                                                        <% } %>
-
-                                                            <tr>
-                                                                <td colspan="3"></td>
-                                                                <td>
-                                                                    <h5>total</h5>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 id="grand-total">₹<%=grandTotal.toFixed(2) %>
-                                                                    </h5>
-                                                                </td>
-                                                            </tr>
-
-                                                            <tr class="out_button_area">
-                                                                <td colspan="3"></td>
-                                                                <td colspan="2">
-                                                                    <div
-                                                                        class="checkout_btn_inner d-flex justify-content-end">
-                                                                        <a class="btn btn-secondary gray_btn mr-2"
-                                                                            href="/user/shop">Continue Shopping</a>
-
-
-                                                                        <% if (cart.products && cart.products.length> 0)
-                                                                            { %>
-                                                                            <button
-                                                                                class="btn btn-primary primary-btn h"
-                                                                                onclick="proceedCheckout('<%= cart._id%>', '<%= grandTotal %>')">
-                                                                                Proceed to Checkout
-                                                                            </button>
-                                                                            <% } %>
-
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+  <div class="container">
+    <div class="cart_inner">
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">Images</th>
+              <th scope="col">Product</th>
+              <th scope="col">Price</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Total</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (cart && cart.products && cart.products.length > 0) { %>
+              <% cart.products.forEach(item => { %>
+                <tr class="cart-row">
+                  <td data-label="Image">
+                    <div class="media">
+                      <div class="col-md-6 text-center">
+                        <div class="cart-image-container">
+                          <% if (item.productId && item.productId.images && item.productId.images.length > 0) { %>
+                            <img
+                              class="cart-thumbnail img-fluid"
+                              src="<%= item.productId.images[0] %>"
+                              alt="Product Image"
+                              style="max-width: 120px; height: auto; border-radius: 8px;"
+                            >
+                          <% } else { %>
+                            <p class="no-image">No image available</p>
+                          <% } %>
                         </div>
+                      </div>
                     </div>
-                </section>
+                  </td>
+                  <td data-label="Product">
+                    <div class="media-body">
+                      <p><%= item.productId.name %></p>
+                    </div>
+                  </td>
+                  <td data-label="Price">
+                    <h5>₹<%= item.productId.salesPrice %></h5>
+                  </td>
+                  <td data-label="Quantity">
+                    <div class="product_count">
+                      <input
+                        type="text"
+                        name="qty"
+                        id="sst-<%= item.productId._id %>"
+                        maxlength="12"
+                        value="<%= item.quantity %>"
+                        class="input-text qty form-control"
+                        readonly
+                      >
+                      <div class="d-flex mt-2">
+                        <button
+                          id="increment-<%= item.productId._id %>"
+                          onclick="updateQuantity('<%= item.productId._id %>', 1, `<%= item.productId.salesPrice %>`, 5, `<%= item.productId.stock %>`)"
+                          class="btn btn-sm btn-outline-secondary increase items-count"
+                          type="button"
+                        >
+                          <i class="bi bi-plus-lg"></i>
+                        </button>
+                        <button
+                          onclick="updateQuantity('<%= item.productId._id %>', -1, `<%= item.productId.salesPrice %>`, `<%= item.productId.stock %>`)"
+                          class="btn btn-sm btn-outline-secondary reduced items-count ml-1"
+                          type="button"
+                        >
+                          <i class="bi bi-dash-lg"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                  <td data-label="Total">
+                    <% grandTotal += item.salesPrice * item.quantity %>
+                    <h5 id="price-<%= item.productId._id %>">₹<%= (item.salesPrice * item.quantity).toFixed(2) %></h5>
+                  </td>
+                  <td data-label="Action">
+                    <button class="btn btn-sm delete-btn" onclick="deleteCartItem('<%= item.productId._id %>')">
+                      <i class="lnr lnr-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" style="color: red;" class="text-center">No products in the cart</td>
+              </tr>
+            <% } %>
+            <tr>
+              <td colspan="3"></td>
+              <td>
+                <h5>total</h5>
+              </td>
+              <td>
+                <h5 id="grand-total">₹<%= grandTotal.toFixed(2) %></h5>
+              </td>
+              <td></td>
+            </tr>
+            <tr class="out_button_area">
+              <td colspan="3"></td>
+              <td colspan="3">
+                <div class="checkout_btn_inner d-flex justify-content-end">
+                  <a class="btn btn-secondary gray_btn mr-2" href="/user/shop">Continue Shopping</a>
+                  <% if (cart.products && cart.products.length > 0) { %>
+                    <button
+                      class="btn btn-primary primary-btn h"
+                      onclick="proceedCheckout('<%= cart._id %>', '<%= grandTotal %>')"
+                    >
+                      Proceed to Checkout
+                    </button>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
                 <!--================End Cart Area =================-->
 
                 <!-- start footer Area -->

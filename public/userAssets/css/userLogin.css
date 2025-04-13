@@ -1,8 +1,65 @@
-.form-group {
-    position: relative;
-}
 
-.password-eye {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  
+  .login_box_area {
+    padding: 60px 0;
+    margin-top: 7%;
+    background: #ffffff;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+  
+  
+  .login_box_img {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .login_box_img img {
+    width: 100%;
+    height: auto;
+    max-height: 500px; 
+    object-fit: cover; 
+    display: block;
+  }
+  
+  
+  
+  .login_box_img .hover h4 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
+  .login_box_img .hover p {
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+ 
+  .login_form_inner {
+    padding: 40px;
+    background: #fff;
+  }
+  
+  
+  .form-group {
+    position: relative;
+  }
+  
+  
+  .password-eye {
     position: absolute;
     right: 10px;
     top: 50%;
@@ -11,22 +68,137 @@
     background: none;
     border: none;
     padding: 5px;
-}
-
-.password-eye:focus {
+  }
+  
+  .password-eye:focus {
     outline: none;
-}
-
-
-.password-eye i {
+  }
+  
+  .password-eye i {
     color: #666;
     font-size: 16px;
-}
-
-.password-eye:hover i {
+  }
+  
+  .password-eye:hover i {
     color: #333;
-}
-
-a {
-  color: #333;
-}
+  }
+  
+ 
+  a {
+    color: #333;
+  }
+  
+  
+  .social {
+    margin-left: 15%;
+    margin-top: 8px;
+  }
+  
+  .google-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .google-btn i {
+    margin-left: 5px;
+    font-size: 20px;
+  }
+  
+  .google-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  
+  @media (max-width: 575.98px) {
+    .login_box_area {
+      padding: 30px 0;
+    }
+  
+    .login_form_inner {
+      padding: 20px;
+    }
+  
+    .login_box_img {
+      margin-bottom: 20px;
+    }
+  
+    .login_box_img img {
+      max-height: 300px; 
+    }
+  
+    .login_box_img .hover {
+      padding: 10px;
+    }
+  
+    .login_box_img .hover h4 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+  
+    .login_box_img .hover p {
+      font-size: 11px;
+      line-height: 1.4;
+    }
+  
+    .social {
+      margin-left: 0;
+      text-align: center;
+    }
+  
+    .google-btn {
+      padding: 5px 10px;
+      font-size: 13px;
+    }
+  
+    .google-btn i, .google-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  
+  @media (min-width: 576px) and (max-width: 767.98px) {
+    .login_box_area {
+      padding: 40px 0;
+      
+    }
+  
+    .login_form_inner {
+      padding: 30px;
+    }
+  
+    .login_box_img img {
+      max-height: 400px;
+    }
+  
+    .login_box_img .hover {
+      padding: 15px;
+    }
+  
+    .login_box_img .hover h4 {
+      font-size: 18px;
+    }
+  
+    .login_box_img .hover p {
+      font-size: 12px;
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    .login_box_area {
+      padding: 50px 0;
+    }
+  
+    .login_box_img .hover h4 {
+      font-size: 20px;
+    }
+  
+    .login_box_img .hover p {
+      font-size: 13px;
+    }
+  }

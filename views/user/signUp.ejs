@@ -48,62 +48,50 @@
 	<!--================Login Box Area =================-->
 	<section class="login_box_area section_gap">
 		<div class="container">
-			<div class="row">
-				<div class="col-lg-6">
-					<div class="login_box_img">
-						<img class="img-fluid" src="/public/userAssets/images/login.jpg" alt="">
-						<div class="hover">
-							<h4>BUILD YOUR DREAM</h4>
-							<p>Transform your living space with furniture that blends elegance and comfort seamlessly. Discover premium designs crafted to turn your house into a home, adding luxury and durability to every corner. Complement your beautiful interiors with smart home appliances that redefine modern living. Simplify your daily chores with innovative technology that’s efficient, reliable, and built to last. Experience the perfect harmony of style and functionality – because your dream home deserves nothing less!</p>
-							<!-- <a class="primary-btn" href="registration.html">Create an Account</a> -->
-						</div>
-					</div>
+		  <div class="row">
+			<div class="col-lg-6">
+			  <div class="login_box_img">
+				<img class="img-fluid" src="/public/userAssets/images/login.jpg" alt="">
+				<div class="hover">
+				  <h4>BUILD YOUR DREAM</h4>
+				  <p>Transform your living space with furniture that blends elegance and comfort seamlessly. Discover premium designs crafted to turn your house into a home, adding luxury and durability to every corner. Complement your beautiful interiors with smart home appliances that redefine modern living. Simplify your daily chores with innovative technology that’s efficient, reliable, and built to last. Experience the perfect harmony of style and functionality – because your dream home deserves nothing less!</p>
 				</div>
-				<div class="col-lg-6">
-					<div class="login_form_inner pt-5">
-						<h3>create new Account</h3>
-						<form action="/user/otp" method="post" class="row login_form" autocomplete="off" id="signUp-form" >
-							<div id="UnameError" class="text-danger"></div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="Uname" name="username" placeholder="Username" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Username'" >
-							</div>
-
-							
-							<div id="emailError" class="text-danger"></div>
-                            <div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="email-adress" name="email" placeholder="email address" onfocus="this.placeholder = ''" onblur="this.placeholder = 'email address'">
-							</div>
-                           
-						   <div id="passwordError" class="text-danger"></div>
-                           <div class="col-md-12 form-group">
-							<input type="password" class="form-control" id="password" name="password" 
-								   placeholder="Password" onfocus="this.placeholder = ''" 
-								   onblur="this.placeholder = 'Password'">
-							<button type="button" class="password-eye" onclick="togglePassword()">
-								<i class="fa fa-eye" id="eyeIcon"></i>
-							</button>
-						</div>
-							
-
-							<div id="CpasswordError" class="text-danger"></div>
-							<div class="col-md-12 form-group">
-								
-								<input type="password" class="form-control" id="C-password" name="confirmpassword" placeholder="confirm Password" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Password'">
-							</div>
-							
-
-							 
-							<div class="col-md-8 mt-3 ml-5 form-group">
-								<button type="submit" id="btn-submit" value="submit" class="primary-btn mb-5">generate otp</button>
-								
-								
-							</div>
-						</form>
-					</div>
-				</div> 
+			  </div>
 			</div>
+			<div class="col-lg-6">
+			  <div class="login_form_inner pt-5">
+				<h3>create new Account</h3>
+				<form action="/user/otp" method="post" class="row login_form" autocomplete="off" id="signUp-form">
+				  <div id="UnameError" class="text-danger"></div>
+				  <div class="col-md-12 form-group">
+					<input type="text" class="form-control" id="Uname" name="username" placeholder="Username" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Username'">
+				  </div>
+				  <div id="emailError" class="text-danger"></div>
+				  <div class="col-md-12 form-group">
+					<input type="text" class="form-control" id="email-adress" name="email" placeholder="email address" onfocus="this.placeholder = ''" onblur="this.placeholder = 'email address'">
+				  </div>
+				  <div id="passwordError" class="text-danger"></div>
+				  <div class="col-md-12 form-group">
+					<input type="password" class="form-control" id="password" name="password" 
+						   placeholder="Password" onfocus="this.placeholder = ''" 
+						   onblur="this.placeholder = 'Password'">
+					<button type="button" class="password-eye" onclick="togglePassword()">
+					  <i class="fa fa-eye" id="eyeIcon"></i>
+					</button>
+				  </div>
+				  <div id="CpasswordError" class="text-danger"></div>
+				  <div class="col-md-12 form-group">
+					<input type="password" class="form-control" id="C-password" name="confirmpassword" placeholder="confirm Password" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Password'">
+				  </div>
+				  <div class="col-md-8 mt-3 ml-5 form-group">
+					<button type="submit" id="btn-submit" value="submit" class="primary-btn mb-5">generate otp</button>
+				  </div>
+				</form>
+			  </div>
+			</div>
+		  </div>
 		</div>
-	</section>
+	  </section>
 	<!--================End Login Box Area =================-->
 
 	<!-- start footer Area -->

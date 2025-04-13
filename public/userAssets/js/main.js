@@ -146,7 +146,7 @@ $(document).ready(function(){
       // -------   Mail Send ajax
 
          $(document).ready(function() {
-            var form = $('#booking'); // contact form
+            var form = $('#booking'); 
             var submit = $('.submit-btn'); // submit button
             var alert = $('.alert-msg'); // alert div for show alert message
 
@@ -568,37 +568,37 @@ $(document).ready(function(){
 
 //  contact page 
 
-const form = document.querySelector('form');
+// const form = document.querySelector('form');
 
-form.addEventListener('submit', (event) => {
-    event.preventDefault();
+// form.addEventListener('submit', (event) => {
+//     event.preventDefault();
 
-    // Get form values
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const message = document.getElementById('message').value;
+//     // Get form values
+//     const name = document.getElementById('name').value;
+//     const email = document.getElementById('email').value;
+//     const message = document.getElementById('message').value;
 
-    // Send data to server (replace with your actual server-side code)
-    fetch('/contact', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name, email, message })
-    })
-    .then(response => {
-        if (response.ok) {
-            alert('Message sent successfully!');
-            form.reset();
-        } else {
-            alert('Error sending message.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again la.');
-    });
-});
+//     // Send data to server (replace with your actual server-side code)
+//     fetch('/contact', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({ name, email, message })
+//     })
+//     .then(response => {
+//         if (response.ok) {
+//             alert('Message sent successfully!');
+//             form.reset();
+//         } else {
+//             alert('Error sending message.');
+//         }
+//     })
+//     .catch(error => {
+//         console.error('Error:', error);
+//         alert('An error occurred. Please try again la.');
+//     });
+// });
 
 
 

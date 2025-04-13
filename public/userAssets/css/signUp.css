@@ -1,8 +1,53 @@
-.form-group {
-    position: relative;
-}
 
-.password-eye {
+.login_box_img {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .login_box_img img {
+    width: 100%;
+    height: auto;
+    max-height: 500px; 
+    object-fit: cover;
+    display: block;
+  }
+  
+  .login_box_img .hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .login_box_img .hover h4 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
+  .login_box_img .hover p {
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+
+  .form-group {
+    position: relative;
+  }
+  
+  
+  .password-eye {
     position: absolute;
     right: 10px;
     top: 50%;
@@ -11,18 +56,103 @@
     background: none;
     border: none;
     padding: 5px;
-}
-
-.password-eye:focus {
+  }
+  
+  .password-eye:focus {
     outline: none;
-}
-
-/* Optional: Style for the eye icon */
-.password-eye i {
+  }
+  
+  .password-eye i {
     color: #666;
     font-size: 16px;
-}
-
-.password-eye:hover i {
+  }
+  
+  .password-eye:hover i {
     color: #333;
-}
+  }
+  
+  
+  .col-md-8.mt-3.ml-5 .primary-btn {
+    width: 100%;
+  }
+  
+  
+  @media (max-width: 575.98px) {
+    .login_box_img {
+      margin-bottom: 20px;
+    }
+  
+    .login_box_img img {
+      max-height: 300px; 
+    }
+  
+    .login_box_img .hover {
+      padding: 10px;
+    }
+  
+    .login_box_img .hover h4 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+  
+    .login_box_img .hover p {
+      font-size: 11px;
+      line-height: 1.4;
+    }
+  
+    
+    .col-md-8.mt-3.ml-5 {
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 15px;
+      width: 100%;
+      max-width: 300px; 
+    }
+  
+    .col-md-8.mt-3.ml-5 .primary-btn {
+      font-size: 14px;
+      padding: 3px;
+    }
+  }
+  
+  @media (min-width: 576px) and (max-width: 767.98px) {
+    .login_box_img img {
+      max-height: 400px;
+    }
+  
+    .login_box_img .hover {
+      padding: 15px;
+    }
+  
+    .login_box_img .hover h4 {
+      font-size: 18px;
+    }
+  
+    .login_box_img .hover p {
+      font-size: 12px;
+    }
+  
+    
+    .col-md-8.mt-3.ml-5 {
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 15px;
+      width: 100%;
+      max-width: 350px; 
+    }
+  
+    .col-md-8.mt-3.ml-5 .primary-btn {
+      font-size: 15px;
+      padding: 10px 15px;
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    .login_box_img .hover h4 {
+      font-size: 20px;
+    }
+  
+    .login_box_img .hover p {
+      font-size: 13px;
+    }
+  }

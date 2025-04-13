@@ -74,7 +74,7 @@ const addMoneyWallet = async (req, res) => {
         const userId = req.session?.User?._id;
 
         if(amount>550000){
-            res.status(HttpStatus.BAD_REQUEST).json({success:false , message:"Max add limit: ₹5,00,000 per transaction."})
+           return res.status(HttpStatus.BAD_REQUEST).json({success:false , message:"Max add limit: ₹5,00,000 per transaction."})
         }
 
         const wallet = await Wallet.findOneAndUpdate(

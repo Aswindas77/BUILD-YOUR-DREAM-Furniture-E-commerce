@@ -70,10 +70,12 @@ const loadCart = async (req, res) => {
 //====================================================================================================================================================
 
 const addcart = async (req, res) => {
-    try {
+    try { 
 
 
         const { productId, quantity } = req.body;
+
+        
 
         if (!req.session.User || !req.session.User._id) {
             return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: "User not authenticated" });

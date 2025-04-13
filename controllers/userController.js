@@ -105,7 +105,7 @@ const verifyUser = async (req, res) => {
         }
 
 
-        
+
         if (user.isBlocked) {
             return res.status(HttpStatus.BAD_REQUEST).json({ emailError: "sorry you have been blocked!" });
 
@@ -159,7 +159,7 @@ const genOtpForgotPass = async (req, res) => {
         const { email } = req.body;
 
         const user = await User.findOne({ email });
-        req.session.checkPass = "forgot";
+        req.session.checkPass = "forgot"; 
 
         if (!user) {
             return res.status(400).json({
@@ -271,7 +271,8 @@ const registration = async (req, res) => {
         console.log('this is the data', req.body)
         const { name, email, password } = req.body;
         const username = name
-        req.session.checkPass = "singUp"
+
+        req.session.checkPass="singup"
         const existingUser = await User.findOne({ email });
         console.log("Existing User:", existingUser);
 
@@ -286,12 +287,12 @@ const registration = async (req, res) => {
             const otp = generateOtp();
 
             sendotp(otp, email)
-
+ 
 
             req.session.data = { username, email, password }
             req.session.otp = otp
             req.session.time = Date.now()
-            console.log(`requset time=============${req.session.time}`) 
+            console.log(`requset time=============${req.session.time}`)
 
             console.log(`your email is:${otp}`)
 
@@ -403,11 +404,9 @@ const generateOtp = () => {
 };
 
 
-// load otp verify section 
+// verify otp for changepassword
 
-//====================================================================================================================================================
-
-const verifyOtp = async (req, res) => {
+const verifyOtpPassword = async (req, res) => {
     try {
         const checkData = req.session.checkPass;
         const { otp } = req.body;
@@ -417,8 +416,8 @@ const verifyOtp = async (req, res) => {
 
         console.log("checkData", checkData)
 
-        console.log("type otp",typeof(otp));
-        console.log("type session",typeof(sessionOtp));
+        console.log("type otp", otp);
+        console.log("type session", sessionOtp);
 
         if (!otp) {
             return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
@@ -451,7 +450,7 @@ const verifyOtp = async (req, res) => {
         }
         else if (checkData.trim() === "forgot") {
             console.log("hhhh");
-            const {email} =req.session.data
+            const { email } = req.session.data
             req.session.forgotPasswordEmail = email;
             req.session.checkPass = null;
             req.session.otp = null;
@@ -463,6 +462,77 @@ const verifyOtp = async (req, res) => {
 
         // Just in case checkPass is undefined or invalid
         return res.status(HttpStatus.BAD_REQUEST).send('Invalid session state');
+
+    } catch (err) {
+        console.error(err);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    }
+};
+
+
+
+// load otp verify section 
+
+//====================================================================================================================================================
+
+const verifyOtp = async (req, res) => {
+    try {
+        const checkData = req.session.checkPass;
+        const { otp } = req.body;
+        const sessionOtp = req.session.otp;
+        const currentTime = Date.now();
+        const otpSentTime = req.session.time || 0;
+
+        console.log("checkData:", checkData);
+        console.log("checkData.trim():", checkData?.trim())
+
+        console.log("type otp", otp);
+        console.log("type session", sessionOtp);
+
+        if (!otp) {
+            return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
+        }
+
+        else if (currentTime - otpSentTime > 60000) {
+            return res.status(HttpStatus.NOT_FOUND).send('Your OTP has expired');
+        }
+
+
+        else if (checkData=="singup") {
+            
+            const { username, email, password } = req.session.data;
+
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+            const newUser = await User.create({
+                username,
+                email,
+                password: hashedPassword
+            });
+
+            console.log("new User", newUser)
+
+            req.session.User = newUser;
+            req.session.logged = true;
+            req.session.otp = null;
+            req.session.checkPass = null;
+
+            return res.status(HttpStatus.OK).send('Account created successfully');
+        }
+        else if (checkData== "forgot") {
+            console.log("hhhh");
+            const { email } = req.session.data
+            req.session.forgotPasswordEmail = email;
+            req.session.checkPass = null;
+            req.session.otp = null;
+            req.session.time = null;
+            req.session.data = null;
+
+            return res.status(HttpStatus.CREATED).send("forgot password otp verified successfully");
+
+        } else {
+            return res.status(HttpStatus.BAD_REQUEST).send('Invalid session state');
+        }
 
     } catch (err) {
         console.error(err);
@@ -568,7 +638,7 @@ const loadShop = async (req, res) => {
         const limit = 12;
         const skip = (page - 1) * limit;
 
-       
+
         let query = {
             isDeleted: false,
             isListed: false
@@ -1556,7 +1626,7 @@ const verifyPayment = async (req, res) => {
 
 
         await newOrder.save();
-        
+
         if (coupon) {
             coupon.usedBy.push(userId);
             await coupon.save();
@@ -1656,8 +1726,8 @@ const addAddressCheckout = async (req, res) => {
         const addressData = req.body;
         console.log("Request Body:", addressData);
 
-        
-        const user = req.session?.User; 
+
+        const user = req.session?.User;
         if (!user) {
             return res.status(HttpStatus.UNAUTHORIZED).json({
                 success: false,
@@ -1666,10 +1736,10 @@ const addAddressCheckout = async (req, res) => {
         }
         console.log("Address User Data:", user);
 
-        
+
         const { houseNumber, street, city, landmark, country, pincode, phone, isDefault } = addressData;
 
-        
+
         if (!houseNumber || !street || !city || !country || !pincode || !phone) {
             return res.status(HttpStatus.BAD_REQUEST).json({
                 success: false,
@@ -1677,7 +1747,7 @@ const addAddressCheckout = async (req, res) => {
             });
         }
 
-        
+
         const phoneRegex = /^[6-9]\d{9}$/;
         if (!phoneRegex.test(phone)) {
             return res.status(HttpStatus.BAD_REQUEST).json({
@@ -1764,40 +1834,40 @@ const verifyChangePassword = async (req, res) => {
     try {
         const { newPassword } = req.body;
 
-        console.log("newPassword",newPassword)
-        
+        console.log("newPassword", newPassword)
 
-    const email = req.session.forgotPasswordEmail;
-    console.log(req.session.forgotPasswordEmail)
 
-    
+        const email = req.session.forgotPasswordEmail;
+        console.log(req.session.forgotPasswordEmail)
 
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-    if (!passwordRegex.test(newPassword)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Password must be at least 8 characters long and contain at least one letter, one number, and one special character'
-        });
-    }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-    }
 
-    
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 8 characters long and contain at least one letter, one number, and one special character'
+            });
+        }
 
-    
-    user.password = hashedPassword;
-    await user.save();
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
 
-    
-    req.session.forgotPasswordEmail = null;
-    console.log("hello")
-    return res.status(200).json({ success: true });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+
+        user.password = hashedPassword;
+        await user.save();
+
+
+        req.session.forgotPasswordEmail = null;
+        console.log("hello")
+        return res.status(200).json({ success: true });
     } catch (error) {
-        
+
         console.log(error.message);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
@@ -1841,6 +1911,7 @@ module.exports = {
     loadAbout,
     loadContact,
     verifyOtp,
+    verifyOtpPassword,
     logOut,
     loadProductView,
     loadBanProduct,

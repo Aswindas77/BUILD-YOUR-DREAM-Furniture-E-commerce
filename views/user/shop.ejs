@@ -29,7 +29,7 @@
 	<link rel="stylesheet" href="/public/userAssets/css/ion.rangeSlider.skinFlat.css" />
 	<link rel="stylesheet" href="/public/userAssets/css/magnific-popup.css">
 	<link rel="stylesheet" href="/public/userAssets/css/main.css">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"  rel="stylesheet"> 
 	<link href="css/font-awesome.css" rel="stylesheet">
 	<link rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
@@ -47,7 +47,7 @@
 
 
 
- 
+
 
 	<link rel="stylesheet" href="/public/userAssets/css/shop.css">
 
@@ -70,7 +70,7 @@
 						<div class="col-xl-9 col-lg-10 col-md-12 mx-auto">
 							<!-- Top Bar -->
 							<div class="top-bar">
-								
+
 								<div class="search-container">
 									<input type="text" class="search-input" id="searchInput"
 										placeholder="Search products..." value="<%= filters?.search || '' %>">
@@ -82,7 +82,7 @@
 								</div>
 
 								<!-- Collapsible Filter Section -->
-								<div class="filter-container"> 
+								<div class="filter-container">
 									<button class="filter-toggle-btn" id="filterToggleBtn">
 										<i class="fas fa-filter"></i> Filters
 									</button>
@@ -171,12 +171,12 @@
 											<div class="product-price">
 												<% if (product.productOffer> 0) { %>
 													<span class="price-sale">₹<%= product.salesPrice.toFixed(2) %>
-															</span>
+													</span>
 													<span class="price-original">₹<%= (product.salesPrice / (1 -
 															product.productOffer / 100)).toFixed(2) %></span>
 													<% } else { %>
 														<span class="price-sale">₹<%= product.salesPrice.toFixed(2) %>
-																</span>
+														</span>
 														<% } %>
 											</div>
 
@@ -272,7 +272,7 @@
 				<script src="/public/userAssets/js/jquery.nice-select.min.js"></script>
 				<script src="/public/userAssets/js/jquery.sticky.js"></script>
 				<script src="/public/userAssets/js/nouislider.min.js"></script>
-				<script src="/public/userAssets/js/countdown.js"></script>
+				<!-- <script src="/public/userAssets/js/countdown.js"></script> -->
 				<script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
 				<script src="/public/userAssets/js/owl.carousel.min.js"></script>
 				<!--gmaps Js-->
@@ -287,8 +287,8 @@
 					}
 
 					function addToCart(productId) {
-						console.log(productId)
-						fetch("/user/cart", {
+						console.log(productId);
+						fetch("/user/cart", {  
 							method: "POST",
 							headers: {
 								"Content-Type": "application/json"
@@ -298,8 +298,15 @@
 								quantity: 1
 							})
 						})
-							.then(response => response.json())
+							.then(response => {
+								if (response.status === 401) {
+									window.location.href = '/user/login';
+									return; 
+								}
+								return response.json(); 
+							})
 							.then(data => {
+								if (!data) return; 
 								if (data.message) {
 									showToast(data.message);
 								}
@@ -309,7 +316,7 @@
 							});
 					}
 
-					
+
 
 					function showToast(message, type) {
 						Toastify({
@@ -383,12 +390,12 @@
 							page: 1
 						};
 
-						
+
 						function handleSearch(searchValue) {
 							currentFilters.search = searchValue.trim();
 							currentFilters.page = 1;
 
-							
+
 							const queryParams = new URLSearchParams(window.location.search);
 							queryParams.set('search', searchValue);
 							queryParams.set('page', '1');
@@ -396,12 +403,12 @@
 							updateProducts(currentFilters);
 						}
 
-						
+
 						searchInput.addEventListener('input', debounce(function (e) {
 							handleSearch(e.target.value);
 						}, 1000));
 
-						
+
 						applyButton.addEventListener('click', function () {
 							currentFilters.sort = sortSelect.value;
 							currentFilters.category = categorySelect.value;
@@ -423,20 +430,20 @@
 						});
 
 						function updateProducts(filters) {
-							
+
 							productGrid.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
 
-							
+
 							const queryParams = new URLSearchParams();
 							if (filters.search) queryParams.append('search', filters.search);
 							if (filters.sort) queryParams.append('sort', filters.sort);
 							if (filters.category) queryParams.append('category', filters.category);
 							if (filters.page) queryParams.append('page', filters.page);
 
-							
+
 							window.history.pushState({}, '', `/user/shop?${queryParams.toString()}`);
 
-							
+
 							fetch(`/user/shop?${queryParams.toString()}`, {
 								method: 'GET',
 								headers: {
@@ -471,7 +478,7 @@
 								});
 						}
 
-						
+
 						function debounce(func, wait) {
 							let timeout;
 							return function (...args) {
@@ -611,7 +618,7 @@
 						})
 							.then(response => response.json())
 							.then(data => {
-								if (data.success) { 
+								if (data.success) {
 
 									showToast(data.message);
 
@@ -641,22 +648,22 @@
 						const filterToggleBtn = document.getElementById('filterToggleBtn');
 						const filterOptions = document.getElementById('filterOptions');
 
-						
+
 						window.addEventListener('scroll', function () {
-							if (window.scrollY > 50) { 
+							if (window.scrollY > 50) {
 								topBar.classList.add('scrolled');
 							} else {
 								topBar.classList.remove('scrolled');
-								filterOptions.classList.remove('active'); 
+								filterOptions.classList.remove('active');
 							}
 						});
 
-						
+
 						filterToggleBtn.addEventListener('click', function () {
 							filterOptions.classList.toggle('active');
 						});
 
-						
+
 						document.addEventListener('click', function (e) {
 							if (!filterToggleBtn.contains(e.target) && !filterOptions.contains(e.target)) {
 								filterOptions.classList.remove('active');
