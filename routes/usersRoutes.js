@@ -235,7 +235,6 @@ userRouter.get('/orderInvoice/:orderId', isBan, orderController.generateInvoice)
 
 
 
-
 // google auth
 
 userRouter.get("/auth/google", isLogin, passport.authenticate("google", { scope: ["profile", "email"] }));
