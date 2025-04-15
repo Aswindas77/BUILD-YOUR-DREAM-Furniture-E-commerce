@@ -6,7 +6,7 @@ const env = require('dotenv').config();
 passport.use(new googleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'https://buildyourdream.ddnsking.com/auth/google/callback'
+    callbackURL:'http://buildyourdream.ddnsking.com/auth/google/callback'
 },
 async (accessToken, refreshToken, profile, done) => {
 
@@ -52,4 +52,4 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-module.exports  =  passport;
+module.exports = passport;
