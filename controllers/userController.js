@@ -490,15 +490,19 @@ const verifyOtp = async (req, res) => {
         console.log("type session", sessionOtp);
 
         if (!otp) {
-            return res.status(HttpStatus.BAD_REQUEST).send('OTP is required');
+            return res.status(HttpStatus.BAD_REQUEST).json({ message:'OTP is required'});
         }
 
-        else if (currentTime - otpSentTime > 60000) {
-            return res.status(HttpStatus.NOT_FOUND).send('Your OTP has expired');
+        if (String(otp) !== String(sessionOtp)) {
+            return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid OTP or Invalid format' });
+        }
+
+         if (currentTime - otpSentTime > 60000) {
+            return res.status(HttpStatus.NOT_FOUND).json({ message:'Your OTP has expired'});
         }
 
 
-        else if (checkData=="singup") {
+         if (checkData=="singup") {
             
             const { username, email, password } = req.session.data;
 
@@ -511,16 +515,16 @@ const verifyOtp = async (req, res) => {
             });
 
             console.log("new User", newUser)
-
+ 
             req.session.User = newUser;
             req.session.logged = true;
             req.session.otp = null;
             req.session.checkPass = null;
 
-            return res.status(HttpStatus.OK).send('Account created successfully');
+            return res.status(HttpStatus.OK).json({ message:'Account created successfully'});
         }
         else if (checkData== "forgot") {
-            console.log("hhhh");
+            console.log("forrrr")
             const { email } = req.session.data
             req.session.forgotPasswordEmail = email;
             req.session.checkPass = null;
@@ -528,10 +532,10 @@ const verifyOtp = async (req, res) => {
             req.session.time = null;
             req.session.data = null;
 
-            return res.status(HttpStatus.CREATED).send("forgot password otp verified successfully");
+            return res.status(HttpStatus.CREATED).json({message:"forgot password otp verified successfully"});
 
         } else {
-            return res.status(HttpStatus.BAD_REQUEST).send('Invalid session state');
+            return res.status(HttpStatus.BAD_REQUEST).json({message:'Invalid session state'});
         }
 
     } catch (err) {
@@ -655,38 +659,38 @@ const loadShop = async (req, res) => {
             }
         }
 
-        // Build sort object
+       
         let sortQuery = {};
         switch (sort) {
             case 'nameAsc': sortQuery = { name: 1 }; break;
             case 'nameDesc': sortQuery = { name: -1 }; break;
             case 'priceAsc': sortQuery = { salesPrice: 1 }; break;
             case 'priceDesc': sortQuery = { salesPrice: -1 }; break;
-            default: sortQuery = { createdAt: 1 }; // Default sort
+            default: sortQuery = { createdAt: 1 }; 
         }
 
-        // Get total count for pagination
+        
         const totalProducts = await Products.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Get products
+        
         const products = await Products.find(query)
             .sort(sortQuery)
             .skip(skip)
             .limit(limit)
             .populate('category');
 
-        // Get wishlist products
+        
         let wishlistProducts = [];
         if (user) {
             const wishlist = await WhishList.findOne({ userId: user._id });
             wishlistProducts = wishlist ? wishlist.products.map(p => p.productId.toString()) : [];
         }
 
-        // Get categories for filter dropdown
+        
         const categories = await Category.find({ isDeleted: false, isListed: false });
 
-        // Check if request wants JSON response
+        
         if (req.xhr || req.headers.accept.includes('application/json')) {
             return res.json({
                 success: true,
@@ -698,7 +702,7 @@ const loadShop = async (req, res) => {
             });
         }
 
-        // Render HTML response
+        
         res.render('shop', {
             products,
             categories,
@@ -1156,13 +1160,6 @@ const buyNow = async (req, res) => {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
     }
 };
-
-
-
-
-
-
-
 
 
 
