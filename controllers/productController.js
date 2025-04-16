@@ -171,7 +171,7 @@ const editProduct = async (req, res) => {
 
     if (!product) return res.send("product not found")
 
-    res.render("editproduct", { product, categories })
+    res.render("editProduct", { product, categories })
 
   } catch (error) {
     console.log(error.message);
