@@ -6,38 +6,38 @@ const env = require('dotenv').config();
 passport.use(new googleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'http://buildyourdream.ddnsking.com/auth/google/callback'
+    callbackURL: 'https://buildyourdream.ddnsking.com/auth/google/callback'
 },
-async (accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, profile, done) => {
 
-    try {
-        const email = profile.emails[0].value;
-        const googleId = profile.id;
+        try {
+            const email = profile.emails[0].value;
+            const googleId = profile.id;
 
-        let user = await User.findOne({ email });
+            let user = await User.findOne({ email });
 
 
-        if (user) {
-            if (!user.googleId) {
-                user.googleId = googleId;
-                await user.save();
+            if (user) {
+                if (!user.googleId) {
+                    user.googleId = googleId;
+                    await user.save();
+                }
+            } else {
+                user = await User.create({
+                    googleId,
+                    email,
+                    username: profile.displayName
+                });
             }
-        } else {
-            user = await User.create({
-                googleId,
-                email,
-                username: profile.displayName
-            });
+
+
+            return done(null, user);
+
+
+        } catch (error) {
+            return done(error, null);
         }
-
-        
-        return done(null, user);
-        
-
-    } catch (error) {
-        return done(error, null);
-    }
-}));
+    }));
 
 passport.serializeUser((user, done) => {
     done(null, user._id);
@@ -52,4 +52,4 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-module.exports = passport;
+module.exports = passport;
