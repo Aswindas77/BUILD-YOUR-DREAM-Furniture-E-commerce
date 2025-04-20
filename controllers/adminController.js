@@ -3,15 +3,16 @@ const userData = require('../models/userModel');
 const bcrypt = require("bcrypt");
 const mongoose = require('mongoose');
 const Order = require('../models/ordermodel');
+const Coupon = require("../models/couponModel");
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const User = require('../models/userModel');
 const Return = require('../models/returnModel');
 const HttpStatus = require('../constants/httpStatus');
-const Messages =require('../constants/messages.json')
+const Messages = require('../constants/messages.json')
 
 
- 
+
 
 
 
@@ -28,7 +29,7 @@ const Messages =require('../constants/messages.json')
 //====================================================================================================================================================
 
 const loadLogin = async (req, res) => {
-  try { 
+  try {
     const { email, password } = req.body;
     res.render("adminLogin", { emailError: "", passwordError: "", layout: false });
   } catch (err) {
@@ -41,7 +42,7 @@ const loadLogin = async (req, res) => {
 
 //====================================================================================================================================================
 
-const loadDash = async (req, res) => {
+const verifyAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -424,12 +425,7 @@ const getYearlySales = async (page = 1, limit = 10, startDate = null, endDate = 
 
   yearlySales.sort((a, b) => b.year - a.year);
 
-  console.log('Yearly Sales Found:', {
-    startYear,
-    endYear,
-    dataFound: yearlySales.length > 0,
-    numberOfYears: yearlySales.length
-  });
+
 
   if (yearlySales.length === 0) {
     return {
@@ -448,10 +444,12 @@ const getYearlySales = async (page = 1, limit = 10, startDate = null, endDate = 
 
 
 
-// dashboard
+
 
 const loadDashboard = async (req, res) => {
   try {
+
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 3;
     const skip = (page - 1) * limit;
@@ -462,207 +460,166 @@ const loadDashboard = async (req, res) => {
     if (req.query.startDate && req.query.endDate) {
       startDate = new Date(req.query.startDate);
       startDate.setHours(0, 0, 0, 0);
-
       endDate = new Date(req.query.endDate);
       endDate.setHours(23, 59, 59, 999);
     }
 
-    // Get top selling products
-    const topProducts = await Order.aggregate([
-      {
-        $match: {
-          status: 'Delivered'
-        }
-      },
-      { $unwind: '$items' },
-      {
-        $group: {
-          _id: '$items.productId',
-          soldCount: { $sum: '$items.quantity' },
-          totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
-        }
-      },
-      { $sort: { soldCount: -1 } },
-      { $limit: 10 },
-      {
-        $lookup: {
-          from: 'products',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'productDetails'
-        }
-      },
-      {
-        $project: {
-          name: { $arrayElemAt: ['$productDetails.name', 0] },
-          price: { $arrayElemAt: ['$productDetails.price', 0] },
-          images: { $arrayElemAt: ['$productDetails.images', 0] },
-          soldCount: 1,
-          totalRevenue: 1
-        }
-      }
-    ]);
-
-    // Get top categories
-    const topCategories = await Order.aggregate([
-      {
-        $match: {
-          status: 'Delivered'
-        }
-      },
-      { $unwind: '$items' },
-      {
-        $lookup: {
-          from: 'products',
-          localField: 'items.productId',
-          foreignField: '_id',
-          as: 'product'
-        }
-      },
-      { $unwind: '$product' },
-      {
-        $group: {
-          _id: '$product.category',
-          totalSales: { $sum: '$items.quantity' },
-          totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
-          productCount: { $addToSet: '$product._id' }
-        }
-      },
-      {
-        $lookup: {
-          from: 'categories',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'categoryDetails'
-        }
-      },
-      {
-        $project: {
-          name: { $arrayElemAt: ['$categoryDetails.name', 0] },
-          totalSales: 1,
-          totalRevenue: 1,
-          productCount: { $size: '$productCount' }
-        }
-      },
-      { $sort: { totalSales: -1 } },
-      { $limit: 10 }
-    ]);
-
-    const [dailySalesData, weeklySalesData, monthlySalesData, yearlySalesData] = await Promise.all([
-      getDailySales(startDate, endDate),
-      getWeeklySales(page, limit, startDate, endDate),
-      getMonthlySales(page, limit, startDate, endDate),
-      getYearlySales(page, limit, startDate, endDate)
-    ]);
-
-    if (!dailySalesData.length) {
-      const emptyData = {
-        data: [],
-        totalPages: 0
-      };
-
-      return res.render('adminDashboard', {
-        totalUsers: await User.countDocuments(),
-        totalOrders: 0,
-        totalProducts: 0,
-        totalDeliveredProducts: 0,
-        totalRevenue: 0,
-        totalReturns: 0,
-        orders: [],
-        topProducts: [],
-        topCategories: []
-      });
-    }
-
-    let orderQuery = {};
-    if (startDate && endDate) {
-      orderQuery.createdAt = {
+    const dateFilter = startDate && endDate ? {
+      createdAt: {
         $gte: startDate,
         $lte: endDate
-      };
-    }
-
-    const totalUsers = await User.countDocuments();
-    const totalReturns = await Return.countDocuments(orderQuery);
-
-    const totalOrdersCount = await Order.aggregate([
-      {
-        $match: orderQuery
-      },
-      { $group: { _id: null, total: { $sum: 1 } } }
-    ]).then(result => result.length ? result[0].total : 0);
-
-    const totalProducts = await Order.aggregate([
-      {
-        $match: orderQuery
-      },
-      { $unwind: "$items" },
-      {
-        $group: {
-          _id: null,
-          totalProducts: { $sum: "$items.quantity" }
-        }
       }
-    ]).then(result => result.length ? result[0].totalProducts : 0);
+    } : {};
 
-    const totalDeliveredProducts = await Order.aggregate([
-      {
-        $match: {
-          ...orderQuery,
-          'status': 'Delivered'
+    const [
+      totalUsers,
+      totalOrdersCount,
+      totalReturns,
+      totalProducts,
+      totalDeliveredProducts,
+      totalRevenueData,
+      topProducts,
+      topCategories
+    ] = await Promise.all([
+
+      User.countDocuments(),
+
+      Order.countDocuments(dateFilter),
+
+      Return.countDocuments(dateFilter),
+
+      Order.aggregate([
+        { $match: dateFilter },
+        { $unwind: "$items" },
+        {
+          $group: {
+            _id: null,
+            totalProducts: { $sum: "$items.quantity" }
+          }
         }
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 }
+      ]).then(res => res[0]?.totalProducts || 0),
+
+      Order.countDocuments({
+        ...dateFilter,
+        status: 'Delivered'
+      }),
+
+      Order.aggregate([
+        {
+          $match: {
+            ...dateFilter,
+            paymentStatus: 'Paid'
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: "$totalAmount" }
+          }
         }
-      }
-    ]).then(result => result.length ? result[0].total : 0);
+      ]).then(res => res[0]?.totalRevenue || 0),
 
-    const orders = await Order.find(orderQuery).populate('items.productId');
-    let totalRevenue = 0;
+      Order.aggregate([
+        { $match: { status: 'Delivered' } },
+        { $unwind: "$items" },
+        {
+          $group: {
+            _id: "$items.productId",
+            soldCount: { $sum: "$items.quantity" },
+            totalRevenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+          }
+        },
+        { $sort: { soldCount: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "products",
+            localField: "_id",
+            foreignField: "_id",
+            as: "productDetails"
+          }
+        },
+        {
+          $project: {
+            name: { $arrayElemAt: ["$productDetails.name", 0] },
+            price: { $arrayElemAt: ["$productDetails.price", 0] },
+            images: { $arrayElemAt: ["$productDetails.images", 0] },
+            soldCount: 1,
+            totalRevenue: 1
+          }
+        }
+      ]),
 
-    orders.forEach(order => {
-      if (order.paymentStatus === 'Paid') {
-        totalRevenue += order.totalAmount;
-      }
-    });
+      Order.aggregate([
+        { $match: { status: 'Delivered' } },
+        { $unwind: "$items" },
+        {
+          $lookup: {
+            from: "products",
+            localField: "items.productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        { $unwind: "$product" },
+        {
+          $group: {
+            _id: "$product.category",
+            totalSales: { $sum: "$items.quantity" },
+            totalRevenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
+            productCount: { $addToSet: "$product._id" }
+          }
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "_id",
+            foreignField: "_id",
+            as: "categoryDetails"
+          }
+        },
+        {
+          $project: {
+            name: { $arrayElemAt: ["$categoryDetails.name", 0] },
+            totalSales: 1,
+            totalRevenue: 1,
+            productCount: { $size: "$productCount" }
+          }
+        },
+        { $sort: { totalSales: -1 } },
+        { $limit: 10 }
+      ])
+    ]);
 
-    return res.render('adminDashboard', {
+
+
+    return res.render("adminDashboard", {
       totalUsers,
       totalOrders: totalOrdersCount,
       totalProducts,
       totalDeliveredProducts,
-      totalRevenue,
+      totalRevenue: totalRevenueData,
       totalReturns,
-      orders,
       topProducts,
       topCategories,
-      currentPage: {
-        daily: page,
-        weekly: page,
-        monthly: page,
-        yearly: page
-      },
-      totalPages: {
-        daily: dailySalesData.length,
-        weekly: weeklySalesData.totalPages,
-        monthly: monthlySalesData.totalPages,
-        yearly: yearlySalesData.totalPages
-      },
-      dailySales: dailySalesData,
-      weeklySales: weeklySalesData.data,
-      monthlySales: monthlySalesData.data,
-      yearlySales: yearlySalesData.data,
-      startDate: startDate ? startDate.toISOString().split('T')[0] : '',
-      endDate: endDate ? endDate.toISOString().split('T')[0] : ''
+      orders: [],
+      dailySales: [],
+      weeklySales: [],
+      monthlySales: [],
+      yearlySales: [],
+      currentPage: { daily: 1, weekly: 1, monthly: 1, yearly: 1 },
+      totalPages: { daily: 0, weekly: 0, monthly: 0, yearly: 0 },
+      startDate: startDate ? startDate.toISOString().split("T")[0] : '',
+      endDate: endDate ? endDate.toISOString().split("T")[0] : ''
     });
-  } catch (error) {
-    console.error("Dashboard loading error:", error);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+
+  } catch (err) {
+    console.error("Dashboard Load Error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
 
 
 
@@ -855,10 +812,12 @@ const getSalesReport = async (req, res) => {
       couponDiscount: parseFloat(sale.couponDiscount || 0).toFixed(2),
       totalProductDiscount: parseFloat(sale.totalProductDiscount || 0).toFixed(2)
     })));
+
+
   } catch (error) {
     console.error('Error getting sales report:', error);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
-    }
+  }
 };
 
 
@@ -901,28 +860,46 @@ const getOrdersByPeriod = async (req, res) => {
       .populate('items.productId', 'name price')
       .sort({ createdAt: -1 });
 
-    const formattedOrders = orders.map(order => ({
-      _id: order._id,
-      dummyOrderId:order.dummyOrderId,
-      userId: order.userId.email,
-      items: order.items,
-      totalAmount: order.totalAmount,
-      paymentStatus: order.paymentStatus,
-      paymentMethod: order.paymentMethod,
-      status: order.status,
-      createdAt: order.createdAt
+    console.log("Orders found:", orders);
+
+    
+    const formattedOrders = await Promise.all(orders.map(async (order) => {
+      let discountAmount = null;
+
+      if (order.couponCode) {
+        const coupon = await Coupon.findOne({ code: order.couponCode });
+        const couponPercentage = coupon?.discountPercentage;
+
+        if (coupon && couponPercentage && order.totalAmount) {
+          discountAmount = Number(((couponPercentage / 100) * order.totalAmount).toFixed(2));
+        }
+      }
+
+      return {
+        _id: order._id,
+        dummyOrderId: order.dummyOrderId,
+        userId: order.userId.email,
+        items: order.items,
+        totalAmount: order.totalAmount,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+        status: order.status,
+        discountAmount,
+        createdAt: order.createdAt
+      };
     }));
 
     console.log('Start date:', startDate);
     console.log('End date:', now);
-    console.log('Number of orders found:', formattedOrders.length);
+    console.log('Formatted Orders with Discounts:', formattedOrders);
 
     res.json(formattedOrders);
   } catch (error) {
     console.error('Error getting orders by period:', error);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 
 
@@ -1209,11 +1186,70 @@ const getAnalytics = async (req, res) => {
 
 
 
+const getOrdersByCustomRange = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.body;
+
+
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const orders = await Order.find({
+      createdAt: {
+        $gte: start,
+        $lte: end
+      }
+    })
+      .populate('userId', 'username email')
+      .populate('items.productId', 'name price')
+      .sort({ createdAt: -1 });
+
+    const codeCoupon = orders?.couponCode
+
+    const coupon = await Coupon.findOne({ code: codeCoupon });
+
+    let couponPercentage = coupon?.discountPercentage || null;
+
+    let discountAmount = null;
+    if (coupon) {
+      discountAmount = (couponPercentage / 100) * orders?.totalAmount
+      discountAmount = Number(discountAmount.toFixed(2));
+
+    }
+
+    console.log("discount Amount", discountAmount)
+
+
+    const formattedOrders = orders.map(order => ({
+      _id: order._id,
+      dummyOrderId: order.dummyOrderId || `ORD-${order._id.toString().slice(-6).toUpperCase()}`,
+      userId: order.userId.email,
+      items: order.items,
+      totalAmount: order.totalAmount,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      status: order.status,
+      createdAt: order.createdAt,
+      discountAmount
+    }));
+
+    res.json(formattedOrders);
+
+  } catch (error) {
+    console.error('Error fetching orders by custom range:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 
 
 module.exports = {
   loadLogin,
-  loadDash,
+  verifyAdmin,
   loadDashboard,
   loadusermanagment,
   logout,
@@ -1226,5 +1262,6 @@ module.exports = {
   getOrdersByPeriod,
   getGraphData,
   getSalesDataByPeriod,
-  getAnalytics
+  getAnalytics,
+  getOrdersByCustomRange
 };

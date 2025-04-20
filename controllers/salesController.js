@@ -3,7 +3,8 @@ const Order = require('../models/ordermodel');
 const User = require('../models/userModel');
 const Return = require('../models/returnModel');
 const HttpStatus = require('../constants/httpStatus');
-const Messages =require('../constants/messages.json');
+const Messages = require('../constants/messages.json');
+const Coupon = require('../models/couponModel');
 
 
 
@@ -25,7 +26,7 @@ const loadSalesReport = async (req, res) => {
     let startDate = null;
     let endDate = null;
 
-    if (req.query.startDate && req.query.endDate) { 
+    if (req.query.startDate && req.query.endDate) {
       startDate = new Date(req.query.startDate);
       startDate.setHours(0, 0, 0, 0);
 
@@ -107,18 +108,33 @@ const loadSalesReport = async (req, res) => {
     const orders = await Order.find(orderQuery).populate('items.productId');
     let totalRevenue = 0;
 
+    const couponCode = orders.couponCode;
+    const coupon = await Coupon.findOne({ code: couponCode })
+    let couponPercentage = coupon?.discountPercentage || null;
+
+    let discount = null;
+
+    if (coupon && couponPercentage) {
+      discount = (couponPercentage / 100) * grandTotal;
+
+    }
+
+
+
     orders.forEach(order => {
       if (order.status === 'Delivered') {
         totalRevenue += order.totalAmount;
       }
     });
 
+
+
     return res.render('salesReport', {
       totalUsers,
       totalOrders: totalOrdersCount,
       totalProducts,
       totalDeliveredProducts,
-      totalRevenue,
+      totalProductDiscount: discount,
       totalRevenue,
       totalReturns,
       orders,
@@ -128,7 +144,7 @@ const loadSalesReport = async (req, res) => {
         monthly: page,
         yearly: page
 
-      }, 
+      },
       totalPages: {
         daily: dailySalesData.length,
         weekly: weeklySalesData.totalPages,
@@ -373,7 +389,7 @@ const getYearlySales = async (page = 1, limit = 0, startDate = null, endDate = n
     return {
       data: [],
       totalPages: 0
-    }; 
+    };
   }
 
   for (let year = startYear; year <= endYear; year++) {
@@ -429,5 +445,5 @@ const getYearlySales = async (page = 1, limit = 0, startDate = null, endDate = n
 
 module.exports = {
   loadSalesReport,
-  
+
 }

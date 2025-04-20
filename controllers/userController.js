@@ -159,7 +159,7 @@ const genOtpForgotPass = async (req, res) => {
         const { email } = req.body;
 
         const user = await User.findOne({ email });
-        req.session.checkPass = "forgot"; 
+        req.session.checkPass = "forgot";
 
         if (!user) {
             return res.status(400).json({
@@ -272,7 +272,7 @@ const registration = async (req, res) => {
         const { name, email, password } = req.body;
         const username = name
 
-        req.session.checkPass="singup"
+        req.session.checkPass = "singup"
         const existingUser = await User.findOne({ email });
         console.log("Existing User:", existingUser);
 
@@ -287,7 +287,7 @@ const registration = async (req, res) => {
             const otp = generateOtp();
 
             sendotp(otp, email)
- 
+
 
             req.session.data = { username, email, password }
             req.session.otp = otp
@@ -490,20 +490,20 @@ const verifyOtp = async (req, res) => {
         console.log("type session", sessionOtp);
 
         if (!otp) {
-            return res.status(HttpStatus.BAD_REQUEST).json({ message:'OTP is required'});
+            return res.status(HttpStatus.BAD_REQUEST).json({ message: 'OTP is required' });
         }
 
         if (String(otp) !== String(sessionOtp)) {
             return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid OTP or Invalid format' });
         }
 
-         if (currentTime - otpSentTime > 60000) {
-            return res.status(HttpStatus.NOT_FOUND).json({ message:'Your OTP has expired'});
+        if (currentTime - otpSentTime > 60000) {
+            return res.status(HttpStatus.NOT_FOUND).json({ message: 'Your OTP has expired' });
         }
 
 
-         if (checkData=="singup") {
-            
+        if (checkData == "singup") {
+
             const { username, email, password } = req.session.data;
 
             const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -515,15 +515,15 @@ const verifyOtp = async (req, res) => {
             });
 
             console.log("new User", newUser)
- 
+
             req.session.User = newUser;
             req.session.logged = true;
             req.session.otp = null;
             req.session.checkPass = null;
 
-            return res.status(HttpStatus.OK).json({ message:'Account created successfully'});
+            return res.status(HttpStatus.OK).json({ message: 'Account created successfully' });
         }
-        else if (checkData== "forgot") {
+        else if (checkData == "forgot") {
             console.log("forrrr")
             const { email } = req.session.data
             req.session.forgotPasswordEmail = email;
@@ -532,10 +532,10 @@ const verifyOtp = async (req, res) => {
             req.session.time = null;
             req.session.data = null;
 
-            return res.status(HttpStatus.CREATED).json({message:"forgot password otp verified successfully"});
+            return res.status(HttpStatus.CREATED).json({ message: "forgot password otp verified successfully" });
 
         } else {
-            return res.status(HttpStatus.BAD_REQUEST).json({message:'Invalid session state'});
+            return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid session state' });
         }
 
     } catch (err) {
@@ -659,38 +659,38 @@ const loadShop = async (req, res) => {
             }
         }
 
-       
+
         let sortQuery = {};
         switch (sort) {
             case 'nameAsc': sortQuery = { name: 1 }; break;
             case 'nameDesc': sortQuery = { name: -1 }; break;
             case 'priceAsc': sortQuery = { salesPrice: 1 }; break;
             case 'priceDesc': sortQuery = { salesPrice: -1 }; break;
-            default: sortQuery = { createdAt: 1 }; 
+            default: sortQuery = { createdAt: 1 };
         }
 
-        
+
         const totalProducts = await Products.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        
+
         const products = await Products.find(query)
             .sort(sortQuery)
             .skip(skip)
             .limit(limit)
             .populate('category');
 
-        
+
         let wishlistProducts = [];
         if (user) {
             const wishlist = await WhishList.findOne({ userId: user._id });
             wishlistProducts = wishlist ? wishlist.products.map(p => p.productId.toString()) : [];
         }
 
-        
+
         const categories = await Category.find({ isDeleted: false, isListed: false });
 
-        
+
         if (req.xhr || req.headers.accept.includes('application/json')) {
             return res.json({
                 success: true,
@@ -702,7 +702,7 @@ const loadShop = async (req, res) => {
             });
         }
 
-        
+
         res.render('shop', {
             products,
             categories,
@@ -1700,23 +1700,7 @@ const placePendingOrder = async (req, res) => {
 };
 
 
-const downloadInvoice = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const filePath = path.join(__dirname, `../invoices/invoice-${orderId}.pdf`);
 
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ message: "Invoice not found" });
-        }
-
-        res.contentType("application/pdf");
-        res.download(filePath, `invoice-${orderId}.pdf`);
-    } catch (error) {
-        console.error(error.message)
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
-
-    }
-}
 
 const addAddressCheckout = async (req, res) => {
     try {
@@ -1921,13 +1905,11 @@ module.exports = {
     buyNow,
     createOrder,
     verifyPayment,
-
     paypalSuccess,
     loadOrderPlaced,
     filterProducts,
     deleteWhishlist,
 
-    downloadInvoice,
     addAddressCheckout
 
 

@@ -799,7 +799,7 @@
                             .catch(error => {
                                 console.error("Error:", error);
                                 Swal.fire("An error occurred during checkout");
-                            }); 
+                            });
 
                     } else if (requestData.paymentMethod === "paypal") {
                         fetch("/user/checkout", {
@@ -829,7 +829,7 @@
 
                     }
 
-                }); 
+                });
 
 
                 function initiateRazorpayPayment(requestData, grandTotal, couponCode) {
@@ -839,13 +839,13 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            cartId:requestData.cartId,
+                            cartId: requestData.cartId,
                             amount: requestData.grandTotal * 100,
                             currency: "INR",
                             receipt: "receipt_" + Date.now(),
                             totalAmount: grandTotal,
                             coupon: couponCode
-                        }) 
+                        })
                     })
                         .then(response => response.json())
                         .then(data => {
@@ -853,8 +853,8 @@
                                 console.log("orderAmount", data.order.totalamount)
                                 openRazorpay(data.order, requestData);
                             } else {
-                                
-                                showToast(data.message ||"Razorpay transactions are limited. Please choose a different payment method ", "error");
+
+                                showToast(data.message || "Razorpay transactions are limited. Please choose a different payment method ", "error");
                             }
                         })
                         .catch(error => {
@@ -982,20 +982,16 @@
 
 
 
-                function showRetrySwal(requestData, orderId, response,) {
+                function showRetrySwal(requestData, orderId, response) {
                     Swal.fire({
                         title: "Payment Failed!",
-                        text: "Do you want to retry the payment or pay later?",
+                        text: "Please try again later.",
                         icon: "error",
-                        showCancelButton: true,
-                        confirmButtonText: "Retry Payment",
-                        cancelButtonText: "Pay Later"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            openRazorpay(requestData);
-                        } else {
-                            payLater(orderId, requestData,);
-                        }
+                        confirmButtonText: "Pay Later",
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    }).then(() => {
+                        payLater(orderId, requestData);
                     });
                 }
 
@@ -1105,7 +1101,7 @@
                         const messageDiv = document.getElementById('couponMessage');
 
 
-                        
+
 
                         if (data.success) {
                             document.getElementById('appliedCouponArea').style.display = 'block';
@@ -1127,8 +1123,8 @@
                     </div>
                 `;
                         }
-                        
-                         else {
+
+                        else {
                             messageDiv.innerHTML = `
                     <div class="alert alert-danger">
                         ${data.message}
@@ -1223,7 +1219,7 @@
                     let toast = document.createElement("div");
                     toast.innerHTML = `<strong>${message}</strong>`;
 
-                    
+
                     toast.style.position = "fixed";
                     toast.style.top = "122px";
                     toast.style.left = "50%";
@@ -1245,17 +1241,17 @@
 
                     document.body.appendChild(toast);
 
-                    
-                    setTimeout(() => { 
+
+                    setTimeout(() => {
                         toast.style.opacity = "1";
                         toast.style.transform = "translateX(-50%) translateY(10px)";
                     }, 100);
 
-                    
+
                     setTimeout(() => {
                         toast.style.opacity = "0";
                         toast.style.transform = "translateX(-50%) translateY(0px)";
-                        setTimeout(() => toast.remove(), 500); 
+                        setTimeout(() => toast.remove(), 500);
                     }, 3000);
                 }
 

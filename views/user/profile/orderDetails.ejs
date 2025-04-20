@@ -50,7 +50,7 @@
             <div>
                 <h2>Order id: #<%= order._id.toString().slice(-8) %>
                 </h2>
-                
+
             </div>
             <span class="status-badge status-<%= order.status.toLowerCase() %>">
                 <%= order.status %>
@@ -147,7 +147,7 @@
         <div class="price-summary">
             <div class="price-row">
                 <span>Subtotal</span>
-                <span>₹<%= order.totalAmount.toFixed(2) %></span>
+                <span>₹<%= subTotal.toFixed(2) %></span>
             </div>
             <% if (coupon && coupon !==null) { %>
                 <div class="price-row">
@@ -278,20 +278,20 @@
 
             const currentStatus = '<%= order.status %>';
 
-            
+
             const statusOrder = ['Pending', 'Processing', 'Shipped', 'Delivered'];
             const currentStatusIndex = statusOrder.indexOf(currentStatus);
 
-            
+
             const progress = (currentStatusIndex + 1) * (100 / statusOrder.length);
 
-            
+
             setTimeout(() => {
                 const progressLine = document.querySelector('.tracking-line-progress');
                 progressLine.style.width = `${progress}%`;
             }, 500);
 
-           
+
             const steps = document.querySelectorAll('.tracking-step');
             steps.forEach((step, index) => {
                 const stepIcon = step.querySelector('.step-icon');
@@ -302,28 +302,28 @@
                         stepIcon.classList.add('completed');
                         stepLabel.classList.add('completed');
 
-                        
+
                         if (index === currentStatusIndex) {
                             stepIcon.classList.add('current');
                         }
                     }
-                }, index * 600); 
+                }, index * 600);
             });
 
-            
+
             window.updateOrderStatus = function (newStatus) {
                 const statusBadge = document.querySelector('.status-badge');
                 statusBadge.className = `status-badge status-${newStatus.toLowerCase()} status-update`;
                 statusBadge.textContent = newStatus;
 
-                
+
                 const newStatusIndex = statusOrder.indexOf(newStatus);
                 const newProgress = (newStatusIndex + 1) * (100 / statusOrder.length);
 
                 const progressLine = document.querySelector('.tracking-line-progress');
                 progressLine.style.width = `${newProgress}%`;
 
-                
+
                 steps.forEach((step, index) => {
                     const stepIcon = step.querySelector('.step-icon');
                     const stepLabel = step.querySelector('span');
@@ -336,7 +336,7 @@
                         stepLabel.classList.remove('completed');
                     }
 
-                    
+
                     if (index === newStatusIndex) {
                         stepIcon.classList.add('current');
                     } else {
@@ -346,7 +346,7 @@
             };
         });
 
-        
+
         function simulateStatusUpdate() {
             const statusOrder = ['Pending', 'Processing', 'Shipped', 'Delivered'];
             let currentIndex = statusOrder.indexOf('<%= order.status %>');
@@ -444,7 +444,7 @@
 
 
         function downloadInvoice(orderId) {
-            // Step 1: Show Confirmation Popup
+
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'Do you want to download the invoice?',
@@ -454,7 +454,7 @@
                 cancelButtonText: 'Cancel',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Step 2: Show Loading Swal
+
                     Swal.fire({
                         title: 'Generating Invoice',
                         text: 'Please wait...',
@@ -464,7 +464,7 @@
                         }
                     });
 
-                    // Step 3: Fetch the Invoice
+
                     fetch(`/user/orderInvoice/${orderId}`, {
                         method: 'GET',
                         headers: { 'Accept': 'application/pdf' }
@@ -476,10 +476,12 @@
                             return response.blob();
                         })
                         .then(blob => {
-                            // Step 4: Close Loading Swal
+
+                            console.log(blob)
+
                             Swal.close();
 
-                            // Step 5: Create and Trigger File Download
+
                             const url = window.URL.createObjectURL(blob);
                             const link = document.createElement("a");
                             link.href = url;
@@ -488,10 +490,10 @@
                             link.click();
                             document.body.removeChild(link);
 
-                            // Cleanup
-                            setTimeout(() => window.URL.revokeObjectURL(url), 100);
 
-                            // Step 6: Show Success Message
+                            setTimeout(() => window.URL.revokeObjectURL(url), 200);
+
+
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Success!',
@@ -500,6 +502,7 @@
                                 showConfirmButton: false
                             });
                         })
+
                         .catch(error => {
                             console.error("Error:", error);
                             Swal.fire({

@@ -197,7 +197,7 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    // Get the existing product to preserve unchanged images
+   
     const existingProduct = await Products.findById(id);
     if (!existingProduct) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -209,11 +209,11 @@ const updateProduct = async (req, res) => {
     const dirPath = `./public/uploads/products/${id}`;
     fs.mkdirSync(dirPath, { recursive: true });
 
-    const updatedImages = [...existingProduct.images]; // Create a copy of existing images
+    const updatedImages = [...existingProduct.images];
 
-    // Process only the new images that have been changed
+   
     for (let i = 0; i < images.length; i++) {
-      if (images[i] && !images[i].startsWith('/public/uploads/')) { // Check if it's a new base64 image
+      if (images[i] && !images[i].startsWith('/public/uploads/')) { 
         const base64Data = images[i].replace(/^data:image\/\w+;base64,/, "");
         const binary = Buffer.from(base64Data, "base64");
         const filePath = `${dirPath}/image${i}.png`;

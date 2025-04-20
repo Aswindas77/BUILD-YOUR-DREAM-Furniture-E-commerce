@@ -43,9 +43,7 @@ const addCoupon = async (req, res) => {
             expiryDate
         } = req.body;
 
-        if (discountPercentage < 50) {
-            console.log("hhhh")
-        }
+        
 
         const formattedCode = code.toUpperCase();
 

@@ -7,9 +7,8 @@
     <title>Admin Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
+
     <style>
-        
         .pagination-container {
             margin-top: 20px;
             display: flex;
@@ -61,7 +60,7 @@
             border-radius: 4px;
         }
 
-        
+
 
         .page-number.active {
             background: #007bff;
@@ -69,7 +68,7 @@
             border-color: #007bff;
         }
 
-        
+
         .modal {
             display: none;
             position: fixed;
@@ -141,7 +140,7 @@
 
 
 
-    
+
     <h1>sales-report</h1>
     <div class="sales-section">
         <div class="sales-header">
@@ -165,7 +164,7 @@
             </div>
         </div>
 
-        
+
         <div class="table-container">
             <table class="sales-table">
                 <thead>
@@ -178,10 +177,11 @@
                         <th>Payment Method</th>
                         <th>Order Status</th>
                         <th>Order Date</th>
+                        <th>discount Amount</th>
                     </tr>
                 </thead>
                 <tbody>
-                  
+
                     <tr>
                         <td>#ORD001</td>
                         <td>USR123</td>
@@ -202,7 +202,7 @@
                         <td>Processing</td>
                         <td>02 Mar, 2024</td>
                     </tr>
-                    
+
                 </tbody>
             </table>
             <div class="pagination-container">
@@ -217,9 +217,9 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
 
-    
+
     <div id="customDateModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -238,7 +238,7 @@
         </div>
     </div>
 
-    
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -247,13 +247,13 @@
             const tableBody = document.querySelector('.sales-table tbody');
             const periodText = document.getElementById('period-text');
 
-            
+
             let currentPage = 1;
             let itemsPerPage = 10;
             let totalItems = 0;
             let currentData = [];
 
-            
+
             function formatDate(dateString) {
                 const date = new Date(dateString);
                 return date.toLocaleDateString('en-IN', {
@@ -263,31 +263,31 @@
                 });
             }
 
-            
+
             function formatCurrency(amount) {
                 return '₹' + Number(amount).toLocaleString('en-IN');
             }
 
-            
+
             function updateHeading(period) {
                 periodText.textContent = period.charAt(0).toUpperCase() + period.slice(1);
             }
 
-            
+
             function renderPagination(total) {
                 const totalPages = Math.ceil(total / itemsPerPage);
                 const pageNumbers = document.getElementById('page-numbers');
                 const prevButton = document.getElementById('prev-page');
                 const nextButton = document.getElementById('next-page');
 
-               
+
                 const start = (currentPage - 1) * itemsPerPage + 1;
                 const end = Math.min(start + itemsPerPage - 1, total);
                 document.getElementById('showing-start').textContent = start;
                 document.getElementById('showing-end').textContent = end;
                 document.getElementById('total-items').textContent = total;
 
-                
+
                 pageNumbers.innerHTML = '';
                 for (let i = 1; i <= totalPages; i++) {
                     const pageButton = document.createElement('button');
@@ -301,12 +301,12 @@
                     pageNumbers.appendChild(pageButton);
                 }
 
-                
+
                 prevButton.disabled = currentPage === 1;
                 nextButton.disabled = currentPage === totalPages;
             }
 
-            
+
             function renderTable() {
                 const start = (currentPage - 1) * itemsPerPage;
                 const end = start + itemsPerPage;
@@ -322,11 +322,12 @@
                     <td>${order.paymentMethod}</td>
                     <td>${order.status}</td>
                     <td>${formatDate(order.createdAt)}</td>
+                    <td>${order.discountAmount !== null ? `₹${order.discountAmount}` : 'No Discount'}</td>
                 </tr>
             `).join('');
             }
 
-            
+
             periodButtons.forEach(button => {
                 button.addEventListener('click', async function () {
                     periodButtons.forEach(btn => btn.classList.remove('active'));
@@ -348,11 +349,11 @@
                         renderPagination(totalItems);
                     } catch (error) {
                         console.error('Error fetching orders:', error);
-                    } 
+                    }
                 });
             });
 
-            
+
             document.getElementById('prev-page').addEventListener('click', () => {
                 if (currentPage > 1) {
                     currentPage--;
@@ -369,10 +370,10 @@
                 }
             });
 
-            
+
             document.querySelector('.period-button').click();
 
-            
+
             const modal = document.getElementById('customDateModal');
             const customButton = document.querySelector('[data-period="custom"]');
             const closeBtn = document.querySelector('.close');
@@ -380,24 +381,24 @@
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
 
-            
+
             customButton.addEventListener('click', function () {
                 modal.style.display = "block";
             });
 
-            
+
             closeBtn.addEventListener('click', function () {
                 modal.style.display = "none";
             });
 
-            
+
             window.addEventListener('click', function (event) {
                 if (event.target == modal) {
                     modal.style.display = "none";
                 }
             });
 
-            
+
             applyBtn.addEventListener('click', async function () {
                 if (!startDate.value || !endDate.value) {
                     alert('Please select both start and end dates');
@@ -417,7 +418,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
-                        }, 
+                        },
                         body: JSON.stringify({
                             startDate: startDate.value,
                             endDate: endDate.value
@@ -428,12 +429,12 @@
 
                     const data = await response.json();
 
-                    console.log("dataaaa",data)
+
                     currentData = data;
                     totalItems = data.length;
                     currentPage = 1;
 
-                    
+
                     const formattedStart = new Date(startDate.value).toLocaleDateString();
                     const formattedEnd = new Date(endDate.value).toLocaleDateString();
                     periodText.textContent = `Custom (${formattedStart} - ${formattedEnd})`;
@@ -443,7 +444,7 @@
                     modal.style.display = "none";
                 } catch (error) {
                     console.error('Error fetching custom date range:', error);
-                    alert('kooiii');
+
                 }
             });
 
@@ -451,52 +452,56 @@
             function generatePDF() {
                 const element = document.createElement('div');
                 element.innerHTML = `
-                    <div class="pdf-container" style="padding: 20px;">
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <h1 style="color: #333;">Build Your Dream</h1>
-                            <h2>Sales Report</h2>
-                            <p>Period: ${document.getElementById('period-text').textContent}</p>
-                            <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    <div class="pdf-container" style="padding: 10px; font-size: 9px;">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <h1 style="color: #333; font-size: 16px; margin-bottom: 5px;">Build Your Dream</h1>
+                            <h2 style="font-size: 14px; margin-bottom: 5px;">Sales Report</h2>
+                            <p style="font-size: 11px; margin: 2px 0;">Period: ${document.getElementById('period-text').textContent}</p>
+                            <p style="font-size: 11px; margin: 2px 0;">Generated on: ${new Date().toLocaleDateString()}</p>
                         </div>
                         
-                        <div style="margin-bottom: 20px;">
-                            <h3>Summary</h3>
-                            <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+                        <div style="margin-bottom: 15px;">
+                            <h3 style="font-size: 12px; margin-bottom: 5px;">Summary</h3>
+                            <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
                                 <tr>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Total Orders</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Total Revenue</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; font-size: 10px;">Total Orders</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; font-size: 10px;">Total Revenue</th>
                                 </tr>
                                 <tr>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${totalItems}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">₹${calculateTotalRevenue()}</td>
+                                    <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 10px;">${totalItems}</td>
+                                    <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 10px;">₹${calculateTotalRevenue()}</td>
                                 </tr>
                             </table>
                         </div>
 
-                        <table style="width: 100%; border-collapse: collapse;">
+                        <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                             <thead>
                                 <tr>
-                                    <th style="border: 1px solid #ddd; padding: 10px; background: #f4f4f4;">Client Email</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">User ID</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Items</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Total Amount</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Payment Status</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Order Status</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">Payment Method</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; background: #f4f4f4;">order date</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 12%; font-size: 9px;">Order ID</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 22%; word-wrap: break-word; font-size: 9px;">Client Email</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 8%; font-size: 9px;">Items</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 15%; font-size: 9px;">Total Amount</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 12%; font-size: 9px;">Payment Status</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 12%; font-size: 9px;">Order Status</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 12%; font-size: 9px;">Payment Method</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 11%; font-size: 9px;">Order Date</th>
+                                    <th style="border: 1px solid #ddd; padding: 4px; background: #f4f4f4; width: 11%; font-size: 9px;">discount Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${currentData.map(order => `
+                                ${currentData
+                        .filter(order => order.status !== 'Cancelled') // Filter out cancelled orders
+                        .map(order => `
                                     <tr>
-                                        <td style="border: 1px solid #ddd; padding: 10px;">#${order.dummyOrderId}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.userId}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.items.length}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">₹${order.totalAmount}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.paymentStatus}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.status}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">${order.paymentMethod}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">${formatDate(order.createdAt)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 9px;">${order.dummyOrderId}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; word-wrap: break-word; font-size: 9px;">${order.userId}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.items.length}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: right; font-size: 9px;">${formatCurrency(order.totalAmount)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.paymentStatus}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.status}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.paymentMethod}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${formatDate(order.createdAt)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.discountAmount !== null ? `₹${order.discountAmount}` : 'No Discount'}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -505,64 +510,76 @@
                 `;
 
                 const opt = {
-                    margin: 1,
+                    margin: [5, 5, 5, 5],
                     filename: `sales-report-${new Date().toISOString().slice(0, 10)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+                    html2canvas: {
+                        scale: 2,
+                        letterRendering: true,
+                        useCORS: true
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'landscape',
+                        compress: true
+                    },
+                    pagebreak: { mode: 'avoid-all' }
                 };
 
                 html2pdf().set(opt).from(element).save();
             }
 
 
-            
-            function generateExcel() {
-                const wb = XLSX.utils.book_new(); 
 
-                
+            function generateExcel() {
+                const wb = XLSX.utils.book_new();
+
+
                 const wsData = [
-                    ["Build Your Dream"],  
-                    ["Sales Report"],      
-                    [`Generated on: ${new Date().toLocaleDateString()}`],  
-                    [], 
-                    ["Order ID", "User ID", "Items", "Total Amount", "Payment Status", "Order Status", "Payment Method", "Order Date"], 
+                    ["Build Your Dream"],
+                    ["Sales Report"],
+                    [`Generated on: ${new Date().toLocaleDateString()}`],
+                    [],
+                    ["Order ID", "User ID", "Items", "Total Amount", "Payment Status", "Order Status", "Payment Method", "Order Date"],
                     ...currentData.map(order => [
-                        order.dummyOrderId || `ORD-${order._id.slice(-6).toUpperCase()}`, 
+                        order.dummyOrderId || `ORD-${order._id.slice(-6).toUpperCase()}`,
                         order.userId,
                         order.items.length,
                         `₹${order.totalAmount}`,
                         order.paymentStatus,
                         order.status,
                         order.paymentMethod,
+
                         formatDate(order.createdAt),
+
                     ])
                 ];
 
                 const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-                
+
                 ws['!cols'] = [
-                    { width: 20 }, 
-                    { width: 20 }, 
+                    { width: 20 },
+                    { width: 20 },
                     { width: 10 },
-                    { width: 15 }, 
-                    { width: 15 }, 
-                    { width: 15 }, 
-                    { width: 20 }  
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 20 }
                 ];
 
-                
+
                 ws['!merges'] = [
-                    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, 
-                    { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }, 
-                    { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } } 
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+                    { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
+                    { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } }
                 ];
 
-                
+
                 XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
 
-                
+
                 XLSX.writeFile(wb, `BYD-SalesReport-${new Date().toISOString().slice(0, 10)}.xlsx`);
             }
 
@@ -571,15 +588,15 @@
                     .toLocaleString('en-IN');
             }
 
-            
+
             document.querySelector('.pdf-button').addEventListener('click', generatePDF);
 
             document.querySelector('.excel-button').addEventListener('click', generateExcel);
 
 
         });
-   
-   </script>
+
+    </script>
 </body>
 
 </html>

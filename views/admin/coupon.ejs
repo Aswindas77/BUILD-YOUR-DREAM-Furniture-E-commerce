@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coupon Management</title>
-    <!-- Bootstrap CSS -->
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
+    
     <style>
         .coupon-card {
             border: 2px dashed #3498db;
@@ -105,6 +105,7 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
         }
     </style>
+
 </head>
 
 <body>
@@ -122,54 +123,58 @@
             </div>
 
             <div class="row">
-               <% if(coupons&&coupons.length>0) { %>
-                <% coupons.forEach(coupon=> { %>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="coupon-card position-relative">
-                            <div class="coupon-status">
-                                <% if(coupon.isActive) { %>
-                                    <i class="fas fa-circle status-active"></i>
-                                    <% } else { %>
-                                        <i class="fas fa-circle status-inactive"></i>
-                                        <% } %>
-                            </div>
-                            <div class="coupon-code">
-                                <%= coupon.code %>
-                            </div>
-                            <h5>
-                                <%= coupon.description %>
-                            </h5>
-                            <div class="coupon-details">
-                                <p><i class="fas fa-percentage me-2"></i>Discount: <%= coupon.discountPercentage %>%</p>
-                                <p><i class="fas fa-money-bill-wave me-2"></i>Min Purchase: ₹<%= coupon.minPurchase %>
-                                </p>
-                                <p><i class="fas fa-calendar-alt me-2"></i>Valid Till: <%= new
-                                        Date(coupon.expiryDate).toLocaleDateString() %>
-                                </p>
-                            </div>
-                            <div class="action-buttons mt-3">
-                                <button class="btn btn-sm btn-primary me-2" onclick="editCoupon('<%= coupon._id %>')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteCoupon('<%= coupon._id %>')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <% }); %>
-                <% }else{ %>
-                    <div class="col-12">
-                        <div class="d-flex justify-content-center align-items-center" style="min-height: 50vh;">
-                            <div class="text-center">
-                                <i class="fas fa-tag fa-4x text-secondary mb-4"></i>
-                                <h2 class="text-muted mb-3">No Coupons Available</h2>
-                                <p class="text-muted">Click the button above to create a new coupon</p>
-                                
+                <% if(coupons&&coupons.length>0) { %>
+                    <% coupons.forEach(coupon=> { %>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="coupon-card position-relative">
+                                <div class="coupon-status">
+                                    <% if(coupon.isActive) { %>
+                                        <i class="fas fa-circle status-active"></i>
+                                        <% } else { %>
+                                            <i class="fas fa-circle status-inactive"></i>
+                                            <% } %>
+                                </div>
+                                <div class="coupon-code">
+                                    <%= coupon.code %>
+                                </div>
+                                <h5>
+                                    <%= coupon.description %>
+                                </h5>
+                                <div class="coupon-details">
+                                    <p><i class="fas fa-percentage me-2"></i>Discount: <%= coupon.discountPercentage %>%
+                                    </p>
+                                    <p><i class="fas fa-money-bill-wave me-2"></i>Min Purchase: ₹<%= coupon.minPurchase
+                                            %>
+                                    </p>
+                                    <p><i class="fas fa-calendar-alt me-2"></i>Valid Till: <%= new
+                                            Date(coupon.expiryDate).toLocaleDateString() %>
+                                    </p>
+                                </div>
+                                <div class="action-buttons mt-3">
+                                    <button class="btn btn-sm btn-primary me-2"
+                                        onclick="editCoupon('<%= coupon._id %>')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteCoupon('<%= coupon._id %>')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <% } %>
+                        <% }); %>
+                            <% }else{ %>
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-center align-items-center"
+                                        style="min-height: 50vh;">
+                                        <div class="text-center">
+                                            <i class="fas fa-tag fa-4x text-secondary mb-4"></i>
+                                            <h2 class="text-muted mb-3">No Coupons Available</h2>
+                                            <p class="text-muted">Click the button above to create a new coupon</p>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
             </div>
         </div>
 
@@ -275,7 +280,7 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
-           
+
             document.getElementById('addCouponForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const form = e.target;
@@ -284,7 +289,7 @@
 
                 let isValid = true;
 
-                
+
                 let code = document.getElementsByName("code")[0];
                 let description = document.getElementsByName("description")[0];
                 let discountPercentage = document.getElementsByName("discountPercentage")[0];
@@ -292,11 +297,11 @@
                 let startDate = document.getElementsByName("startDate")[0];
                 let expiryDate = document.getElementsByName("expiryDate")[0];
 
-                
+
                 document.querySelectorAll(".invalid-feedback").forEach(el => el.style.display = "none");
                 document.querySelectorAll(".form-control").forEach(input => input.classList.remove("is-invalid"));
 
-                
+
                 function showError(input, message) {
                     input.classList.add("is-invalid");
                     const error = input.nextElementSibling;
@@ -307,13 +312,13 @@
                     isValid = false;
                 }
 
-                
+
                 let today = new Date();
                 today.setHours(0, 0, 0, 0);
                 let start = startDate ? new Date(startDate.value) : null;
                 let expiry = new Date(expiryDate.value);
 
-                
+
                 if (!code.value || code.value.length < 5) {
                     showError(code, "Coupon code must be at least 5 characters long.");
                 }
@@ -322,8 +327,9 @@
                     showError(description, "Description cannot be empty.");
                 }
 
-                if (!discountPercentage.value || discountPercentage.value <= 0 || discountPercentage.value > 100) {
-                    showError(discountPercentage, "Discount must be between 1 and 100.");
+                const discountValue = parseFloat(discountPercentage.value);
+                if (isNaN(discountValue) || discountValue <= 0 || discountValue >=100) {
+                    showError(discountPercentage, "Discount must be between 1 and 99.");
                 }
 
                 if (!minPurchase.value || minPurchase.value <= 0) {
@@ -372,16 +378,16 @@
                                 location.reload();
                             });
                     } else {
-        if (result.message === "Coupon code already exists") {
-            showError(code, result.message); 
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: result.message || "Failed to add coupon"
-            });
-        }
-    }
+                        if (result.message === "Coupon code already exists") {
+                            showError(code, result.message);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: result.message || "Failed to add coupon"
+                            });
+                        }
+                    }
                 } catch (error) {
 
 
@@ -435,19 +441,19 @@
 
             async function editCoupon(couponId) {
                 try {
-                   
+
                     const response = await fetch(`/admin/editCoupon/${couponId}`);
                     if (!response.ok) {
                         throw new Error(`Failed to fetch coupon data: ${response.statusText}`);
                     }
                     const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.message || "Coupon fetch failed");
-        }
-        
-        const coupon = data.coupon;
+                    if (!data.success) {
+                        throw new Error(data.message || "Coupon fetch failed");
+                    }
 
-                    
+                    const coupon = data.coupon;
+
+
                     const editForm = document.getElementById('editCouponForm');
                     editForm.querySelector('input[name="id"]').value = coupon._id;
                     editForm.querySelector('input[name="code"]').value = coupon.code;
@@ -455,13 +461,13 @@
                     editForm.querySelector('input[name="discountPercentage"]').value = coupon.discountPercentage;
                     editForm.querySelector('input[name="minPurchase"]').value = coupon.minPurchase;
 
-                    
+
                     const startDate = new Date(coupon.startDate).toISOString().split('T')[0];
                     const expiryDate = new Date(coupon.expiryDate).toISOString().split('T')[0];
                     editForm.querySelector('input[name="startDate"]').value = startDate;
                     editForm.querySelector('input[name="expiryDate"]').value = expiryDate;
 
-                    
+
                     const editModal = new bootstrap.Modal(document.getElementById('editCouponModal'));
                     editModal.show();
 
@@ -475,13 +481,13 @@
                 }
             }
 
-            
+
             document.getElementById('editCouponForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const form = e.target;
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData.entries());
-                console.log("jiii",data)
+
 
                 try {
                     const response = await fetch(`/admin/updateCoupon/${data.id}`, {
@@ -493,7 +499,7 @@
                     });
 
                     if (response.ok) {
-                        
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Success',

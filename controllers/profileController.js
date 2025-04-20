@@ -13,7 +13,7 @@ const { logOut } = require("./userController");
 const Wallet = require("../models/walletModel");
 const Return = require("../models/returnModel");
 const HttpStatus = require('../constants/httpStatus');
-const Messages =require('../constants/messages.json');
+const Messages = require('../constants/messages.json');
 
 
 
@@ -258,7 +258,8 @@ const addAddress = async (req, res) => {
         return res.status(HttpStatus.CREATED).json({ success: true, message: "Address added successfully!", address });
     } catch (error) {
         console.error("Error Adding Address:", error);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });    }
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    }
 };
 
 
@@ -496,20 +497,20 @@ const getOrderDetails = async (req, res) => {
         const order = await Order.findById(orderId)
             .populate('items.productId')
 
-            const codeCoupon=order?.couponCode
+        const codeCoupon = order?.couponCode
 
-            const coupon = await Coupon.findOne({ code: codeCoupon, isActive: true, isDeleted: false });
+        const coupon = await Coupon.findOne({ code: codeCoupon});
 
-            let couponPercentage =coupon?.discountPercentage||null;
+        let couponPercentage = coupon?.discountPercentage || null;
 
-        let discountAmount=null;
-            if(coupon){
-                 discountAmount=(couponPercentage/100)*order?.totalAmount
-                  discountAmount = Number(discountAmount.toFixed(2));
-      
-              }
+        let discountAmount = null;
+        if (coupon) {
+            discountAmount = (couponPercentage / 100) * order?.totalAmount
+            discountAmount = Number(discountAmount.toFixed(2));
 
-              console.log("discount Amount",discountAmount)
+        }
+
+        console.log("discount Amount", discountAmount)
 
 
 
@@ -541,7 +542,7 @@ const getOrderDetails = async (req, res) => {
             }, 0);
         }
 
-        
+
 
 
 
@@ -587,17 +588,18 @@ const getOrderDetails = async (req, res) => {
         };
 
 
-        console.log("subtotal :",order.subTotal)
-        
+
+        console.log("subtotal :", order.subTotal)
+
 
         console.log('Formatted Order:', formattedOrder);
 
 
         res.render('profile/orderDetails', {
             order: formattedOrder,
-            subTotal:order.subTotal,
-            discountAmount:discountAmount,
-            coupon :coupon,
+            subTotal: order.subTotal,
+            discountAmount: discountAmount,
+            coupon: coupon,
             returnOrder: returnRequest,
             user: req.session?.User,
             selectedAddress
