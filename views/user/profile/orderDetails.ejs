@@ -154,7 +154,12 @@
                     <span>Discount Amount</span>
                     <span>- ₹<%= (discountAmount ? discountAmount.toFixed(2) : "0.00" ) %></span>
                 </div>
-                <% } %>
+                <% }else{ %>
+                    <div class="price-row">
+                        <span>Discount Amount</span>
+                        <span>₹0.00</span>
+                    </div>
+                    <% } %>
                     <div class="price-row total-row">
                         <span>Total</span>
                         <span>₹<%= (order.totalAmount - order.discount).toFixed(2) %></span>
@@ -196,7 +201,7 @@
         </div>
     </div>
 
-    <!-- Return Modal -->
+    
     <div id="returnModal" class="return-modal">
         <div class="return-modal-content">
             <div class="return-modal-header">
