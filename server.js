@@ -82,6 +82,10 @@ app.use("/user", (req, res, next) => {
 });
 app.use("/user", userRoute);
 
+app.use((req, res) => {
+    res.status(404).render('userError');
+});
+
 
 
 
@@ -97,4 +101,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/user`);
     console.log(`Server running at http://localhost:${port}/admin/login`);
-});
+}); 
+

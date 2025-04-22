@@ -169,17 +169,17 @@
             min-height: 100vh;
         }
 
-        /* Your existing sidebar styles */
+
         .sidebar {
             width: 280px;
             background: white;
             box-shadow: var(--card-shadow);
             position: fixed;
             height: 100vh;
-            transition: transform 0.3s ease; 
+            transition: transform 0.3s ease;
         }
 
-        /* Wallet specific styles */
+
         .main-content {
             flex: 1;
             margin-left: 280px;
@@ -356,7 +356,7 @@
             }
         }
 
-        /* Modal styles */
+
         .modal {
             display: none;
             position: fixed;
@@ -566,14 +566,16 @@
             <span class="close-modal">&times;</span>
             <h2>Add Money to Wallet</h2>
             <div class="modal-form">
-                <input type="number" id="amount" placeholder="Enter amount" min="1">
-                <button class="add-money-btn" onclick="handleAddMoney()">Add Money</button>
+                <input type="number" id="amount" placeholder="Enter amount" min="1" oninput="validateAmount()">
+                <span id="amountError" style="color: red; font-size: 14px; display: none;"></span>
+                <button class="add-money-btn" id="confirmAddMoney" onclick="handleAddMoney()" disabled>Add
+                    Money</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Your existing sidebar toggle script
+
         const menuToggle = document.querySelector('.menu-toggle');
         const sidebar = document.querySelector('.sidebar');
 
@@ -583,17 +585,38 @@
             });
         }
 
-        // Modal functionality
+        function validateAmount() {
+            const amountInput = document.getElementById('amount');
+            const errorSpan = document.getElementById('amountError');
+            const confirmBtn = document.getElementById('confirmAddMoney');
+            const value = parseFloat(amountInput.value);
+        
+
+
+        if (isNaN(value) || value <= 0) {
+            errorSpan.textContent = "Amount must be greater than 0.";
+            errorSpan.style.display = 'block';
+            confirmBtn.disabled = true;
+        } else if (value > 100000) {
+            errorSpan.textContent = "Amount cannot exceed ₹1,00,000.";
+            errorSpan.style.display = 'block';
+            confirmBtn.disabled = true;
+        } else {
+            errorSpan.style.display = 'none';
+            confirmBtn.disabled = false;
+        }
+
+    }
+
         function openAddMoneyModal() {
             document.getElementById('addMoneyModal').style.display = 'block';
+            document.getElementById('moneyInput').value = "";
+            document.getElementById('confirmAddMoney').disabled = true;
+            document.getElementById('amountError').style.display = 'none';
         }
 
-        // Close modal when clicking the X button
-        document.querySelector('.close-modal').onclick = function () {
-            document.getElementById('addMoneyModal').style.display = 'none';
-        }
 
-        // Close modal when clicking outside
+
         window.onclick = function (event) {
             const modal = document.getElementById('addMoneyModal');
             if (event.target == modal) {
@@ -601,10 +624,29 @@
             }
         }
 
-        function handleAddMoney() {
-            const amount = document.getElementById('amount').value;
+        document.querySelector('.close-modal').onclick = function () {
+            document.getElementById('addMoneyModal').style.display = 'none';
+        }
 
-            razorpay(amount)
+        function handleAddMoney() {
+            const amountInput = document.getElementById('amount');
+            const amount = parseFloat(amountInput.value);
+            const errorSpan = document.getElementById('amountError');
+
+            if (isNaN(amount) || amount <= 0) {
+                errorSpan.textContent = "Amount must be greater than 0.";
+                errorSpan.style.display = 'block';
+                return;
+            }
+
+            if (amount > 100000) {
+                errorSpan.textContent = "Amount cannot exceed ₹1,00,000.";
+                errorSpan.style.display = 'block';
+                return;
+            }
+
+            razorpay(amount);
+
             fetch('/user/add-money-wallet', {
                 method: 'POST',
                 headers: {
@@ -612,19 +654,19 @@
                 },
                 body: JSON.stringify({ amount })
             })
-        
+
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                       
+
                         document.getElementById('addMoneyModal').style.display = 'none';
 
-                        
+
                         const currentBalance = parseFloat(document.querySelector('.wallet-balance').textContent);
                         const newBalance = currentBalance + parseFloat(amount);
                         document.querySelector('.wallet-balance').textContent = newBalance;
 
-                        
+
                         const transactionsList = document.querySelector('.transactions-list');
                         const newTransaction = document.createElement('div');
                         newTransaction.className = 'transaction-item';
