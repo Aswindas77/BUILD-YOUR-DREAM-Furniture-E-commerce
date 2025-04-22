@@ -253,28 +253,42 @@ const deleteCart = async (req, res) => {
 
 const loadCheckout = async (req, res) => {
     try {
+
+        
         const { cartId, grandtotal } = req.body
-
         const userId = req.session?.User?._id;
-
-        console.log("cartid", cartId)
-
-
         const user = await User.findById(userId)
-
-        console.log("Total", grandtotal)
-
-
-        const grandTotal = parseFloat(grandtotal);
-        if (isNaN(grandTotal)) {
-            return res.status(400).json({ success: false, message: "Invalid total amount" });
-        }
-
-        console.log("grandTotal", grandTotal);
 
         if (!userId) {
             return res.redirect('/user/login');
         }
+
+
+        if (req.session.cartId || req.session.grandtotal) {
+            req.session.cartId = null;
+            req.session.grandtotal = null;
+        }
+
+        
+
+        if (!cartId || !userId) {
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Missing data" });
+    }
+
+
+        const grandTotal = parseFloat(grandtotal);
+        if (isNaN(grandTotal)) {
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Invalid total amount" });
+        }
+
+        
+
+        
+
+
+         req.session.cartId =cartId;
+         req.session.grandtotal=grandtotal;
+
         const validCoupons = await Coupon.find({
             isActive: true,
             validUntil: { $gt: new Date() },
@@ -354,6 +368,9 @@ const loadCheckout = async (req, res) => {
     }
 };
 
+
+
+
 // Add coupon validation endpoint
 const validateCoupon = async (req, res) => {
     try {
@@ -404,7 +421,11 @@ const validateCoupon = async (req, res) => {
 const renderCheckoutPage = async (req, res) => {
     try {
         const userId = req.session?.User?._id;
-        const { id: cartId, total: grandtotal } = req.query;
+        const cartId = req.session.cartId;
+        const grandTotal = req.session.grandtotal;
+
+        console.log("cart",cartId);
+        console.log("grandTotal",grandTotal);
 
         const [
             user,
@@ -421,6 +442,11 @@ const renderCheckoutPage = async (req, res) => {
             Address.findOne({ userId }).populate("userId")
         ]);
 
+        if (!cart) {
+            console.log('Cart not found for ID:', cartId);
+            return res.redirect('/user/cart');
+          }
+
         const addresses = userAddresses?.address?.filter(a => !a.isDeleted) || [];
 
         res.render("checkOut", {
@@ -429,7 +455,7 @@ const renderCheckoutPage = async (req, res) => {
             products: cart.products, 
             categories,
             addresses,
-            grandTotal: parseFloat(grandtotal)
+            grandTotal: parseFloat(grandTotal)
         });
 
     } catch (err) {

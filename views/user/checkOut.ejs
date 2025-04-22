@@ -495,9 +495,9 @@
                 </div>
                 </div>
             </section>
-            <!--================End Checkout Area =================-->
+            
 
-            <!-- start footer Area -->
+           
             <footer class="footer-area section_gap">
                 <div class="container">
                     <div class="row">
@@ -573,18 +573,18 @@
                     </div>
                     <div class="footer-bottom d-flex justify-content-center align-items-center flex-wrap">
                         <p class="footer-text m-0">
-                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                            
                             Copyright &copy;
                             <script>document.write(new Date().getFullYear());</script> All rights reserved | This
                             template
                             is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a
                                 href="https://colorlib.com" target="_blank">Colorlib</a>
-                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                            
                         </p>
                     </div>
                 </div>
             </footer>
-            <!-- End footer Area -->
+           
 
             <script src="/public/userAssets/js/vendor/jquery-2.2.4.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
@@ -598,7 +598,7 @@
             <script src="/public/userAssets/js/countdown.js"></script>
             <script src="/public/userAssets/js/jquery.magnific-popup.min.js"></script>
             <script src="/public/userAssets/js/owl.carousel.min.js"></script>
-            <!--gmaps Js-->
+           
             <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
             <script src="/public/userAssets/js/gmaps.min.js"></script>
             <script src="/public/userAssets/js/main.js"></script>
@@ -653,31 +653,31 @@
                 document.getElementById('saveAddressBtn').addEventListener('click', function () {
                     const form = document.getElementById('addAddressForm');
 
-                    // Validate the form
+                    
                     if (!form.checkValidity()) {
                         form.reportValidity();
                         return;
                     }
 
-                    // Collect form data
+                    
                     const formData = new FormData(form);
                     const addressData = {};
 
                     formData.forEach((value, key) => {
                         if (key === 'isDefault') {
-                            addressData[key] = formData.get('isDefault') === 'on'; // Convert checkbox to boolean
+                            addressData[key] = formData.get('isDefault') === 'on'; 
                         } else {
                             addressData[key] = value;
                         }
                     });
 
-                    // Show loading state
+                    
                     const saveBtn = this;
                     const originalText = saveBtn.innerHTML;
                     saveBtn.innerHTML = 'Saving...';
                     saveBtn.disabled = true;
 
-                    // Send data to the server
+                   
                     fetch('/user/checkoutAddAddress', {
                         method: 'POST',
                         headers: {
@@ -688,10 +688,10 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // Close the modal
+                                
                                 $('#addAddressModal').modal('hide');
 
-                                // Show success message with an "OK" button
+                                
                                 Swal.fire({
                                     title: 'Success!',
                                     text: 'Address added successfully!',
@@ -699,14 +699,14 @@
                                     confirmButtonText: 'OK'
                                 }).then((result) => {
                                     if (result.isConfirmed) {
-                                        window.location.reload(); // Reload only when "OK" is clicked
+                                        window.location.reload(); 
                                     }
                                 });
 
-                                // Reset the form
+                                
                                 form.reset();
 
-                                // Update selected address ID
+                               
                                 if (data.address.isDefault) {
                                     document.getElementById('selectedAddressId').value = data.address._id;
                                     document.querySelectorAll('.address-box').forEach(box => {
@@ -730,7 +730,7 @@
                             });
                         })
                         .finally(() => {
-                            // Reset button state
+                            
                             saveBtn.innerHTML = originalText;
                             saveBtn.disabled = false;
                         });
@@ -943,7 +943,6 @@
 
 
 
-
                 function placePendingOrder(requestData, orderId, response) {
                     fetch('/user/placePendingOrder', {
                         method: 'POST',
@@ -977,11 +976,6 @@
                         });
                 }
 
-
-
-
-
-
                 function showRetrySwal(requestData, orderId, response) {
                     Swal.fire({
                         title: "Payment Failed!",
@@ -995,8 +989,6 @@
                     });
                 }
 
-
-
                 function payLater(orderId, requestData) {
                     Swal.fire({
                         title: "Order Placed!",
@@ -1007,28 +999,6 @@
                         window.location.href = "/user/orderPlace";
                     });
                 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                 async function toggleCouponList() {
                     const couponList = document.getElementById('availableCoupons');

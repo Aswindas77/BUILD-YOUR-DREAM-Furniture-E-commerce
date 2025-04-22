@@ -178,7 +178,7 @@ userRouter.post("/checkout", isBan, userController.buyNow);
 
 userRouter.post("/createOrder", userController.createOrder);
 
-userRouter.post("/verifyPayment", userController.verifyPayment);
+userRouter.post("/verifyPayment", userController.verifyPayment); 
 
 userRouter.post("/placePendingOrder", userController.placePendingOrder)
 

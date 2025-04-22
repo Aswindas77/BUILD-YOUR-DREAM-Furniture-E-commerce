@@ -15,6 +15,8 @@ const Wallet = require('../models/walletModel');
  */
 const loadCheckout = async (req, res) => {
     try {
+
+        
         const Id = req.query.id;
         const Total = req.query.total;
         const cartId = new mongoose.Types.ObjectId(Id);
@@ -168,6 +170,7 @@ const selectAddress = async (req, res) => {
 /**
  * Process the order checkout
  */
+
 const processCheckout = async (req, res) => {
     try {
         const { selectedAddressId, paymentMethod, cartId, couponCode } = req.body;

@@ -90,7 +90,7 @@
   
   
   .social {
-    margin-left: 15%;
+    margin-left: 14%;
     margin-top: 8px;
   }
   
@@ -147,7 +147,7 @@
     }
   
     .social {
-      margin-left: 0;
+      margin-left: 56px;
       text-align: center;
     }
   
@@ -159,6 +159,8 @@
     .google-btn i, .google-btn svg {
       width: 16px;
       height: 16px;
+      margin-left: 25%;
+    margin-top: 13px;
     }
   }
   
@@ -187,6 +189,10 @@
     .login_box_img .hover p {
       font-size: 12px;
     }
+    .social {
+      margin-left: 14%;
+      text-align: center;
+    }
   }
   
   @media (min-width: 768px) and (max-width: 991.98px) {
@@ -200,5 +206,9 @@
   
     .login_box_img .hover p {
       font-size: 13px;
+    }
+    .social {
+      margin-left: 24%;
+      text-align: center;
     }
   }

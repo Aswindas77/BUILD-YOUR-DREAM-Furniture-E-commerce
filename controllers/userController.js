@@ -759,8 +759,16 @@ const loadProductView = async (req, res) => {
     try {
         const user = req.session?.User
         const productId = req.params.product_id
+
+        if(!mongoose.Types.ObjectId.isValid(productId)){
+            return res.render('userError')
+        }
+
+        
         const product = await Products.findOne({ _id: productId, isListed: false }).populate('category', 'name description');
         const categories = await Category.find({ isDeleted: false, isListed: false })
+
+        
 
         if (!product) {
             res.redirect("/user/productBan")
