@@ -343,7 +343,7 @@
                         const data = await response.json();
                         currentData = data;
                         totalItems = data.length;
-                        currentPage = 1;
+                        currentPage = 1; 
 
                         renderTable();
                         renderPagination(totalItems);
@@ -412,7 +412,7 @@
                     alert('End date must be after start date');
                     return;
                 }
-
+ 
                 try {
                     const response = await fetch('/admin/ordersCustom', {
                         method: 'POST',
@@ -490,7 +490,7 @@
                             </thead>
                             <tbody>
                                 ${currentData
-                        .filter(order => order.status !== 'Cancelled') // Filter out cancelled orders
+                        .filter(order => order.status !== 'Cancelled') 
                         .map(order => `
                                     <tr>
                                         <td style="border: 1px solid #ddd; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 9px;">${order.dummyOrderId}</td>

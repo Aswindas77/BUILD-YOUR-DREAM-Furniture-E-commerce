@@ -842,6 +842,9 @@ const getSalesReport = async (req, res) => {
   }
 };
 
+
+
+
 const getOrdersByPeriod = async (req, res) => {
   try {
     const period = req.params.period;
@@ -881,9 +884,9 @@ const getOrdersByPeriod = async (req, res) => {
 
     console.log("Orders found:", orders);
 
-    const formattedOrders = await Promise.all(
+    const formattedOrders = await Promise.all( 
       orders.map(async (order) => {
-        let discountAmount = null;
+        let discountAmount = null; 
 
         if (order.couponCode) {
           const coupon = await Coupon.findOne({ code: order.couponCode });
@@ -921,6 +924,7 @@ const getOrdersByPeriod = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const getGraphData = async (req, res) => {
   try {
@@ -1185,6 +1189,8 @@ const getAnalytics = async (req, res) => {
   }
 };
 
+
+
 const getOrdersByCustomRange = async (req, res) => {
   try {
     const { startDate, endDate } = req.body;
@@ -1205,34 +1211,38 @@ const getOrdersByCustomRange = async (req, res) => {
       .populate("items.productId", "name price")
       .sort({ createdAt: -1 });
 
-    const codeCoupon = orders?.couponCode;
+   
+    const formattedOrders = await Promise.all(
+      orders.map(async (order) => {
+        let discountAmount = null;
 
-    const coupon = await Coupon.findOne({ code: codeCoupon });
+        if (order.couponCode) {
+          const coupon = await Coupon.findOne({ code: order.couponCode });
+          const couponPercentage = coupon?.discountPercentage;
 
-    let couponPercentage = coupon?.discountPercentage || null;
+          if (coupon && couponPercentage && order.totalAmount) {
+            discountAmount = Number(
+              ((couponPercentage / 100) * order.totalAmount).toFixed(2)
+            );
+          }
+        }
 
-    let discountAmount = null;
-    if (coupon) {
-      discountAmount = (couponPercentage / 100) * orders?.totalAmount;
-      discountAmount = Number(discountAmount.toFixed(2));
-    }
-
-    console.log("discount Amount", discountAmount);
-
-    const formattedOrders = orders.map((order) => ({
-      _id: order._id,
-      dummyOrderId:
-        order.dummyOrderId ||
-        `ORD-${order._id.toString().slice(-6).toUpperCase()}`,
-      userId: order.userId.email,
-      items: order.items,
-      totalAmount: order.totalAmount,
-      paymentStatus: order.paymentStatus,
-      paymentMethod: order.paymentMethod,
-      status: order.status,
-      createdAt: order.createdAt,
-      discountAmount,
-    }));
+        return {
+          _id: order._id,
+          dummyOrderId:
+            order.dummyOrderId ||
+            `ORD-${order._id.toString().slice(-6).toUpperCase()}`,
+          userId: order.userId.email,
+          items: order.items,
+          totalAmount: order.totalAmount,
+          paymentStatus: order.paymentStatus,
+          paymentMethod: order.paymentMethod,
+          status: order.status,
+          discountAmount,
+          createdAt: order.createdAt,
+        };
+      })
+    );
 
     res.json(formattedOrders);
   } catch (error) {
@@ -1240,6 +1250,7 @@ const getOrdersByCustomRange = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 module.exports = {
   loadLogin,
