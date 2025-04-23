@@ -299,7 +299,7 @@
                         renderPagination(total);
                     });
                     pageNumbers.appendChild(pageButton);
-                }
+                } 
 
 
                 prevButton.disabled = currentPage === 1;
@@ -316,7 +316,7 @@
                 <tr>
                     <td>#${order.dummyOrderId}</td>
                     <td>${order.userId}</td>
-                    <td>${order.items.length} items</td>
+                    <td>${order.items.length ||1} items</td>
                     <td>${formatCurrency(order.totalAmount)}</td>
                     <td>${order.paymentStatus}</td>
                     <td>${order.paymentMethod}</td>
@@ -495,7 +495,7 @@
                                     <tr>
                                         <td style="border: 1px solid #ddd; padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 9px;">${order.dummyOrderId}</td>
                                         <td style="border: 1px solid #ddd; padding: 4px; word-wrap: break-word; font-size: 9px;">${order.userId}</td>
-                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.items.length}</td>
+                                        <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.items.length ||1}</td>
                                         <td style="border: 1px solid #ddd; padding: 4px; text-align: right; font-size: 9px;">${formatCurrency(order.totalAmount)}</td>
                                         <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.paymentStatus}</td>
                                         <td style="border: 1px solid #ddd; padding: 4px; text-align: center; font-size: 9px;">${order.status}</td>
@@ -545,7 +545,7 @@
                     ...currentData.map(order => [
                         order.dummyOrderId || `ORD-${order._id.slice(-6).toUpperCase()}`,
                         order.userId,
-                        order.items.length,
+                        order.items.length ||1,
                         `₹${order.totalAmount}`,
                         order.paymentStatus,
                         order.status,

@@ -842,9 +842,6 @@ const getSalesReport = async (req, res) => {
   }
 };
 
-
-
-
 const getOrdersByPeriod = async (req, res) => {
   try {
     const period = req.params.period;
@@ -884,9 +881,9 @@ const getOrdersByPeriod = async (req, res) => {
 
     console.log("Orders found:", orders);
 
-    const formattedOrders = await Promise.all( 
+    const formattedOrders = await Promise.all(
       orders.map(async (order) => {
-        let discountAmount = null; 
+        let discountAmount = null;
 
         if (order.couponCode) {
           const coupon = await Coupon.findOne({ code: order.couponCode });
@@ -924,7 +921,6 @@ const getOrdersByPeriod = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const getGraphData = async (req, res) => {
   try {
@@ -1189,8 +1185,6 @@ const getAnalytics = async (req, res) => {
   }
 };
 
-
-
 const getOrdersByCustomRange = async (req, res) => {
   try {
     const { startDate, endDate } = req.body;
@@ -1211,7 +1205,6 @@ const getOrdersByCustomRange = async (req, res) => {
       .populate("items.productId", "name price")
       .sort({ createdAt: -1 });
 
-   
     const formattedOrders = await Promise.all(
       orders.map(async (order) => {
         let discountAmount = null;
@@ -1227,11 +1220,10 @@ const getOrdersByCustomRange = async (req, res) => {
           }
         }
 
+        console.log("items length :",order.items.length)
         return {
           _id: order._id,
-          dummyOrderId:
-            order.dummyOrderId ||
-            `ORD-${order._id.toString().slice(-6).toUpperCase()}`,
+          dummyOrderId: order.dummyOrderId,
           userId: order.userId.email,
           items: order.items,
           totalAmount: order.totalAmount,
@@ -1250,7 +1242,6 @@ const getOrdersByCustomRange = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 module.exports = {
   loadLogin,
