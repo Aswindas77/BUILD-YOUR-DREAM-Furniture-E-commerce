@@ -1688,7 +1688,7 @@ const placePendingOrder = async (req, res) => {
     }
 
     const newOrder = new ordermodel({
-      userId: userId,
+      userId: userId, 
       dummyOrderId: dummyId,
       addressId: requestData.selectedAddressId,
       cartId: requestData.cartId,
@@ -1702,6 +1702,12 @@ const placePendingOrder = async (req, res) => {
     });
 
     await newOrder.save();
+
+    if (coupon) {
+      coupon.usedBy.push(userId);
+      await coupon.save();
+    }
+
     await Cart.findByIdAndDelete(requestData.cartId);
 
     console.log(" Order Placed with Payment Pending:", newOrder);
