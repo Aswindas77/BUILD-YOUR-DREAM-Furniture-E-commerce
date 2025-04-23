@@ -70,7 +70,7 @@
 
 
     <script>
-        // Function to show error message
+        
         function showError(inputId, message) {
             const input = document.getElementById(inputId);
             const errorElement = document.getElementById(inputId + '-error');
@@ -78,7 +78,7 @@
             errorElement.textContent = message;
         }
 
-        // Function to clear error message
+        
         function clearError(inputId) {
             const input = document.getElementById(inputId);
             const errorElement = document.getElementById(inputId + '-error');
@@ -86,7 +86,7 @@
             errorElement.textContent = '';
         }
 
-        // Function to validate single field
+        
         function validateField(inputId, value, rules) {
             clearError(inputId);
 
@@ -140,7 +140,7 @@
             return true;
         }
 
-        // Add input event listeners for real-time validation
+       
         document.getElementById('category-name').addEventListener('input', function () {
             validateField('category-name', this.value);
         });
@@ -170,20 +170,20 @@
             const minimumPrice = document.getElementById('minPrice').value.trim();
             const claimableAmount = document.getElementById('claimableAmount').value.trim();
 
-            // Validate all fields
+            
             const isNameValid = validateField('category-name', categoryName);
             const isDescriptionValid = validateField('category-description', categoryDescription);
             const isOfferValid = validateField('catOffer', categoryOffer);
             const isMinPriceValid = validateField('minPrice', minimumPrice);
             const isClaimableValid = validateField('claimableAmount', claimableAmount);
 
-            // Check price logic
+            
             if (parseFloat(minimumPrice) < parseFloat(claimableAmount)) {
                 showError('minPrice', 'Minimum price cannot be less than the maximum claimable amount');
                 return false;
             }
 
-            // If any validation fails, stop form submission
+            
             if (!isNameValid || !isDescriptionValid || !isOfferValid || !isMinPriceValid || !isClaimableValid) {
                 return false;
             }
