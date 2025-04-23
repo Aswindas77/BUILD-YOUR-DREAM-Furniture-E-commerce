@@ -395,7 +395,7 @@
             };
 
 
-            console.log("Return Data Sent:", returnData);
+            
 
             Swal.fire({
                 title: "Are you sure?",
@@ -416,7 +416,7 @@
                     })
                         .then(response => response.json())
                         .then(data => {
-                            console.log("Server Response:", data);
+                            
                             if (data.success) {
                                 Swal.fire(
                                     "Success!",
@@ -482,7 +482,7 @@
                         })
                         .then(blob => {
 
-                            console.log(blob)
+                            
 
                             Swal.close();
 

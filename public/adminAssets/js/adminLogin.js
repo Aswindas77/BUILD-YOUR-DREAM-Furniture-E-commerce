@@ -1,22 +1,21 @@
 document.getElementById("admin-loginForm").addEventListener("submit", (event) => {
-  // Prevent default form submission
+
   event.preventDefault();
 
-  // Get input values
   const email = document.getElementById("email");
   const password = document.getElementById("password");
 
-  // Regex Patterns
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const minLengthRegex = /^.{8,}$/;
   const specialCharRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
   const numberRegex = /\d/;
 
-  // Error Messages
+  
   const emailError = document.getElementById("emailError");
   const passwordError = document.getElementById("passwordError");
 
-  // Email Validation 
+ 
   let isValid = true;
 
   if (!emailRegex.test(email.value.trim())) {
@@ -29,7 +28,7 @@ document.getElementById("admin-loginForm").addEventListener("submit", (event) =>
     email.style.border = "1px solid green";
   }
 
-  // Password Validation
+ 
   const passwordValue = password.value.trim();
   if (!minLengthRegex.test(passwordValue)) {
     passwordError.textContent = "Password must be at least 8 characters";
@@ -51,14 +50,14 @@ document.getElementById("admin-loginForm").addEventListener("submit", (event) =>
     password.style.border = "1px solid green";
   }
 
-  // If all validations pass, send data to backend
+
   if (isValid) {
     const loginData = {
       email: email.value.trim(),
       password: password.value.trim(),
     }; 
 
-    // Send data to the backend using fetch
+   
     fetch("/admin/login", {
       method: "POST",
       headers: { 
@@ -70,7 +69,7 @@ document.getElementById("admin-loginForm").addEventListener("submit", (event) =>
       .then((data) => {
         if (data.success) {
           
-          window.location.href = "/admin/dashboard"; // Redirect on success
+          window.location.href = "/admin/dashboard"; 
         } else {
           if (data.emailError) emailError.textContent = data.emailError;
           if (data.passwordError) passwordError.textContent = data.passwordError;

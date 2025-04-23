@@ -42,7 +42,7 @@
 
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-	<link rel="stylesheet" href="/public/userAssets/css/custom.css">
+	
 	<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 
@@ -288,7 +288,7 @@
 					
 
 					function addToCart(productId) {
-						console.log(productId);
+						
 						fetch("/user/cart", {  
 							method: "POST",
 							headers: {
@@ -348,7 +348,7 @@
 
 					document.getElementById("searchBox").addEventListener("input", async function () {
 						let query = this.value.trim();
-						console.log("Search Query:", query);
+						
 
 
 

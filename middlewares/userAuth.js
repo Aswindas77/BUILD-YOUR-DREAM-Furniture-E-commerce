@@ -13,7 +13,7 @@ const   isLogin = async (req, res, next) => {
 };
  
 
-// checking if user logged out or not
+
 const isLOgut = async (req, res, next) => {
     try {
         if (!req.session.user) {

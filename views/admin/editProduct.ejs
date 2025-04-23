@@ -245,7 +245,7 @@
                         }
                     }
 
-                    console.log(newimages, 'this is images')
+                    
                     const productData = {
                         id: formData.get('id'),
                         name: formData.get('name'),
@@ -267,7 +267,7 @@
                     });
 
                     const data = await response.json();
-                    console.log(data, 'fkasldkfaslkdfjlaksdjflkasjflaskd')
+                    
 
                     if (data.success) {
                         Swal.fire({

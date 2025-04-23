@@ -781,7 +781,7 @@
         });
 
         function showOrderDetails(orderId) {
-            console.log("noo", orderId);
+           
 
             window.location.href = `/user/orderdetails/${orderId}`;
         }
@@ -836,7 +836,7 @@
                                 body: JSON.stringify({ reason: reason })
                             })
                                 .then(response => {
-                                    console.log(response)
+                                   
                                     if (!response.ok) {
                                         throw new Error(`HTTP Error! Status: ${response.status}`);
                                     }
@@ -880,8 +880,7 @@
  
 
         function retryPayment(orderId, totalAmount) {
-            console.log("totalAmount", totalAmount)
-            console.log("orderId",orderId);
+           
             Swal.fire({
                 title: "Retry Payment?",
                 text: `Your order total is ₹${totalAmount}. Do you want to proceed?`,
@@ -905,7 +904,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                console.log("order", data.orderId)
+                                
                                 retryRazorpay(data.order, data.amount, orderId);
                             } else {
                                
@@ -935,9 +934,7 @@
 
         function retryRazorpay(order, totalAmount, orderId) {
 
-            console.log("totalAmount",totalAmount)
-            console.log("order",order)
-            console.log("orderId",orderId)
+           
 
 
             var options = {
@@ -976,7 +973,7 @@
 
 
         function updatePayment(response, orderId) {
-            console.log("orderId", orderId)
+            
 
             fetch(`/user/updateRetryPayment`, {
                 method: "POST",

@@ -23,12 +23,11 @@
 } (function ($, document, window, navigator, undefined) {
     "use strict";
 
-    // =================================================================================================================
-    // Service
+   
 
     var plugin_count = 0;
 
-    // IE8 fix
+    
     var is_old_ie = (function () {
         var n = navigator.userAgent,
             r = /msie\s\d+/i,
@@ -116,8 +115,7 @@
 
 
 
-    // =================================================================================================================
-    // Template
+    
 
     var base_html =
         '<span class="irs">' +
@@ -144,8 +142,7 @@
 
 
 
-    // =================================================================================================================
-    // Core
+    
 
     /**
      * Main plugin constructor
@@ -180,7 +177,7 @@
 
         options = options || {};
 
-        // cache for links to all DOM elements
+        
         this.$cache = {
             win: $(window),
             body: $(document.body),
@@ -205,18 +202,17 @@
             grid_labels: []
         };
 
-        // storage for measure variables
+        
         this.coords = {
-            // left
+            
             x_gap: 0,
             x_pointer: 0,
 
-            // width
             w_rs: 0,
             w_rs_old: 0,
             w_handle: 0,
 
-            // percents
+           
             p_gap: 0,
             p_gap_left: 0,
             p_gap_right: 0,
@@ -232,7 +228,7 @@
             p_bar_x: 0,
             p_bar_w: 0,
 
-            // grid
+            
             grid_gap: 0,
             big_num: 0,
             big: [],
@@ -241,16 +237,16 @@
             big_x: []
         };
 
-        // storage for labels measure variables
+        
         this.labels = {
-            // width
+            
             w_min: 0,
             w_max: 0,
             w_from: 0,
             w_to: 0,
             w_single: 0,
 
-            // percents
+           
             p_min: 0,
             p_max: 0,
             p_from_fake: 0,
@@ -270,7 +266,7 @@
             val = $inp.prop("value"),
             config, config_from_data, prop;
 
-        // default config
+        
         config = {
             type: "single",
 
@@ -334,13 +330,13 @@
         };
 
 
-        // check if base element is input
+       
         if ($inp[0].nodeName !== "INPUT") {
             console && console.warn && console.warn("Base element should be <input>!", $inp[0]);
         }
 
 
-        // config from data-attributes extends js config
+        
         config_from_data = {
             type: $inp.data("type"),
 
@@ -405,7 +401,7 @@
         }
 
 
-        // input value extends default config
+        
         if (val !== undefined && val !== "") {
             val = val.split(config_from_data.input_values_separator || options.input_values_separator || ";");
 
@@ -427,23 +423,23 @@
 
 
 
-        // js config extends default config
+        
         $.extend(config, options);
 
 
-        // data config extends config
+        
         $.extend(config, config_from_data);
         this.options = config;
 
 
 
-        // validate config, to be sure that all data types are correct
+        
         this.update_check = {};
         this.validate();
 
 
 
-        // default result object, returned to callbacks
+        
         this.result = {
             input: this.$cache.input,
             slider: null,

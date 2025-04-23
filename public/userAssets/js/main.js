@@ -12,7 +12,7 @@ $(document).ready(function(){
 	$(".fullscreen").css("height", window_height)
     $(".fitscreen").css("height", fitscreen);
 
-  //------- Active Nice Select --------//
+  
 
     $('select').niceSelect();
 
@@ -30,7 +30,7 @@ $(document).ready(function(){
         }
     });
 
-    // Search Toggle
+  
     $("#search_input_box").hide();
     $("#search").on("click", function () {
         $("#search_input_box").slideToggle();
@@ -40,14 +40,10 @@ $(document).ready(function(){
         $('#search_input_box').slideUp(500);
     });
 
-    /*==========================
-		javaScript for sticky header
-		============================*/
+   
 			$(".sticky-header").sticky();
 
-    /*=================================
-    Javascript for banner area carousel
-    ==================================*/
+    
     $(".active-banner-slider").owlCarousel({
         items:1,
         autoplay:false,
@@ -58,9 +54,7 @@ $(document).ready(function(){
         dots:false
     });
 
-    /*=================================
-    Javascript for product area carousel
-    ==================================*/
+    
     $(".active-product-area").owlCarousel({
         items:1,
         autoplay:false,
@@ -71,9 +65,7 @@ $(document).ready(function(){
         dots:false
     });
 
-    /*=================================
-    Javascript for single product area carousel
-    ==================================*/
+   
     $(".s_Product_carousel").owlCarousel({
       items:1,
       autoplay:false,
@@ -83,9 +75,7 @@ $(document).ready(function(){
       dots:true
     });
     
-    /*=================================
-    Javascript for exclusive area carousel
-    ==================================*/
+    
     $(".active-exclusive-product-slider").owlCarousel({
         items:1,
         autoplay:false,
@@ -96,7 +86,7 @@ $(document).ready(function(){
         dots:false
     });
 
-    //--------- Accordion Icon Change ---------//
+  
 
     $('.collapse').on('shown.bs.collapse', function(){
         $(this).parent().find(".lnr-arrow-right").removeClass("lnr-arrow-right").addClass("lnr-arrow-left");
@@ -104,37 +94,36 @@ $(document).ready(function(){
         $(this).parent().find(".lnr-arrow-left").removeClass("lnr-arrow-left").addClass("lnr-arrow-right");
     });
 
-  // Select all links with hashes
+  
   $('.main-menubar a[href*="#"]')
-    // Remove links that don't actually link to anything
+    
     .not('[href="#"]')
     .not('[href="#0"]')
     .click(function(event) {
-      // On-page links
+      
       if (
         location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') 
         && 
         location.hostname == this.hostname
       ) {
-        // Figure out element to scroll to
+        
         var target = $(this.hash);
         target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
-        // Does a scroll target exist?
+       
         if (target.length) {
-          // Only prevent default if animation is actually gonna happen
+         
           event.preventDefault();
           $('html, body').animate({
             scrollTop: target.offset().top-70
           }, 1000, function() {
-            // Callback after animation
-            // Must change focus!
+            
             var $target = $(target);
             $target.focus();
-            if ($target.is(":focus")) { // Checking if the target was focused
+            if ($target.is(":focus")) { 
               return false;
             } else {
-              $target.attr('tabindex','-1'); // Adding tabindex for elements not focusable
-              $target.focus(); // Set focus again
+              $target.attr('tabindex','-1');
+              $target.focus(); 
             };
           });
         }
@@ -143,30 +132,30 @@ $(document).ready(function(){
 
 
 
-      // -------   Mail Send ajax
+      
 
          $(document).ready(function() {
             var form = $('#booking'); 
-            var submit = $('.submit-btn'); // submit button
-            var alert = $('.alert-msg'); // alert div for show alert message
+            var submit = $('.submit-btn'); 
+            var alert = $('.alert-msg'); 
 
-            // form submit event
+            
             form.on('submit', function(e) {
-                e.preventDefault(); // prevent default form submit
+                e.preventDefault(); 
 
                 $.ajax({
-                    url: 'booking.php', // form action url
-                    type: 'POST', // form submit method get/post
-                    dataType: 'html', // request type html/json/xml
-                    data: form.serialize(), // serialize form data
+                    url: 'booking.php', 
+                    type: 'POST', 
+                    dataType: 'html',
+                    data: form.serialize(), 
                     beforeSend: function() {
                         alert.fadeOut();
-                        submit.html('Sending....'); // change submit button text
+                        submit.html('Sending....'); 
                     },
                     success: function(data) {
-                        alert.html(data).fadeIn(); // fade in response data
-                        form.trigger('reset'); // reset form
-                        submit.attr("style", "display: none !important");; // reset submit button text
+                        alert.html(data).fadeIn(); 
+                        form.trigger('reset'); 
+                        submit.attr("style", "display: none !important");
                     },
                     error: function(e) {
                         console.log(e)
@@ -242,7 +231,7 @@ $(document).ready(function(){
 
 
 
-    //----- Active No ui slider --------//
+    
 
 
 
@@ -268,12 +257,11 @@ $(document).ready(function(){
 
 
         var nodes = [
-            document.getElementById('lower-value'), // 0
-            document.getElementById('upper-value')  // 1
+            document.getElementById('lower-value'),
+            document.getElementById('upper-value') 
         ];
 
-        // Display the slider value and how far the handle moved
-        // from the left edge of the slider.
+        
         nonLinearSlider.noUiSlider.on('update', function ( values, handle, unencoded, isTap, positions ) {
             nodes[handle].innerHTML = values[handle];
         });
@@ -283,7 +271,7 @@ $(document).ready(function(){
     });
 
     
-    //-------- Have Cupon Button Text Toggle Change -------//
+    
 
     $('.have-btn').on('click', function(e){
         e.preventDefault();
@@ -303,7 +291,7 @@ $(document).ready(function(){
 
 
 
-  //------- Start Quantity Increase & Decrease Value --------//
+ 
 
 
 
@@ -346,11 +334,7 @@ $(document).ready(function(){
 
   init();
 
-//------- End Quantity Increase & Decrease Value --------//
 
-  /*----------------------------------------------------*/
-  /*  Google map js
-    /*----------------------------------------------------*/
 
     if ($("#mapBox").length) {
         var $lat = $("#mapBox").data("lat");
@@ -566,44 +550,12 @@ $(document).ready(function(){
 
 
 
-//  contact page 
-
-// const form = document.querySelector('form');
-
-// form.addEventListener('submit', (event) => {
-//     event.preventDefault();
-
-//     // Get form values
-//     const name = document.getElementById('name').value;
-//     const email = document.getElementById('email').value;
-//     const message = document.getElementById('message').value;
-
-//     // Send data to server (replace with your actual server-side code)
-//     fetch('/contact', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({ name, email, message })
-//     })
-//     .then(response => {
-//         if (response.ok) {
-//             alert('Message sent successfully!');
-//             form.reset();
-//         } else {
-//             alert('Error sending message.');
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Error:', error);
-//         alert('An error occurred. Please try again la.');
-//     });
-// });
 
 
 
 
-// this is image zooming feature function 
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const carousel = document.querySelector('.s_Product_carousel');
@@ -644,11 +596,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const img = this.querySelector('img');
           const rect = this.getBoundingClientRect();
           
-          // Calculate precise mouse position percentage
+          
           const x = ((e.clientX - rect.left) / rect.width) * 100;
           const y = ((e.clientY - rect.top) / rect.height) * 100;
           
-          // Set transform origin exactly where mouse is
+          
           img.style.transformOrigin = `${x}% ${y}%`;
       });
 
@@ -687,7 +639,7 @@ priceRange.addEventListener('input', () => {
   priceDisplay.textContent = `Up to $${priceRange.value}`;
 });
 
-// Initialize range slider
+
 const priceSlider = document.getElementById('priceSlider');
 noUiSlider.create(priceSlider, {
   start: [1000, 5000],
@@ -699,20 +651,20 @@ noUiSlider.create(priceSlider, {
   step: 100
 });
 
-// Update price display
+
 priceSlider.noUiSlider.on('update', (values) => {
   document.getElementById('priceDisplay').textContent = 
     `₹${Math.round(values[0])} - ₹${Math.round(values[1])}`;
 });
 
-// Handle filter clearing
+
 document.querySelectorAll('.active-filters .fa-times').forEach(icon => {
   icon.addEventListener('click', () => {
     icon.parentElement.remove();
   });
 });
 
-// Toggle view layout
+
 document.querySelectorAll('.view-switcher button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.view-switcher button').forEach(b => b.classList.remove('active'));

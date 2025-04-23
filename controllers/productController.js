@@ -1,17 +1,13 @@
 const Products = require("../models/productModel");
-const mongoose = require('mongoose');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 const Categories = require("../models/categoryModel");
 const { log } = require("console");
 const Category = require("../models/categoryModel");
 const { updateCategory } = require("./categoryController");
-const HttpStatus = require('../constants/httpStatus');
-const Messages = require('../constants/messages.json')
-
-
-
-
+const HttpStatus = require("../constants/httpStatus");
+const Messages = require("../constants/messages.json");
 
 // load product page
 
@@ -23,16 +19,14 @@ const loadProducts = async (req, res) => {
     const limit = 4;
     const skip = (page - 1) * limit;
 
-
     const totalProducts = await Products.countDocuments({ isDeleted: false });
-    const categories = await Category.find({}, 'name')
+    const categories = await Category.find({}, "name");
 
     const products = await Products.find({ isDeleted: false })
-      .populate('category', 'name description')
+      .populate("category", "name description")
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
-
 
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -44,34 +38,37 @@ const loadProducts = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: Messages.INTERNAL_ERROR });
   }
 };
-
 
 // load product view
 
 //====================================================================================================================================================
 
 const loadProductView = async (req, res) => {
-
   try {
-    const productId = req.params.productid
+    const productId = req.params.productid;
 
+    const product = await Products.findOne({
+      _id: productId,
+      isListed: false,
+      isDeleted: false,
+    });
 
-    const product = await Products.findOne({ _id: productId, isListed: false, isDeleted: false })
-
-    const category = await Categories.findOne({ _id: product.category })
+    const category = await Categories.findOne({ _id: product.category });
     console.log(category);
 
-
-    res.render("productView", { product, categoryname: category.name })
+    res.render("productView", { product, categoryname: category.name });
   } catch (error) {
-    console.log(error.message)
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    console.log(error.message);
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: Messages.INTERNAL_ERROR });
   }
-}
-
+};
 
 // load product page
 
@@ -79,16 +76,15 @@ const loadProductView = async (req, res) => {
 
 const loadAddProducts = async (req, res) => {
   try {
-    const categories = await Categories.find({ isDeleted: false })
-    res.render('addProduct', { categories })
-  }
-  catch (err) {
+    const categories = await Categories.find({ isDeleted: false });
+    res.render("addProduct", { categories });
+  } catch (err) {
     console.log(err);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: Messages.INTERNAL_ERROR });
   }
-}
-
-
+};
 
 // add product page
 
@@ -96,14 +92,11 @@ const loadAddProducts = async (req, res) => {
 
 const addProducts = async (req, res) => {
   try {
-
     const newProduct = await Products.create(req.body);
     console.log(newProduct);
 
-
     const dirPath = `./public/uploads/products/${newProduct._id}`;
     fs.mkdirSync(dirPath, { recursive: true });
-
 
     const imgArray = [req.body.image0, req.body.image1, req.body.image2];
     const imagePaths = [];
@@ -120,7 +113,9 @@ const addProducts = async (req, res) => {
           }
         });
 
-        imagePaths.push(`/public/uploads/products/${newProduct._id}/image${index}.png`);
+        imagePaths.push(
+          `/public/uploads/products/${newProduct._id}/image${index}.png`
+        );
       }
     });
 
@@ -129,13 +124,13 @@ const addProducts = async (req, res) => {
     await newProduct.save();
 
     res.status(HttpStatus.CREATED).redirect("/admin/productManagement");
-
   } catch (error) {
     console.log(error.message);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: Messages.INTERNAL_ERROR });
   }
 };
-
 
 // load edit product
 
@@ -143,43 +138,34 @@ const addProducts = async (req, res) => {
 
 const loadEditProduct = async (req, res) => {
   try {
-    res.render("editproduct")
-
+    res.render("editproduct");
   } catch (error) {
-    console.log(error.message)
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    console.log(error.message);
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: Messages.INTERNAL_ERROR });
   }
+};
 
-}
-
-
-// edit product 
+// edit product
 
 //====================================================================================================================================================
 
 const editProduct = async (req, res) => {
-
-
   try {
-
     const productId = req.body.id;
 
-    const product = await Products.findById(productId)
-    const categories = await Categories.find({ isDeleted: false })
+    const product = await Products.findById(productId);
+    const categories = await Categories.find({ isDeleted: false });
 
+    if (!product) return res.send("product not found");
 
-
-    if (!product) return res.send("product not found")
-
-    res.render("editProduct", { product, categories })
-
+    res.render("editProduct", { product, categories });
   } catch (error) {
     console.log(error.message);
     res.redirect("/admin/productManagement");
   }
-
-}
-
+};
 
 // update product
 
@@ -187,7 +173,18 @@ const editProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const { id, name, description, salesPrice, category, productOffer, stock, status, rating, images } = req.body;
+    const {
+      id,
+      name,
+      description,
+      salesPrice,
+      category,
+      productOffer,
+      stock,
+      status,
+      rating,
+      images,
+    } = req.body;
 
     if (stock === undefined || stock === null || stock < 0) {
       console.log("Stock error");
@@ -197,7 +194,6 @@ const updateProduct = async (req, res) => {
       });
     }
 
-   
     const existingProduct = await Products.findById(id);
     if (!existingProduct) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -211,9 +207,8 @@ const updateProduct = async (req, res) => {
 
     const updatedImages = [...existingProduct.images];
 
-   
     for (let i = 0; i < images.length; i++) {
-      if (images[i] && !images[i].startsWith('/public/uploads/')) { 
+      if (images[i] && !images[i].startsWith("/public/uploads/")) {
         const base64Data = images[i].replace(/^data:image\/\w+;base64,/, "");
         const binary = Buffer.from(base64Data, "base64");
         const filePath = `${dirPath}/image${i}.png`;
@@ -235,7 +230,7 @@ const updateProduct = async (req, res) => {
         ratings: rating,
         status,
         images: updatedImages,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       { new: true, runValidators: true }
     );
@@ -246,40 +241,39 @@ const updateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
-    console.error('Error updating product:', error);
+    console.error("Error updating product:", error);
     res.redirect("/admin/productManagement");
   }
 };
 
-//  delete product 
+//  delete product
 
 //====================================================================================================================================================
 
 const deleteProduct = async (req, res) => {
   try {
-
-    const productId = req.params.productId
-    console.log(productId)
+    const productId = req.params.productId;
+    console.log(productId);
 
     const softdelete = await Products.findByIdAndUpdate(
       productId,
       { isDeleted: true },
       { new: true }
-
     );
     if (!softdelete) {
       throw new Error("Category not found.");
     }
 
-    return res.status(HttpStatus.OK).json({ message: "Product successfully marked as deleted." });
-
+    return res
+      .status(HttpStatus.OK)
+      .json({ message: "Product successfully marked as deleted." });
   } catch (error) {
     console.log(error.message);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
-
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: Messages.INTERNAL_ERROR });
   }
-}
-
+};
 
 // product list || unlist
 
@@ -289,27 +283,23 @@ const toggleListProduct = async (req, res) => {
   try {
     const { productId, action } = req.params;
 
-
-
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       console.log("Invalid userId:", productId);
       return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
-        message: "Invalid category ID"
+        message: "Invalid category ID",
       });
     }
-
 
     if (!["block", "unblock"].includes(action)) {
       console.log("Invalid action:", action);
       return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
-        message: "Invalid action. Use 'listed' or 'unlisted'."
+        message: "Invalid action. Use 'listed' or 'unlisted'.",
       });
     }
 
-    const isListed = action === 'block';
-
+    const isListed = action === "block";
 
     const updateProduct = await Products.findByIdAndUpdate(
       productId,
@@ -317,40 +307,27 @@ const toggleListProduct = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-
     if (!updateProduct) {
       console.log("Category not found in database for ID:", productId);
       return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
     console.log("User updated successfully:", updateProduct);
 
-
     return res.status(HttpStatus.OK).json({
       success: true,
       message: `Product list ${action}ed successfully`,
-      isListed: updateProduct.isListed
+      isListed: updateProduct.isListed,
     });
-
   } catch (error) {
     console.error("Error in toggleListAccess:", error);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_ERROR });
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: Messages.INTERNAL_ERROR });
   }
-}
-
-
-
-
-
-
-
-
-
-
-
-
+};
 
 module.exports = {
   loadProducts,
@@ -362,4 +339,4 @@ module.exports = {
   updateProduct,
   deleteProduct,
   toggleListProduct,
-}
+};

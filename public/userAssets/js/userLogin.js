@@ -1,17 +1,17 @@
 document.getElementById("login-form").addEventListener("submit", (event) => {
   event.preventDefault();
-    // Variables
+    
     const email = document.getElementById("email");
     const password = document.getElementById("password");
     
   
-    // Regex Patterns
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const minLengthRegex = /^.{8,}$/;
     const specialCharRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
     const numberRegex = /\d/;
   
-    // Error Messages
+    
     const emailError = document.getElementById("emailError");
     const passwordError = document.getElementById("passwordError");
     // const captchaError=document.getElementById("captchaError")
@@ -37,7 +37,7 @@ document.getElementById("login-form").addEventListener("submit", (event) => {
   };
     
   
-    // Email Validation
+    
     
 
     if(!emailRegex.test(email.value.trim())){
@@ -51,7 +51,7 @@ document.getElementById("login-form").addEventListener("submit", (event) => {
     }
   
 
-    // Password Validation
+   
     const passwordValue = password.value.trim();
   if (!minLengthRegex.test(passwordValue)) {
     passwordError.textContent = "Password must be at least 8 characters";
@@ -91,7 +91,7 @@ document.getElementById("login-form").addEventListener("submit", (event) => {
       .then((data) => {
         if (data.success) {
           
-          window.location.href = "/user"; // Redirect on success
+          window.location.href = "/user"; 
         } else {
           if (data.emailError) emailError.textContent = data.emailError;
           if (data.passwordError) passwordError.textContent = data.passwordError;

@@ -1,8 +1,6 @@
-/**
- * Checkout page JavaScript
- */
+
 document.addEventListener('DOMContentLoaded', function () {
-    // Handle address selection
+    
     const addressRadios = document.querySelectorAll('.address-radio');
     if (addressRadios) {
         addressRadios.forEach(radio => {
@@ -13,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Handle form submission
+    
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', function (e) {
@@ -22,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Handle add address form
+   
     const addAddressForm = document.getElementById('add-address-form');
     if (addAddressForm) {
         addAddressForm.addEventListener('submit', function (e) {
@@ -34,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /**
  * Select an address for checkout
- * @param {string} addressId - The ID of the selected address
+ * @param {string} addressId 
  */
 function selectAddress(addressId) {
     fetch('/checkout/address/select', {
@@ -47,7 +45,7 @@ function selectAddress(addressId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Update UI to show selected address
+                
                 const addressBoxes = document.querySelectorAll('.address-box');
                 addressBoxes.forEach(box => {
                     box.classList.remove('selected');
@@ -65,9 +63,7 @@ function selectAddress(addressId) {
         });
 }
 
-/**
- * Process the checkout
- */
+
 function processCheckout() {
     const selectedAddressRadio = document.querySelector('.address-radio:checked');
     if (!selectedAddressRadio) {
@@ -103,10 +99,10 @@ function processCheckout() {
         .then(data => {
             if (data.success) {
                 if (data.paypalRedirectUrl) {
-                    // Redirect to PayPal
+                    
                     window.location.href = data.paypalRedirectUrl;
                 } else {
-                    // Redirect to order confirmation page
+                  
                     window.location.href = `/user/orderPlace?id=${data.orderId}`;
                 }
             } else {
@@ -119,9 +115,7 @@ function processCheckout() {
         });
 }
 
-/**
- * Add a new address during checkout
- */
+
 function addNewAddress() {
     const houseNumber = document.getElementById('houseNumber').value;
     const street = document.getElementById('street').value;
@@ -156,14 +150,14 @@ function addNewAddress() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Close the address modal
+                
                 const addressModal = document.getElementById('addressModal');
                 if (addressModal) {
-                    // If using Bootstrap modal
+                    
                     $('#addressModal').modal('hide');
                 }
 
-                // Reload page to show the new address
+                
                 window.location.reload();
             } else {
                 showError(data.message);
@@ -185,12 +179,12 @@ function showError(message) {
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
 
-        // Hide after 5 seconds
+       
         setTimeout(() => {
             errorDiv.style.display = 'none';
         }, 5000);
     } else {
-        // Fallback to alert if error div not found
+       
         alert(message);
     }
 }

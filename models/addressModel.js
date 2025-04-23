@@ -21,7 +21,7 @@ const addresssSchema = new Schema({
         landmark:{
 
             type:String,
-            // required:true
+            
         },
         country:{
             type:String,

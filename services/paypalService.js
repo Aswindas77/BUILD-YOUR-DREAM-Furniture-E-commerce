@@ -14,7 +14,7 @@ const createPayPalOrder = async (totalAmount, userId) => {
        
        
 
-        // Create PayPal order request
+       
         const request = new paypal.orders.OrdersCreateRequest();
         request.prefer("return=representation");
         request.requestBody({
@@ -81,7 +81,7 @@ const capturePayPalOrder = async (req, res) => {
         const capture = await client.execute(request);
 
         if (capture.result.status === 'COMPLETED') {
-            // Create order in database
+            
             const newOrder = await Order.create({
                 userId: req.session.User._id,
                 items: orderDetails.items,

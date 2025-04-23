@@ -1,19 +1,19 @@
 document.getElementById("signUp-form").addEventListener("submit", (event) => {
   event.preventDefault();
-  // Variables
+  
   const name = document.getElementById("Uname");
   const email = document.getElementById("email-adress");
   const password = document.getElementById("password");
   const Cpassword = document.getElementById("C-password");
 
-  // Regex Patterns
+ 
   const nameRegex = /^[a-zA-Z]+$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const minLengthRegex = /^.{8,}$/;
   const specialCharRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
   const numberRegex = /\d/;
 
-  // Error Messages
+ 
   const UnameError = document.getElementById("UnameError");
   const emailError = document.getElementById("emailError");
   const passwordError = document.getElementById("passwordError");
@@ -22,7 +22,7 @@ document.getElementById("signUp-form").addEventListener("submit", (event) => {
 
   let isValid = true;
 
-  // Username Validation
+  
   if(!nameRegex.test(name.value.trim())){
     UnameError.textContent = "Invalid username format";
   UnameError.style.color = "red"; 
@@ -34,7 +34,7 @@ document.getElementById("signUp-form").addEventListener("submit", (event) => {
   }
 
 
-  // Email Validation
+  
   
 
   if(!emailRegex.test(email.value.trim())){
@@ -47,7 +47,7 @@ document.getElementById("signUp-form").addEventListener("submit", (event) => {
   email.style.border = "1px solid green";
   }
 
-  // Password Validation
+ 
     const passwordValue = password.value.trim();
   if (!minLengthRegex.test(passwordValue)) {
     passwordError.textContent = "Password must be at least 8 characters";
@@ -69,7 +69,7 @@ document.getElementById("signUp-form").addEventListener("submit", (event) => {
     password.style.border = "1px solid green";
   }
 
-  // Confirm Password Validation
+  
   
   const cPasswordValue = Cpassword.value.trim();
 

@@ -25,11 +25,11 @@ const isLogin= async(req,res,next)=>{
 const verifyAdmin = (req, res, next) => {
     if (req.session && req.session.admin) {
         
-        // Check if user is admin
+       
         adminData.findOne({})
             .then(admin => {
                 if (admin) {
-                    next(); // Proceed if admin
+                    next(); 
                 } else {
                     res.redirect("/admin/login");
                 }
@@ -39,12 +39,12 @@ const verifyAdmin = (req, res, next) => {
                 res.status(500).send("Internal Server Error");
             });
     } else {
-        res.redirect("/admin/login"); // No session, redirect to login
+        res.redirect("/admin/login"); 
     }
 };
 
 
-// Checking  admin logged out or not
+
 
 const isLogout= async(req,res,next)=>{
     try{
