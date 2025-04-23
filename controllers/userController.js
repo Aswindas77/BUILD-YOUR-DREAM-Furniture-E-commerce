@@ -1703,9 +1703,9 @@ const placePendingOrder = async (req, res) => {
 
     await newOrder.save();
 
-    if (coupon) {
-      coupon.usedBy.push(userId);
-      await coupon.save();
+    if (couponCode) {
+      couponCode.usedBy.push(userId);
+      await couponCode.save();
     }
 
     await Cart.findByIdAndDelete(requestData.cartId);
