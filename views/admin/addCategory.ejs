@@ -9,6 +9,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
     <link rel="stylesheet" href="/public/adminAssets/css/addCat.css">
+    <style>
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .error .error-message {
+            display: block;
+        }
+
+        .error input,
+        .error textarea {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,25 +39,27 @@
             <div class="form-group">
                 <input type="text" id="category-name" name="name" placeholder=" ">
                 <label for="category-name">Category Name</label>
+                <span class="error-message" id="category-name-error"></span>
             </div>
             <div class="form-group">
                 <textarea id="category-description" name="description" placeholder=" "></textarea>
                 <label for="category-description">Category Description</label>
+                <span class="error-message" id="category-description-error"></span>
             </div>
-            <div class="mt-3">
-
+            <div class="form-group">
                 <input type="number" class="form-control" id="catOffer" name="productOffer"
-                    placeholder="Enter category offer" step="1" >
+                    placeholder="Enter category offer" step="1">
+                <span class="error-message" id="catOffer-error"></span>
             </div>
-            <div class="mt-3">
-
+            <div class="form-group">
                 <input type="number" class="form-control" id="minPrice" name="productOffer"
-                    placeholder="minimum purchase price" step="1" >
+                    placeholder="minimum purchase price" step="1">
+                <span class="error-message" id="minPrice-error"></span>
             </div>
-            <div class="mt-3">
-
+            <div class="form-group">
                 <input type="number" class="form-control" id="claimableAmount" name="productOffer"
-                    placeholder="maximum claimable amount" step="1" >
+                    placeholder="maximum claimable amount" step="1">
+                <span class="error-message" id="claimableAmount-error"></span>
             </div>
             <div class="mt-3">
                 <button type="submit" id="btn-submit" class="btn">Add Category</button>
@@ -47,75 +70,123 @@
 
 
     <script>
+        // Function to show error message
+        function showError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorElement = document.getElementById(inputId + '-error');
+            input.parentElement.classList.add('error');
+            errorElement.textContent = message;
+        }
+
+        // Function to clear error message
+        function clearError(inputId) {
+            const input = document.getElementById(inputId);
+            const errorElement = document.getElementById(inputId + '-error');
+            input.parentElement.classList.remove('error');
+            errorElement.textContent = '';
+        }
+
+        // Function to validate single field
+        function validateField(inputId, value, rules) {
+            clearError(inputId);
+
+            if (!value.trim()) {
+                showError(inputId, `This field is required`);
+                return false;
+            }
+
+            switch (inputId) {
+                case 'category-name':
+                    if (!/^[A-Za-z ]+$/.test(value)) {
+                        showError(inputId, 'Category name should only contain alphabets and spaces');
+                        return false;
+                    }
+                    break;
+
+                case 'category-description':
+                    if (value.length < 10) {
+                        showError(inputId, 'Description should be at least 10 characters');
+                        return false;
+                    }
+                    if (value.length > 200) {
+                        showError(inputId, 'Description should not exceed 200 characters');
+                        return false;
+                    }
+                    break;
+
+                case 'catOffer':
+                    const offerValue = parseFloat(value);
+                    if (isNaN(offerValue) || offerValue < 0 || offerValue > 99) {
+                        showError(inputId, 'Offer must be between 0 and 99');
+                        return false;
+                    }
+                    break;
+
+                case 'minPrice':
+                    if (isNaN(value) || parseFloat(value) < 0) {
+                        showError(inputId, 'Minimum price must be a positive number');
+                        return false;
+                    }
+                    break;
+
+                case 'claimableAmount':
+                    if (isNaN(value) || parseFloat(value) < 0) {
+                        showError(inputId, 'Claimable amount must be a positive number');
+                        return false;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+
+        // Add input event listeners for real-time validation
+        document.getElementById('category-name').addEventListener('input', function () {
+            validateField('category-name', this.value);
+        });
+
+        document.getElementById('category-description').addEventListener('input', function () {
+            validateField('category-description', this.value);
+        });
+
+        document.getElementById('catOffer').addEventListener('input', function () {
+            validateField('catOffer', this.value);
+        });
+
+        document.getElementById('minPrice').addEventListener('input', function () {
+            validateField('minPrice', this.value);
+        });
+
+        document.getElementById('claimableAmount').addEventListener('input', function () {
+            validateField('claimableAmount', this.value);
+        });
+
         async function handleSubmit(event) {
             event.preventDefault();
 
-            const categoryName = document.getElementById('category-name').value;
-            const categoryDescription = document.getElementById('category-description').value;
-            const categoryOffer = document.getElementById('catOffer').value;
-            const minimumPrice = document.getElementById('minPrice').value;
-            const claimableAmount = document.getElementById('claimableAmount').value;
+            const categoryName = document.getElementById('category-name').value.trim();
+            const categoryDescription = document.getElementById('category-description').value.trim();
+            const categoryOffer = document.getElementById('catOffer').value.trim();
+            const minimumPrice = document.getElementById('minPrice').value.trim();
+            const claimableAmount = document.getElementById('claimableAmount').value.trim();
 
-            
-            const nameRegex = /^[A-Za-z ]+$/;
-            const numberRegex = /^(0|[1-9]\d*)(\.\d+)?$/;
-            const minPriceValue = parseFloat(minimumPrice);
-            const claimableValue = parseFloat(claimableAmount);
+            // Validate all fields
+            const isNameValid = validateField('category-name', categoryName);
+            const isDescriptionValid = validateField('category-description', categoryDescription);
+            const isOfferValid = validateField('catOffer', categoryOffer);
+            const isMinPriceValid = validateField('minPrice', minimumPrice);
+            const isClaimableValid = validateField('claimableAmount', claimableAmount);
 
-            if (!nameRegex.test(categoryName)) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'enter Category required all fields',
-                    text: 'please enter category name and description',
-                    confirmButtonColor: '#007bff'
-                });
-                return false;
-            }
-
-            if (!categoryOffer || !numberRegex.test(categoryOffer) || parseFloat(categoryOffer) > 99 ||parseFloat(categoryOffer) < 0 ) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Offer',
-                    text: 'Category offer must be a valid number between 0 and 99.',
-                    confirmButtonColor: '#007bff'
-                });
-                return false;
-            }
-
-            
-
-            if (!minimumPrice || isNaN(minimumPrice) || minimumPrice < 0) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Minimum Price',
-                    text: 'Minimum purchase price must be a non-negative number.',
-                    confirmButtonColor: '#007bff'
-                });
-                return false;
-            }
-
-            if (!claimableAmount || isNaN(claimableAmount) || claimableAmount < 0) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Claimable Amount',
-                    text: 'Maximum claimable amount must be a non-negative number.',
-                    confirmButtonColor: '#007bff'
-                });
-                return false;
-            }
-
+            // Check price logic
             if (parseFloat(minimumPrice) < parseFloat(claimableAmount)) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Price Range',
-                    text: 'Minimum price cannot be greater than the maximum claimable amount.',
-                    confirmButtonColor: '#007bff'
-                });
+                showError('minPrice', 'Minimum price cannot be less than the maximum claimable amount');
                 return false;
             }
 
-
-
+            // If any validation fails, stop form submission
+            if (!isNameValid || !isDescriptionValid || !isOfferValid || !isMinPriceValid || !isClaimableValid) {
+                return false;
+            }
 
             try {
                 const response = await fetch('/admin/addcategory', {
@@ -129,7 +200,6 @@
                         categoryOffer: categoryOffer,
                         minimumPrice: minimumPrice,
                         claimableAmount: claimableAmount,
-
                     }),
                 });
                 const result = await response.json();
@@ -162,8 +232,12 @@
             }
         }
 
-        document.getElementById('add-category-form').addEventListener('submit');
+        document.getElementById('add-category-form').addEventListener('submit', handleSubmit);
     </script>
+</body>
+
+</html>
+</script>
 </body>
 
 </html>
